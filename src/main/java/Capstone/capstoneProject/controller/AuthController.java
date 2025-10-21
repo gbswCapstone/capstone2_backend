@@ -20,14 +20,14 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @Operation(summary = "회원가입", description = "회원d가입 시 사용하는 API 입니다.")
+    @Operation(summary = "회원가입", description = "회원가입 시 사용하는 API 입니다.")
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<Object>> signup(@RequestBody SignupRequest request) {
         authService.signup(request);
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
-    @Operation(summary = "로그인d", description = "일반 로그인 시 사용하는 API 입니다.")
+    @Operation(summary = "로그인", description = "일반 로그인 시 사용하는 API 입니다.")
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<TokenResponse>> login(@RequestBody LoginRequest request) {
         TokenResponse tokenResponse = authService.login(request);
