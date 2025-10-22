@@ -28,8 +28,8 @@ public class Challenges {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = false)
     private Users createdBy; // 방 만든 사람
 
     @Column(nullable = false, name="title")

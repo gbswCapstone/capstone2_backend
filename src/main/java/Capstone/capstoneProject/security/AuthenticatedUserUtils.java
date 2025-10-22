@@ -9,15 +9,15 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class AuthenticatedUserUtils {
-
+    private final SecurityUtils securityUtils;
     private final UserRepository userRepository; // Users 조회용
 
     public Long getCurrentUserId() {
-        return SecurityUtils.getCurrentUserId();
+        return securityUtils.getCurrentUserId();
     }
 
     public Users getCurrentUser() {
-        Long userId = SecurityUtils.getCurrentUserId();
+        Long userId = securityUtils.getCurrentUserId();
 
 
         return userRepository.findById(userId)
