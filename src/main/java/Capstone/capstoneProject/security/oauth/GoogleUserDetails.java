@@ -25,5 +25,10 @@ public class GoogleUserDetails implements OAuth2UserInfo {
         return (String) attributes.get("email");
     }
 
+    @Override
+    public String getNickname() {
+        return (String) attributes.get("name"); // 구글 닉네임
+    }
+
 
 }

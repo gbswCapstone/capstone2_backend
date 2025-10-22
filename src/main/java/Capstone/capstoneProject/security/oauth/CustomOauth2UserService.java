@@ -1,7 +1,9 @@
 package Capstone.capstoneProject.security.oauth;
 
+import Capstone.capstoneProject.entity.UserProfile;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.enums.UserRole;
+import Capstone.capstoneProject.repository.UserProfileRepository;
 import Capstone.capstoneProject.repository.UserRepository;
 import Capstone.capstoneProject.repository.oauth.OAuth2UserInfo;
 
@@ -22,7 +24,7 @@ import java.util.Optional;
 public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
-
+    private final UserProfileRepository userProfileRepository;
 
     @Override
     @Transactional
@@ -47,12 +49,14 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
         String providerId = oAuth2UserInfo.getProviderId();
         String email = oAuth2UserInfo.getEmail();
+        String nickname = oAuth2UserInfo.getNickname();
 
 
         Optional<Users> optionalUser = userRepository.findByEmail(email);
         Users user;
-
-        if (optionalUser.isEmpty()) { // db에 사용자가 없으면
+        UserProfile profile;
+        // db에 사용자가 없을 때 회원가입된 후 토큰 반환
+        if (optionalUser.isEmpty()) {
             user = Users.builder()
                     .email(email) // 로그인 아이디
                     .password("SOCIAL_LOGIN") // 소셜 로그인용 임의 비번
@@ -61,6 +65,13 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
                     .role(UserRole.USER)
                     .build();
             userRepository.save(user);
+
+            profile = UserProfile.builder() // 상태메시지랑, 프로필 이미지 null
+                    .user(user)
+                    .nickname(nickname)
+                    .build();
+            userProfileRepository.save(profile);
+
         } else{
             user = optionalUser.get();
             // 기존 유저라면 provider 정보 업데이트

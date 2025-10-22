@@ -2,6 +2,7 @@ package Capstone.capstoneProject.config;
 
 import Capstone.capstoneProject.dto.ApiResponse;
 import Capstone.capstoneProject.exceptions.NotAuthenticatedException;
+import Capstone.capstoneProject.exceptions.RefreshTokenNotFoundException;
 import Capstone.capstoneProject.exceptions.UserNotFoundException;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.http.HttpStatus;
@@ -40,6 +41,12 @@ public class ApiGlobalResponseHandler {
     public ResponseEntity<ApiResponse<Void>> handleNotAuthenticatedException(NotAuthenticatedException e) {
         return ResponseEntity.status(401)
                 .body(ApiResponse.error("로그인이 필요합니다."));
+    }
+
+    @ExceptionHandler(RefreshTokenNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRefreshTokenNotFoundException(RefreshTokenNotFoundException e) {
+        return ResponseEntity.status(404)
+                .body(ApiResponse.error("유효하지 않은 리프레시 토큰입니다."));
     }
 
 }
