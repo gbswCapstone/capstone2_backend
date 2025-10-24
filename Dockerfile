@@ -11,12 +11,9 @@ ENV PATH="/opt/gradle-8.3.1/bin:${PATH}"
 
 COPY . .
 
+
 RUN gradle clean build -x test
 
 
-WORKDIR /app
-COPY build/libs/capstoneProject-0.0.1-SNAPSHOT.jar app.jar
-
-
+ENTRYPOINT ["java","-jar","build/libs/capstoneProject-0.0.1-SNAPSHOT.jar"]
 EXPOSE 8004
-ENTRYPOINT ["java","-jar","app.jar"]
