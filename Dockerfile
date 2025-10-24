@@ -1,9 +1,9 @@
+
 FROM eclipse-temurin:21-jdk-jammy
 WORKDIR /app
 
-
 RUN apt-get update && apt-get install -y curl unzip \
-    && curl -s https://services.gradle.org/distributions/gradle-8.3.1-bin.zip -o gradle.zip \
+    && curl -L https://services.gradle.org/distributions/gradle-8.3.1-bin.zip -o gradle.zip \
     && unzip gradle.zip -d /opt/ \
     && rm gradle.zip
 ENV PATH="/opt/gradle-8.3.1/bin:${PATH}"
