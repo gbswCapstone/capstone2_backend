@@ -1,8 +1,86 @@
 package Capstone.capstoneProject.repository;
 
-
+import Capstone.capstoneProject.dto.ChallengeListDTO;
 import Capstone.capstoneProject.entity.challenges.Challenges;
+import Capstone.capstoneProject.enums.UserJobs;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import java.util.List;
+import java.util.Optional;
 
 public interface ChallengeRepository extends JpaRepository<Challenges, Long> {
+
+    // job없이 조회 최신순
+    @Query("""
+    SELECT new Capstone.capstoneProject.dto.ChallengeListDTO(
+        c.id,
+        c.title,
+        c.maxPersonnel,
+        COUNT(cu.id),
+        c.likeCount
+    )
+    FROM Challenges c
+    LEFT JOIN ChallengeUsers cu ON cu.challenge.id = c.id
+    GROUP BY c.id, c.title, c.maxPersonnel, c.likeCount
+    ORDER BY c.createdAt DESC
+""")
+    List<ChallengeListDTO> findAllOrderByCreatedAtDescWithCurrentPersonnel();
+
+    // job없이 조회 인기순(좋아요순)
+    @Query("""
+    SELECT new Capstone.capstoneProject.dto.ChallengeListDTO(
+        c.id,
+        c.title,
+        c.maxPersonnel,
+        COUNT(cu.id),
+        c.likeCount
+    )
+    FROM Challenges c
+    LEFT JOIN ChallengeUsers cu ON cu.challenge.id = c.id
+    GROUP BY c.id, c.title, c.maxPersonnel, c.likeCount
+    ORDER BY c.likeCount DESC
+""")
+    List<ChallengeListDTO> findAllOrderByLikeCountDescWithCurrentPersonnel();
+
+
+    // job 검색 최신순
+    @Query("""
+    SELECT new Capstone.capstoneProject.dto.ChallengeListDTO(
+        c.id,
+        c.title,
+        c.maxPersonnel,
+        COUNT(cu.id),
+        c.likeCount
+    )
+    FROM Challenges c
+    LEFT JOIN ChallengeUsers cu ON cu.challenge.id = c.id
+    WHERE c.job = :job
+    GROUP BY c.id, c.title, c.maxPersonnel, c.likeCount
+    ORDER BY c.createdAt DESC
+""")
+    List<ChallengeListDTO> findAllByJobOrderByCreatedAtDescWithCurrentPersonnel(UserJobs job);
+
+
+    // job 검색 인기순(좋아요순)
+    @Query("""
+    SELECT new Capstone.capstoneProject.dto.ChallengeListDTO(
+        c.id,
+        c.title,
+        c.maxPersonnel,
+        COUNT(cu.id),
+        c.likeCount
+    )
+    FROM Challenges c
+    LEFT JOIN ChallengeUsers cu ON cu.challenge.id = c.id
+    WHERE c.job = :job
+    GROUP BY c.id, c.title, c.maxPersonnel, c.likeCount
+    ORDER BY c.likeCount DESC
+""")
+    List<ChallengeListDTO> findAllByJobOrderByLikeCountDescWithCurrentPersonnel(UserJobs job);
+
+
+
+
 }
+
+

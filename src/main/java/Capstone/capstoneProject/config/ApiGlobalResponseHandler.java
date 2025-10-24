@@ -1,6 +1,7 @@
 package Capstone.capstoneProject.config;
 
 import Capstone.capstoneProject.dto.ApiResponse;
+import Capstone.capstoneProject.exceptions.ChallengeNotFoundException;
 import Capstone.capstoneProject.exceptions.NotAuthenticatedException;
 import Capstone.capstoneProject.exceptions.RefreshTokenNotFoundException;
 import Capstone.capstoneProject.exceptions.UserNotFoundException;
@@ -47,6 +48,12 @@ public class ApiGlobalResponseHandler {
     public ResponseEntity<ApiResponse<Void>> handleRefreshTokenNotFoundException(RefreshTokenNotFoundException e) {
         return ResponseEntity.status(404)
                 .body(ApiResponse.error("유효하지 않은 리프레시 토큰입니다."));
+    }
+
+    @ExceptionHandler(ChallengeNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleChallengeNotFoundException(ChallengeNotFoundException e) {
+        return ResponseEntity.status(404)
+                .body(ApiResponse.error("해당 챌린지방을 찾을 수 없습니다."));
     }
 
 }
