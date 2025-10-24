@@ -53,6 +53,9 @@ public class Challenges {
     @Builder.Default
     private Set<ChallengeHashtag> challengeHashtags = new HashSet<>();
 
+    @Column(nullable = false, name="like_count")
+    private int likeCount;
+
     @Column(nullable = false, name="created_at")
     @CreatedDate
     private LocalDateTime createdAt;
@@ -64,5 +67,8 @@ public class Challenges {
     @Column(name="deleted_at")
     private LocalDateTime deletedAt;
 
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
 
 }

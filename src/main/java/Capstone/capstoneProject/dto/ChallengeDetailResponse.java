@@ -23,6 +23,7 @@ public class ChallengeDetailResponse {
     @JsonProperty("created_at")
     private LocalDateTime createdAt;
     private final List<String> hashtags;// 이것만 챌린지해시태그 엔티티
+    private boolean isLiked; // 내가 좋아요를 눌렀는지
 
     public ChallengeDetailResponse(Long id,
                                    UserResponseDTO createdBy,
@@ -32,6 +33,7 @@ public class ChallengeDetailResponse {
                                    UserJobs job,
                                    String goal,
                                    LocalDateTime createdAt,
+                                   boolean isLiked,
                                    List<String> hashtags) {
         this.id = id;
         this.createdBy = createdBy;
@@ -42,11 +44,12 @@ public class ChallengeDetailResponse {
         this.goal = goal;
         this.createdAt = createdAt;
         this.hashtags = hashtags;
+        this.isLiked = isLiked;
     }
 
 
     //엔티티 -> DTO 변환 편의 메서드
-    public static ChallengeDetailResponse fromEntity(Challenges challenge) {
+    public static ChallengeDetailResponse fromEntity(Challenges challenge, boolean isLiked) {
         List<String> hashtagNames = challenge.getChallengeHashtags()  // ChallengeHashtag Set 필요
                 .stream()
                 .map(ch -> ch.getHashtag().getName())
@@ -61,6 +64,7 @@ public class ChallengeDetailResponse {
                 challenge.getJob(),
                 challenge.getGoal(),
                 challenge.getCreatedAt(),
+                isLiked,
                 hashtagNames
         );
     }
