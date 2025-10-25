@@ -1,13 +1,20 @@
 FROM openjdk:21-jdk-slim
 
 
-COPY build/libs/*.jar app.jar
+
+WORKDIR /app
+
+
+COPY . .
+
+
+RUN chmod +x ./gradlew
 
 
 RUN ./gradlew clean build -x test
 
-#실행권한추가
-RUN chmod +x ./gradlew
+
+COPY build/libs/*.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=docker"]
 
