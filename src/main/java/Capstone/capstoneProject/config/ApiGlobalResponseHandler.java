@@ -1,10 +1,7 @@
 package Capstone.capstoneProject.config;
 
 import Capstone.capstoneProject.dto.ApiResponse;
-import Capstone.capstoneProject.exceptions.ChallengeNotFoundException;
-import Capstone.capstoneProject.exceptions.NotAuthenticatedException;
-import Capstone.capstoneProject.exceptions.RefreshTokenNotFoundException;
-import Capstone.capstoneProject.exceptions.UserNotFoundException;
+import Capstone.capstoneProject.exceptions.*;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +9,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
+
+import java.rmi.AlreadyBoundException;
 
 @Hidden
 @RestControllerAdvice(annotations = RestController.class)
@@ -54,6 +53,18 @@ public class ApiGlobalResponseHandler {
     public ResponseEntity<ApiResponse<Void>> handleChallengeNotFoundException(ChallengeNotFoundException e) {
         return ResponseEntity.status(404)
                 .body(ApiResponse.error("해당 챌린지방을 찾을 수 없습니다."));
+    }
+
+    @ExceptionHandler(AlreadyBoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAlreadyBoundException(AlreadyBoundException e) {
+        return ResponseEntity.status(409)
+                .body(ApiResponse.error("이미 참여한 챌린지입니다."));
+    }
+
+    @ExceptionHandler(ChallengeFullException.class)
+    public ResponseEntity<ApiResponse<Void>> handleChallengeFullException(ChallengeFullException e) {
+        return ResponseEntity.status(409)
+                .body(ApiResponse.error("참여 인원이 가득 찼습니다."));
     }
 
 }
