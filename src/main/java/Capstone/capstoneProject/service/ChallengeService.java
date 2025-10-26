@@ -265,6 +265,18 @@ public class ChallengeService {
 
         challengeUsersRepository.save(join);
     }
+
+    public List<ChallengeListDTO> myChallengeList () {
+        // user 정보 가져오기 (baarer token에서 추출)
+        Users user = authenticatedUserUtils.getCurrentUser();
+
+        List<ChallengeUsers> joined = challengeUsersRepository.findByUserId(user.getId());
+        // ChallengeListDTO로 매핑
+        return joined.stream()
+                .map(cu -> new ChallengeListDTO(cu.getChallenge()))
+                .collect(Collectors.toList());
+    }
+
 }
 
 

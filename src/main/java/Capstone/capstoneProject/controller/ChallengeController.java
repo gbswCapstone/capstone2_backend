@@ -103,11 +103,12 @@ public class ChallengeController {
     }
 
 
-//    @GetMapping("/myChallenges")
-//    @Operation(summary = "내 챌린지방 조회", description = "내가 가입되어 있는 챌린지방 조회")
-//    public ResponseEntity<ApiResponse<List<ChallengeListDTO>>> myChallenges() {
-//
-//    }
+    @GetMapping("/myChallenges")
+    @Operation(summary = "내 챌린지방 조회", description = "내가 가입되어 있는 챌린지방 조회")
+    public ResponseEntity<ApiResponse<List<ChallengeListDTO>>> myChallenges() {
+        List<ChallengeListDTO> result = challengeService.myChallengeList();
+        return ResponseEntity.ok(ApiResponse.ok(result));
+    }
 
 
 }
