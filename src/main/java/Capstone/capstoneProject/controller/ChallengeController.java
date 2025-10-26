@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -79,7 +80,7 @@ public class ChallengeController {
     }
 
     @GetMapping("/search")
-    @Operation(summary = "챌린지 방 검색", description =  "해시태그, 제목으로 검색")
+    @Operation(summary = "챌린지 방 검색", description =  "해시태그, 제목으로 검색할 수 있는 API 입니다.")
     public ResponseEntity<ApiResponse<List<ChallengeListDTO>>> searchHashtagChallenges(
             @RequestParam(required = false) String hashtag, @RequestParam(required = false) String keyword) {
         List<Challenges> challenges = challengeService.searchChallenge(hashtag, keyword);
@@ -91,9 +92,17 @@ public class ChallengeController {
     }
 
 
-//    @PostMapping("/join/{id}")
-//
-//
+
+    @PostMapping("/join/{id}")
+    @Operation(summary = "챌린지 방 가입", description = "챌린지방 가입 시 사용하는 API 입니다.")
+    public ResponseEntity<ApiResponse<Void>> joinChallenge(
+            @PathVariable Long id
+    ) {
+        challengeService.joinChallenge(id);
+        return ResponseEntity.ok(ApiResponse.ok());
+    }
+
+
 //    @GetMapping("/myChallenges")
 //    @Operation(summary = "내 챌린지방 조회", description = "내가 가입되어 있는 챌린지방 조회")
 //    public ResponseEntity<ApiResponse<List<ChallengeListDTO>>> myChallenges() {

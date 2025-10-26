@@ -5,6 +5,8 @@ import Capstone.capstoneProject.dto.ChallengeListDTO;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.entity.challenges.*;
 import Capstone.capstoneProject.enums.UserJobs;
+import Capstone.capstoneProject.exceptions.AlreadyJoinedException;
+import Capstone.capstoneProject.exceptions.ChallengeFullException;
 import Capstone.capstoneProject.exceptions.ChallengeNotFoundException;
 import Capstone.capstoneProject.repository.*;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
@@ -26,6 +28,7 @@ public class ChallengeService {
     private final ChallengeUsersRepository challengeUsersRepository;
     private final LikeRepository likeRepository;
     private final UserRepository userRepository;
+
 
     public Challenges create(ChallengeCreate dto) {
         // user 정보 가져오기 (baarer token에서 추출)
@@ -235,6 +238,32 @@ public class ChallengeService {
         } else {
             throw new IllegalArgumentException("잘못된 검색입니다.(제목, 해시태그 입력없음)");
         }
+    }
+
+    public void joinChallenge(Long id) {
+        Challenges challenge = challengeRepository.findById(id)
+                .orElseThrow(() -> new ChallengeNotFoundException("챌린지를 찾을 수 없습니다."));
+
+        // user 정보 가져오기 (baarer token에서 추출)
+        Users user = authenticatedUserUtils.getCurrentUser();
+
+        // 참여했는지 확인
+        boolean isAlreadyJoined = challengeUsersRepository.existsByChallengeIdAndUserId(id, user.getId());
+        if (isAlreadyJoined) {
+            throw new AlreadyJoinedException("이미 참여한 챌린지입니다.");
+        }
+        int currentParticipants = challengeUsersRepository.countByChallengeId(id);
+        if (currentParticipants >= challenge.getMaxPersonnel()) {
+            throw new ChallengeFullException("참여 인원이 가득 찼습니다.");
+        }
+
+        ChallengeUsers join = ChallengeUsers.builder()
+                .challenge(challenge)
+                .user(user)
+                .joinedAt(LocalDateTime.now())
+                .build();
+
+        challengeUsersRepository.save(join);
     }
 }
 
