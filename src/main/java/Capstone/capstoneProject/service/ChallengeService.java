@@ -218,6 +218,10 @@ public class ChallengeService {
         challenges.setDeletedAt(LocalDateTime.now());
         challengeRepository.save(challenges);
     }
+    // 해시태그로 검색
+    public List<Challenges> searchByHashtag(String keyword) {
+        return challengeRepository.findByHashtagNameContaining(keyword);
+    }
 
 }
 
