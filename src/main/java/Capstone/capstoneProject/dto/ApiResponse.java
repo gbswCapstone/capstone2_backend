@@ -23,6 +23,16 @@ public class ApiResponse<T> {
                 .build();
     }
 
+    public static <T> ApiResponse<T> ok(String message) {
+        return ApiResponse.<T>builder()
+                .success(true)
+                .data(null)
+                .message("요청이 성공적으로 처리되었습니다.")
+                .build();
+    }
+
+
+
     public static <T> ApiResponse<T> ok() {
         return ApiResponse.<T>builder()
                 .success(true)

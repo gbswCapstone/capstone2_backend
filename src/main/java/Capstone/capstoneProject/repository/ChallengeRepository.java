@@ -21,10 +21,12 @@ public interface ChallengeRepository extends JpaRepository<Challenges, Long> {
     )
     FROM Challenges c
     LEFT JOIN ChallengeUsers cu ON cu.challenge.id = c.id
+    WHERE c.deletedAt IS NULL
     GROUP BY c.id, c.title, c.maxPersonnel, c.likeCount
     ORDER BY c.createdAt DESC
 """)
-    List<ChallengeListDTO> findAllOrderByCreatedAtDescWithCurrentPersonnel();
+    List<ChallengeListDTO> findAllActiveOrderByCreatedAtDescWithCurrentPersonnel();
+
 
     // job없이 조회 인기순(좋아요순)
     @Query("""
@@ -37,10 +39,12 @@ public interface ChallengeRepository extends JpaRepository<Challenges, Long> {
     )
     FROM Challenges c
     LEFT JOIN ChallengeUsers cu ON cu.challenge.id = c.id
+    WHERE c.deletedAt IS NULL
     GROUP BY c.id, c.title, c.maxPersonnel, c.likeCount
     ORDER BY c.likeCount DESC
 """)
-    List<ChallengeListDTO> findAllOrderByLikeCountDescWithCurrentPersonnel();
+    List<ChallengeListDTO> findAllActiveOrderByLikeCountDescWithCurrentPersonnel();
+
 
 
     // job 검색 최신순
@@ -54,11 +58,12 @@ public interface ChallengeRepository extends JpaRepository<Challenges, Long> {
     )
     FROM Challenges c
     LEFT JOIN ChallengeUsers cu ON cu.challenge.id = c.id
-    WHERE c.job = :job
+    WHERE c.deletedAt IS NULL AND c.job = :job
     GROUP BY c.id, c.title, c.maxPersonnel, c.likeCount
     ORDER BY c.createdAt DESC
 """)
-    List<ChallengeListDTO> findAllByJobOrderByCreatedAtDescWithCurrentPersonnel(UserJobs job);
+    List<ChallengeListDTO> findAllActiveByJobOrderByCreatedAtDescWithCurrentPersonnel(UserJobs job);
+
 
 
     // job 검색 인기순(좋아요순)
@@ -72,11 +77,12 @@ public interface ChallengeRepository extends JpaRepository<Challenges, Long> {
     )
     FROM Challenges c
     LEFT JOIN ChallengeUsers cu ON cu.challenge.id = c.id
-    WHERE c.job = :job
+    WHERE c.deletedAt IS NULL AND c.job = :job
     GROUP BY c.id, c.title, c.maxPersonnel, c.likeCount
     ORDER BY c.likeCount DESC
 """)
-    List<ChallengeListDTO> findAllByJobOrderByLikeCountDescWithCurrentPersonnel(UserJobs job);
+    List<ChallengeListDTO> findAllActiveByJobOrderByLikeCountDescWithCurrentPersonnel(UserJobs job);
+
 
 
 
