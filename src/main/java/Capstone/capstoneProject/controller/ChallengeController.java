@@ -58,17 +58,15 @@ public class ChallengeController {
         return ResponseEntity.ok(ApiResponse.ok(new ChallengeLikeResponse(updatedLikeCount)));
     }
 
-//    @PutMapping("/{id}")
-//    @Operation(summary = "챌린지방 수정", description = "등록되어 있는 기존 챌린지방 수정 시 사용하는 API 입니다.")
-//    public ResponseEntity<ApiResponse<ChallengeDetailResponse>> updateChallenge(
-//            @PathVariable Long id,
-//            @RequestBody ChallengeCreate dto) {
-//        Challenges challenges = challengeService.update(id, dto);
-//        boolean isLiked = challengeService.isLikedByUser(challenges);
-//        ChallengeDetailResponse challengeDetailResponse = new ChallengeDetailResponse(
-//                challenges, isLiked
-//        );
-//        return ResponseEntity.ok(ApiResponse.ok(challengeDetailResponse));
-//    }
+    @PutMapping("/{id}")
+    @Operation(summary = "챌린지방 수정", description = "등록되어 있는 기존 챌린지방 수정 시 사용하는 API 입니다.")
+    public ResponseEntity<ApiResponse<ChallengeDetailResponse>> updateChallenge(
+            @PathVariable Long id,
+            @RequestBody ChallengeCreate dto) {
+        Challenges challenges = challengeService.update(id, dto);
+        boolean isLiked = challengeService.isLikedByUser(challenges);
+        ChallengeDetailResponse challengeDetailResponse = ChallengeDetailResponse.fromEntity(challenges, isLiked);
+        return ResponseEntity.ok(ApiResponse.ok(challengeDetailResponse));
+    }
 
 }
