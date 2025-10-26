@@ -69,4 +69,13 @@ public class ChallengeController {
         return ResponseEntity.ok(ApiResponse.ok(challengeDetailResponse));
     }
 
+    @DeleteMapping("/{id}")
+    @Operation(summary = "챌린지방 삭제", description =  "등록되어 있는 기존 챌린지방 삭제 시 사용하는 API 입니다.")
+    public ResponseEntity<ApiResponse<Void>> deleteChallenge(
+            @PathVariable Long id
+    ) {
+        challengeService.delete(id);
+        return ResponseEntity.ok(ApiResponse.ok("삭제되었습니다."));
+    }
+
 }

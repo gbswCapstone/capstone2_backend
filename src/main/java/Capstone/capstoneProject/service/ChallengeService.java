@@ -92,12 +92,12 @@ public class ChallengeService {
         // job 없을 때
         if (finalJob == UserJobs.NONE) {
             challenges = finalSort.equals("POPULAR")
-                    ? challengeRepository.findAllOrderByLikeCountDescWithCurrentPersonnel()
-                    : challengeRepository.findAllOrderByCreatedAtDescWithCurrentPersonnel();
+                    ? challengeRepository.findAllActiveOrderByLikeCountDescWithCurrentPersonnel()
+                    : challengeRepository.findAllActiveOrderByCreatedAtDescWithCurrentPersonnel();
         } else {  // job 있을 때
             challenges = finalSort.equals("POPULAR")
-                    ? challengeRepository.findAllByJobOrderByLikeCountDescWithCurrentPersonnel(finalJob)
-                    : challengeRepository.findAllByJobOrderByCreatedAtDescWithCurrentPersonnel(finalJob);
+                    ? challengeRepository.findAllActiveByJobOrderByLikeCountDescWithCurrentPersonnel(finalJob)
+                    : challengeRepository.findAllActiveByJobOrderByCreatedAtDescWithCurrentPersonnel(finalJob);
         }
 
         return challenges;
@@ -207,6 +207,17 @@ public class ChallengeService {
         return challenges;
     }
 
+    public void delete(Long id) {
+        Challenges challenges = findById(id);
+        // user 정보 가져오기 (bearer token에서 추출)
+        Users user = authenticatedUserUtils.getCurrentUser();
+        // 작성자인지 확인
+        if (!challenges.getCreatedBy().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("작성자가 아니면 삭제할 수 없습니다.");
+        }
+        challenges.setDeletedAt(LocalDateTime.now());
+        challengeRepository.save(challenges);
+    }
 
 }
 
