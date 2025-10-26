@@ -122,14 +122,14 @@ public class ChallengeService {
             challenges.setLikeCount(challenges.getLikeCount() + 1);
             challengeRepository.save(challenges);
         }
-            return likeRepository.countByChallenges(challenges);
+        return likeRepository.countByChallenges(challenges);
     }
 
     public Challenges findById(Long id) {
         Challenges challenges = challengeRepository.findById(id)
                 .filter(c -> c.getDeletedAt() == null)
                 .orElseThrow(() -> new ChallengeNotFoundException("해당 챌린지방을 찾을 수 없습니다."));
-       return challenges;
+        return challenges;
     }
 
     public boolean isLikedByUser(Challenges challenges) {
@@ -218,11 +218,24 @@ public class ChallengeService {
         challenges.setDeletedAt(LocalDateTime.now());
         challengeRepository.save(challenges);
     }
-    // 해시태그로 검색
-    public List<Challenges> searchByHashtag(String keyword) {
-        return challengeRepository.findByHashtagNameContaining(keyword);
-    }
 
+    public List<Challenges> searchChallenge(String hashtag, String keyword) {
+        boolean isHashtagEmpty = (hashtag == null || hashtag.isBlank());
+        boolean isKeywordEmpty = (keyword == null || keyword.isBlank());
+
+        if (!isHashtagEmpty && !isKeywordEmpty) {
+            // 해시태그+제목 검색
+            return challengeRepository.searchByHashtagAndKeyword(hashtag, keyword);
+        } else if (!isHashtagEmpty) {
+            // 해시태그만 검색
+            return challengeRepository.findByHashtagNameContaining(hashtag);
+        } else if (!isKeywordEmpty) {
+            // 제목만 검색
+            return challengeRepository.findByTitleContaining(keyword);
+        } else {
+            throw new IllegalArgumentException("잘못된 검색입니다.(제목, 해시태그 입력없음)");
+        }
+    }
 }
 
 
