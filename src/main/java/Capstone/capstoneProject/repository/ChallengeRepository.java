@@ -5,6 +5,8 @@ import Capstone.capstoneProject.entity.challenges.Challenges;
 import Capstone.capstoneProject.enums.UserJobs;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -84,8 +86,27 @@ public interface ChallengeRepository extends JpaRepository<Challenges, Long> {
     List<ChallengeListDTO> findAllActiveByJobOrderByLikeCountDescWithCurrentPersonnel(UserJobs job);
 
 
+//    @Query("""
+//        SELECT DISTINCT c
+//        FROM Challenges c
+//        JOIN c.challengeHashtags ch
+//        JOIN ch.hashtag h
+//        WHERE h.name LIKE %:keyword%
+//    """)
+//    List<Challenges> findByHashtagNameContaining(@Param("keyword") String keyword);
 
 
+    @Query("""
+    SELECT DISTINCT c
+    FROM Challenges c
+    JOIN c.challengeHashtags ch
+    JOIN ch.hashtag h
+    WHERE h.name LIKE CONCAT('%', :keyword, '%')
+""")
+    List<Challenges> findByHashtagNameContaining(@Param("keyword") String keyword);
+
+//    @Query("SELECT DISTINCT c FROM Challenges c JOIN c.hashtags h WHERE h.name LIKE %:hashtag%")
+//    List<Challenges> findByHashtagNameContaining(@Param("hashtag") String hashtag);
 
 }
 

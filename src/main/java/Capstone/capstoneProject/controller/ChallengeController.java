@@ -78,4 +78,29 @@ public class ChallengeController {
         return ResponseEntity.ok(ApiResponse.ok("삭제되었습니다."));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<ChallengeListDTO>>> searchHashtagChallenges(
+            @RequestParam String hashtag) {
+        List<Challenges> challenges = challengeService.searchByHashtag(hashtag);
+        List<ChallengeListDTO> response = challenges.stream()
+                .map(ChallengeListDTO::new)
+                .toList();
+
+        return ResponseEntity.ok(ApiResponse.ok(response));
+    }
+
+
+
+
+
+//    @PostMapping("/join/{id}")
+//
+//
+//    @GetMapping("/myChallenges")
+//    @Operation(summary = "내 챌린지방 조회", description = "내가 가입되어 있는 챌린지방 조회")
+//    public ResponseEntity<ApiResponse<List<ChallengeListDTO>>> myChallenges() {
+//
+//    }
+
+
 }
