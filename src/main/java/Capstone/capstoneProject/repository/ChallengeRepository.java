@@ -85,17 +85,7 @@ public interface ChallengeRepository extends JpaRepository<Challenges, Long> {
 """)
     List<ChallengeListDTO> findAllActiveByJobOrderByLikeCountDescWithCurrentPersonnel(UserJobs job);
 
-
-//    @Query("""
-//        SELECT DISTINCT c
-//        FROM Challenges c
-//        JOIN c.challengeHashtags ch
-//        JOIN ch.hashtag h
-//        WHERE h.name LIKE %:keyword%
-//    """)
-//    List<Challenges> findByHashtagNameContaining(@Param("keyword") String keyword);
-
-
+    // 해시태그
     @Query("""
     SELECT DISTINCT c
     FROM Challenges c
@@ -105,8 +95,25 @@ public interface ChallengeRepository extends JpaRepository<Challenges, Long> {
 """)
     List<Challenges> findByHashtagNameContaining(@Param("keyword") String keyword);
 
-//    @Query("SELECT DISTINCT c FROM Challenges c JOIN c.hashtags h WHERE h.name LIKE %:hashtag%")
-//    List<Challenges> findByHashtagNameContaining(@Param("hashtag") String hashtag);
+    //제목
+    @Query("""
+    SELECT DISTINCT c
+    FROM Challenges c
+    WHERE c.title LIKE CONCAT('%', :keyword, '%')
+""")
+    List<Challenges> findByTitleContaining(@Param("keyword") String keyword);
+
+    // 해시태그+키워드
+    @Query("""
+    SELECT DISTINCT c
+    FROM Challenges c
+    JOIN c.challengeHashtags ch
+    JOIN ch.hashtag h
+    WHERE h.name LIKE CONCAT('%', :hashtag, '%')
+      AND c.title LIKE CONCAT('%', :keyword, '%')
+""")
+    List<Challenges> searchByHashtagAndKeyword(@Param("hashtag") String hashtag,
+                                               @Param("keyword") String keyword);
 
 }
 
