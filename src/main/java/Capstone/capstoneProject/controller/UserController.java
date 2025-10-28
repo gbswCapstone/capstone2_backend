@@ -17,7 +17,7 @@ public class UserController {
     private final UserService userService;
 
     @Operation(summary = "회원가입", description = "회원가입 시 사용하는 API 입니다.")
-    @PostMapping("api/auth/signup")
+    @PostMapping("/signup")
     public ResponseEntity<ApiResponse<Object>> signup(@RequestBody SecuritySignupRequest request) {
         userService.signup(request);
         return ResponseEntity.ok(ApiResponse.ok());

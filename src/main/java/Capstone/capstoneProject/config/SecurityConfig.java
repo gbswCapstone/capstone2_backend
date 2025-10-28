@@ -62,7 +62,7 @@ public class SecurityConfig {
                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
               .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/oauth2/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll().requestMatchers(HttpMethod.GET, "/api/users/**").permitAll() // 나중에 수정사항
+                        .requestMatchers("/api/auth/**").permitAll().requestMatchers(HttpMethod.GET, "/api/users/signup").permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
