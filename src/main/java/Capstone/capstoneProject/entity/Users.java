@@ -20,7 +20,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class Users {
+public class
+Users {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

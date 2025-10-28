@@ -27,40 +27,9 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
-    private final UserProfileRepository userProfileRepository;
-    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
-
-
     private final AuthTokenRepository authTokenRepository;
-    //회원가입
-    public void signup(SecuritySignupRequest request) {
-         if(userRepository.findByEmail(request.getEmail()).isPresent()) {
-             throw new IllegalArgumentException("이미 존재하는 계정입니다.");
-         }
-        if (!request.getPassword().equals(request.getPasswordCheck())) {
-            throw new IllegalArgumentException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
-        }
-
-         Users user = Users.builder()
-                 .email(request.getEmail())
-                 .password(passwordEncoder.encode(request.getPassword()))
-                 .role(UserRole.USER)
-                 .provider("local")
-                 .providerId(request.getEmail()) // 고유 Id
-                 .build();
-        userRepository.save(user);
-
-        UserProfile profile = UserProfile.builder()
-                .nickname(request.getNickname())
-                .statusMessage(request.getStatusMessage())
-                .profileImg(request.getProfileImg())
-                .user(user)
-                .build();
-
-        userProfileRepository.save(profile);
-    }
 
     @Transactional
     public TokenResponse login(LoginRequest request) {
