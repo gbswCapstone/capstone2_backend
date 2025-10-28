@@ -1,6 +1,7 @@
 package Capstone.capstoneProject.controller;
 
 import Capstone.capstoneProject.dto.ApiResponse;
+import Capstone.capstoneProject.dto.ProfilePatchDTO;
 import Capstone.capstoneProject.dto.SecuritySignupRequest;
 import Capstone.capstoneProject.dto.UserResponseDTO;
 import Capstone.capstoneProject.service.UserService;
@@ -26,6 +27,15 @@ public class UserController {
     @Operation(summary = "프로필 조회하기", description = "프로필 조회 시 사용하는 API 입니다.")
     public ResponseEntity<ApiResponse<UserResponseDTO>> myProfile() {
         UserResponseDTO result = userService.getMyProfile();
+        return ResponseEntity.ok(ApiResponse.ok(result));
+    }
+
+    @PutMapping("/profile")
+    @Operation(summary = "프로필 수정하기", description = "프로필 수정 시 사용하는 API 입니다.")
+    public ResponseEntity<ApiResponse<ProfilePatchDTO>> myProfilePatch(
+            @RequestBody ProfilePatchDTO dto
+    ) {
+        ProfilePatchDTO result = userService.patchMyProfile(dto);
         return ResponseEntity.ok(ApiResponse.ok(result));
     }
 
