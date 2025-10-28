@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>챌린지 목록</title>
+</head>
+<body>
+<h1>챌린지 목록</h1>
+
+<div id="challengeList">
+  <h2>임시 테스트용</h2>
+  <p>백엔드에서 챌린지 목록을 조회하여 ID를 확인하세요.</p>
+
+  <label for="authToken">Bearer Token 입력:</label>
+  <input type="text" id="authToken" style="width: 50%;" placeholder="여기에 유효한 JWT 토큰을 입력하세요"><br><br>
+
+  <a href="#" onclick="enterChallengeChat(11)">[테스트] ID 11 챌린지 채팅방 입장</a>
+</div>
+
+<p><a href="/challenge/create.html">새 챌린지 만들기</a></p>
+
+<script>
+  function enterChallengeChat(challengeId) {
+      // 💡 1. 입력 필드에서 토큰 값을 가져옵니다. (혹은 localStorage/쿠키에서 가져옵니다)
+      const authToken = document.getElementById('authToken').value.trim();
+
+      if (!authToken) {
+          alert('Bearer Token을 먼저 입력해주세요.');
+          return;
+      }
+
+      // 💡 2. 요청 옵션에 Headers를 추가하고 Authorization 필드에 토큰을 설정합니다.
+      const requestOptions = {
+          method: 'GET',
+          headers: {
+              'Authorization': `Bearer ${authToken}` // Bearer Token 추가
+          }
+      };
+
+      // GET /api/chat/{id} 호출
+      fetch(`/api/chat/${challengeId}`, requestOptions)
+          .then(response => {
+              // 응답이 JSON이 아니거나 인증 실패(401/403)인 경우를 처리합니다.
+              const contentType = response.headers.get("content-type");
+
+              if (response.status === 401 || response.status === 403) {
+                  alert(`인증 실패 또는 권한 없음. (상태 코드: ${response.status}) 토큰을 확인하거나 챌린지 가입을 확인하세요.`);
+                  // 서버에서 JSON이 아닌 HTML(로그인 페이지)을 반환했다면 JSON 파싱을 시도하지 않습니다.
+                  throw new Error("인증 실패 또는 권한 없음.");
+              }
+
+              if (!response.ok) {
+                  // response.ok가 false이고 JSON 형식이라면 에러 메시지를 파싱합니다.
+                  if (contentType && contentType.includes("application/json")) {
+                      return response.json().then(err => { throw new Error(err.message || '채팅방 입장 실패'); });
+                  } else {
+                      // 기타 예상치 못한 에러
+                      throw new Error(`채팅방 입장 실패 (HTTP ${response.status})`);
+                  }
+              }
+
+              // 성공 (response.ok === true)
+              return response.json();
+          })
+          .then(apiResponse => {
+              const chatRoom = apiResponse.data;
+              alert(`채팅방 입장 성공! 방 이름: ${chatRoom.name}`);
+
+              // 채팅방으로 이동. roomId와 토큰을 쿼리 파라미터로 전달 (다음 페이지에서 사용하기 위함)
+              window.location.href = `/chat/challengeChatRoom.html?roomId=${chatRoom.roomId}&challengeId=${challengeId}&token=${authToken}`;
+          })
+          .catch(error => {
+              console.error('채팅방 입장 에러:', error);
+              document.getElementById('challengeList').innerHTML += `<p style="color:red;">에러: ${error.message}</p>`;
+          });
+  }
+</script>
+</body>
+</html>
