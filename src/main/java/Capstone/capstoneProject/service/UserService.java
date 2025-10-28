@@ -6,12 +6,11 @@ import Capstone.capstoneProject.dto.UserResponseDTO;
 import Capstone.capstoneProject.entity.UserProfile;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.enums.UserRole;
-import Capstone.capstoneProject.exceptions.UserNotFoundException;
 import Capstone.capstoneProject.repository.UserProfileRepository;
 import Capstone.capstoneProject.repository.UserRepository;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -79,4 +78,11 @@ public class UserService {
         ProfilePatchDTO result = new ProfilePatchDTO(user, profile);
         return result;
     }
+
+//    @Transactional
+//    public void deleteUser() {
+//        // user 정보 가져오기 (baarer token에서 추출)
+//        Users user = authenticatedUserUtils.getCurrentUser();
+//
+//    }
 }
