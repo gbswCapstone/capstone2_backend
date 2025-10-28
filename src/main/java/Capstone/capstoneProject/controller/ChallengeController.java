@@ -1,20 +1,17 @@
 package Capstone.capstoneProject.controller;
 
 import Capstone.capstoneProject.dto.*;
-import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.entity.challenges.Challenges;
 import Capstone.capstoneProject.service.ChallengeService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("api/challenges")
+@RequestMapping("/api/challenges")
 @RequiredArgsConstructor
 public class ChallengeController {
 
@@ -40,6 +37,7 @@ public class ChallengeController {
         List<ChallengeListDTO> result = challengeService.getChallengeList(sortType, job);
         return ResponseEntity.ok(ApiResponse.ok(result));
     }
+
 
     @GetMapping("/{id}")
     @Operation(summary = "챌린지 단일조회", description = "챌린지방 단일 조회 시 사용하는 API 입니다.")
@@ -91,8 +89,6 @@ public class ChallengeController {
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
-
-
     @PostMapping("/join/{id}")
     @Operation(summary = "챌린지 방 가입", description = "챌린지방 가입 시 사용하는 API 입니다.")
     public ResponseEntity<ApiResponse<Void>> joinChallenge(
@@ -102,13 +98,21 @@ public class ChallengeController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
-
     @GetMapping("/myChallenges")
     @Operation(summary = "내 챌린지방 조회", description = "내가 가입되어 있는 챌린지방 조회")
     public ResponseEntity<ApiResponse<List<ChallengeListDTO>>> myChallenges() {
         List<ChallengeListDTO> result = challengeService.myChallengeList();
         return ResponseEntity.ok(ApiResponse.ok(result));
     }
+
+    @GetMapping("/likes")
+    @Operation(summary = "좋아요한 챌린지 전체조회", description = "내가 좋아요한 챌린지 전체 조회 시 사용하는 API 입니다.")
+    public ResponseEntity<ApiResponse<List<ChallengeListDTO>>> getMyLikeChallenge() {
+        List<ChallengeListDTO> result = challengeService.getMyLikeChallengeList();
+        return ResponseEntity.ok(ApiResponse.ok(result));
+    }
+
+
 
 
 }

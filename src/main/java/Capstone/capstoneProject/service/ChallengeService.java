@@ -2,6 +2,7 @@ package Capstone.capstoneProject.service;
 
 import Capstone.capstoneProject.dto.ChallengeCreate;
 import Capstone.capstoneProject.dto.ChallengeListDTO;
+import Capstone.capstoneProject.dto.ChatRoom;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.entity.challenges.*;
 import Capstone.capstoneProject.enums.UserJobs;
@@ -12,6 +13,7 @@ import Capstone.capstoneProject.repository.*;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -28,11 +30,61 @@ public class ChallengeService {
     private final ChallengeUsersRepository challengeUsersRepository;
     private final LikeRepository likeRepository;
     private final UserRepository userRepository;
+    private final ChatService chatService;
 
+//    public Challenges create(ChallengeCreate dto) {
+//        // user 정보 가져오기 (baarer token에서 추출)
+//        Users user = authenticatedUserUtils.getCurrentUser();
+//
+//        Challenges challenge = Challenges.builder()
+//                .createdBy(user)
+//                .title(dto.getTitle())
+//                .maxPersonnel(dto.getMaxPersonnel())
+//                .job(dto.getJob())
+//                .goal(dto.getGoal())
+//                .image(dto.getImage())
+//                .build();
+//
+//        challengeRepository.save(challenge);
+//
+//        // 작성자를 자동 참여자로 추가
+//        ChallengeUsers challengeUser = ChallengeUsers.builder()
+//                .challenge(challenge)
+//                .user(user)
+//                .joinedAt(LocalDateTime.now())
+//                .build();
+//        challengeUsersRepository.save(challengeUser);
+//
+//        // 해시태그 넣어주기
+//        if (dto.getHashtags() != null && !dto.getHashtags().isEmpty()) {
+//            List<Hashtag> hashtags = new ArrayList<>();
+//
+//            for (String name : dto.getHashtags()) {
+//                Hashtag tag = hashtagRepository.findByName(name)
+//                        .orElseGet(() -> {
+//                            Hashtag newTag = new Hashtag();
+//                            newTag.setName(name);
+//                            return hashtagRepository.save(newTag);
+//                        });
+//                hashtags.add(tag);
+//            }
+//
+//            List<ChallengeHashtag> challengeHashtags = hashtags.stream()
+//                    .map(tag -> ChallengeHashtag.of(challenge, tag))
+//                    .toList();
+//            challengeHashtagRepository.saveAll(challengeHashtags);
+//        }
+//
+//
+//        return challenge;
+//    }
 
+    @Transactional
     public Challenges create(ChallengeCreate dto) {
         // user 정보 가져오기 (baarer token에서 추출)
         Users user = authenticatedUserUtils.getCurrentUser();
+        // 챗방생성
+        ChatRoom chatRoom = chatService.createRoom(dto.getTitle());
 
         Challenges challenge = Challenges.builder()
                 .createdBy(user)
@@ -40,10 +92,11 @@ public class ChallengeService {
                 .maxPersonnel(dto.getMaxPersonnel())
                 .job(dto.getJob())
                 .goal(dto.getGoal())
+                .roomId(chatRoom.getRoomId())
                 .image(dto.getImage())
                 .build();
-
         challengeRepository.save(challenge);
+
 
         // 작성자를 자동 참여자로 추가
         ChallengeUsers challengeUser = ChallengeUsers.builder()
@@ -76,6 +129,7 @@ public class ChallengeService {
         return challenge;
     }
 
+
     public List<ChallengeListDTO> getChallengeList(String sortType, String job) {
 
         UserJobs finalJob;
@@ -105,6 +159,10 @@ public class ChallengeService {
 
         return challenges;
     }
+
+
+
+
 
     @Transactional
     public int toggleLike(Long id) {
@@ -275,6 +333,19 @@ public class ChallengeService {
         return joined.stream()
                 .map(cu -> new ChallengeListDTO(cu.getChallenge()))
                 .collect(Collectors.toList());
+    }
+
+    // 내가 좋아요한 챌린지방 조회
+    public List<ChallengeListDTO> getMyLikeChallengeList() {
+        // user 정보 가져오기 (baarer token에서 추출)
+        Users user = authenticatedUserUtils.getCurrentUser();
+        // 유저가 좋아요한 챌린지 목록
+        List<Likes> likes = likeRepository.findAllByUserOrderByCreatedAtDesc(user);
+
+        // dto 변환
+        return likes.stream()
+                .map(like -> new ChallengeListDTO(like.getChallenges()))
+                .toList();
     }
 
 }
