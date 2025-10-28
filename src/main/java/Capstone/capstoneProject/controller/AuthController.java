@@ -41,7 +41,7 @@ public class AuthController {
     }
 
     @Operation(summary = "카카오 로그인", description = "request값없음, response값 일반로그인이랑 똑같음")
-    @GetMapping("/login/oauth2/code/kakao")
+    @GetMapping("/oauth2/authorization/kakao")
     public String kakaoLoginDoc() {
         return "Swagger 표시용 엔드포인트입니다. 실제로는 Spring Security가 처리합니다.";
     }
