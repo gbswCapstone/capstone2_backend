@@ -61,19 +61,18 @@ public class SecurityConfig {
               .csrf(AbstractHttpConfigurer::disable) // Spring Security 6.1 이상에서 권장되는 방식
                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // kakao 로그인
                         .requestMatchers("/oauth2/**").permitAll()
-                        // google 로그인
+                        .requestMatchers("/api/auth/**").permitAll().requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll().requestMatchers(HttpMethod.GET, "/api/users/signup").permitAll()
                         .requestMatchers("/login/**").permitAll()
-                        // 인증 관련 API
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/users/signup").permitAll()
-                        // Swagger/OpenAPI
-                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-                        // 에러 페이지
-                        .requestMatchers("/error").permitAll()
-                        // WebSocket 관련
-                        .requestMatchers("/ws-chat/**", "/room/**").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**"
+                        ).permitAll()
+                        .requestMatchers(
+                                "/error"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
