@@ -3,10 +3,13 @@ package Capstone.capstoneProject.dto;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.entity.UserProfile;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 // 프로필 보기
 @Getter
+@AllArgsConstructor
 public class UserResponseDTO {
 
         //유저테이블
@@ -20,8 +23,6 @@ public class UserResponseDTO {
         @JsonProperty("status_message")
         private final String statusMessage;
 
-
-
     public UserResponseDTO(Users user, UserProfile profile) {
         this.id = user.getId();
         this.email = user.getEmail();
@@ -29,6 +30,5 @@ public class UserResponseDTO {
         this.profileImg = profile.getProfileImg();
         this.statusMessage = profile.getStatusMessage();
     }
-
 
 }
