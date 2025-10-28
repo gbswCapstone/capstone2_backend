@@ -28,6 +28,12 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.ok(tokenResponse));
     }
 
+    @PostMapping("api/auth/log-out")
+    @Operation(summary = "로그아웃", description = "클라이언트에서 토큰 삭제&로그인화면처리")
+    public ResponseEntity<ApiResponse<Void>> logout() {
+        return ResponseEntity.ok(ApiResponse.ok("로그아웃 되었습니다."));
+    }
+
     @Operation(summary = "구글 로그인", description = "request값없음, response값 일반로그인이랑 똑같음")
     @GetMapping("/login/oauth2/code/google")
     public String googleLoginDoc() {
@@ -39,6 +45,7 @@ public class AuthController {
     public String kakaoLoginDoc() {
         return "Swagger 표시용 엔드포인트입니다. 실제로는 Spring Security가 처리합니다.";
     }
+
 
 
 
