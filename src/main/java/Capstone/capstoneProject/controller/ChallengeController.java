@@ -15,9 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChallengeController {
 
-
     private final ChallengeService challengeService;
-
 
     @PostMapping
     @Operation(summary = "챌린지 생성", description = "챌린지방 신규 생성 시 사용하는 API 입니다.")

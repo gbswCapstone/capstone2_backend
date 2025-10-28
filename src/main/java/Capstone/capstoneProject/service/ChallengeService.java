@@ -13,7 +13,6 @@ import Capstone.capstoneProject.repository.*;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -31,53 +30,6 @@ public class ChallengeService {
     private final LikeRepository likeRepository;
     private final UserRepository userRepository;
     private final ChatService chatService;
-
-//    public Challenges create(ChallengeCreate dto) {
-//        // user 정보 가져오기 (baarer token에서 추출)
-//        Users user = authenticatedUserUtils.getCurrentUser();
-//
-//        Challenges challenge = Challenges.builder()
-//                .createdBy(user)
-//                .title(dto.getTitle())
-//                .maxPersonnel(dto.getMaxPersonnel())
-//                .job(dto.getJob())
-//                .goal(dto.getGoal())
-//                .image(dto.getImage())
-//                .build();
-//
-//        challengeRepository.save(challenge);
-//
-//        // 작성자를 자동 참여자로 추가
-//        ChallengeUsers challengeUser = ChallengeUsers.builder()
-//                .challenge(challenge)
-//                .user(user)
-//                .joinedAt(LocalDateTime.now())
-//                .build();
-//        challengeUsersRepository.save(challengeUser);
-//
-//        // 해시태그 넣어주기
-//        if (dto.getHashtags() != null && !dto.getHashtags().isEmpty()) {
-//            List<Hashtag> hashtags = new ArrayList<>();
-//
-//            for (String name : dto.getHashtags()) {
-//                Hashtag tag = hashtagRepository.findByName(name)
-//                        .orElseGet(() -> {
-//                            Hashtag newTag = new Hashtag();
-//                            newTag.setName(name);
-//                            return hashtagRepository.save(newTag);
-//                        });
-//                hashtags.add(tag);
-//            }
-//
-//            List<ChallengeHashtag> challengeHashtags = hashtags.stream()
-//                    .map(tag -> ChallengeHashtag.of(challenge, tag))
-//                    .toList();
-//            challengeHashtagRepository.saveAll(challengeHashtags);
-//        }
-//
-//
-//        return challenge;
-//    }
 
     @Transactional
     public Challenges create(ChallengeCreate dto) {
