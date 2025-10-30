@@ -1,6 +1,6 @@
 package Capstone.capstoneProject.config;
 
-import Capstone.capstoneProject.dto.ApiResponse;
+import Capstone.capstoneProject.global.ApiResponse;
 
 import Capstone.capstoneProject.repository.AuthTokenRepository;
 
@@ -61,6 +61,9 @@ public class SecurityConfig {
               .csrf(AbstractHttpConfigurer::disable) // Spring Security 6.1 이상에서 권장되는 방식
                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/ws-chat/**").permitAll() // chat 추가
+                        .requestMatchers("/pub/**").permitAll() // 메시지 보낼때
+                        .requestMatchers("/sub/**").permitAll() // 메시지 받을때
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll().requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll().requestMatchers(HttpMethod.GET, "/api/users/signup").permitAll()
@@ -73,6 +76,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/error"
                         ).permitAll()
+                        .requestMatchers("/room.html").permitAll() // 테스트용 나중에 빼야함
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)

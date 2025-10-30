@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+<button onclick="connect()">Connect</button>
+<button onclick="sendMessage()">Send Message</button>
+<ul id="messages"></ul>
+
+<script>
+  let stompClient;
+  const roomId = "11";
+  const token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTZAZ21haWwuY29tIiwiaWF0IjoxNzYxNzA2MzgwLCJleHAiOjE3NjE3MDk5ODB9.L40QQCnTL1daefq2MxgsJco88IccWY_BWUqsDO8euWs";
+
+  function connect() {
+    const socket = new SockJS('http://localhost:8005/ws-chat');
+    stompClient = Stomp.over(socket);
+    stompClient.connect(
+      { Authorization: token, roomId: roomId },
+      function(frame) {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/sub/room/' + roomId, function(message) {
+          const msg = JSON.parse(message.body);
+          const li = document.createElement('li');
+          li.innerText = msg.sender + ": " + msg.content;
+          document.getElementById('messages').appendChild(li);
+        });
+      }
+    );
+  }
+
+  function sendMessage() {
+    const msg = { sender: "TestUser", content: "테스트 메시지" };
+    stompClient.send('/pub/room/' + roomId, {}, JSON.stringify(msg));
+  }
+</script>
+</body>
+</html>

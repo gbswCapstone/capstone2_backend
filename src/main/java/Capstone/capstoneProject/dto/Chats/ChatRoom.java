@@ -1,4 +1,4 @@
-package Capstone.capstoneProject.dto;
+package Capstone.capstoneProject.dto.Chats;
 
 import lombok.Builder;
 import lombok.Getter;

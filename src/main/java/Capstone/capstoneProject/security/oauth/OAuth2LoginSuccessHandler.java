@@ -1,6 +1,6 @@
 package Capstone.capstoneProject.security.oauth;
 
-import Capstone.capstoneProject.dto.ApiResponse;
+import Capstone.capstoneProject.global.ApiResponse;
 import Capstone.capstoneProject.dto.TokenResponse;
 import Capstone.capstoneProject.entity.AuthToken;
 import Capstone.capstoneProject.entity.Users;
@@ -37,28 +37,28 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
 
-        // ✅ 인증된 사용자 정보 꺼내기
+        // 인증된 사용자 정보 꺼내기
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
 
-        // ✅ provider 판별 (Google / Kakao)
+        // provider 판별 (Google / Kakao)
         String provider = getProviderName(oauthUser);
 
-        // ✅ provider별 이메일 추출
+        // provider별 이메일 추출
         String email = extractEmail(provider, oauthUser);
 
         if (email == null) {
             throw new UserNotFoundException(provider + " 로그인에서 이메일을 가져올 수 없습니다. (카카오 개발자 콘솔의 동의 항목 확인)");
         }
 
-        // ✅ 사용자 조회
+        // 사용자 조회
         Users user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("사용자가 존재하지 않습니다."));
 
-        // ✅ JWT 발급
+        // JWT 발급
         String accessToken = jwtTokenProvider.createToken(user.getEmail());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
 
-        // ✅ 기존 refresh token 삭제 후 새로 저장
+        // 기존 refresh token 삭제 후 새로 저장
         authTokenRepository.deleteByUser(user);
         AuthToken tokenEntity = AuthToken.builder()
                 .user(user)
@@ -68,11 +68,11 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 .build();
         authTokenRepository.save(tokenEntity);
 
-        // ✅ 응답 생성
+        // 응답 생성
         TokenResponse tokenResponse = new TokenResponse(accessToken, refreshToken);
         ApiResponse<TokenResponse> apiResponse = ApiResponse.ok(tokenResponse);
 
-        // ✅ JSON 응답 전송
+        // JSON 응답 전송
         response.setContentType("application/json;charset=UTF-8");
         ObjectMapper objectMapper = new ObjectMapper();
         response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
@@ -80,7 +80,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     }
 
     /**
-     * ✅ provider 판별 메서드
+     * provider 판별 메서드
      *  - Google: attributes에 "sub" 키가 존재
      *  - Kakao: attributes에 "id" 키가 존재
      */
@@ -92,7 +92,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     }
 
     /**
-     * ✅ provider별 이메일 추출 메서드
+     *  provider별 이메일 추출 메서드
      *  - Google: email이 최상위
      *  - Kakao: kakao_account.email 내부
      */

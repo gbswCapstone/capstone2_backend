@@ -1,13 +1,20 @@
 package Capstone.capstoneProject.controller;
 
-import Capstone.capstoneProject.dto.ApiResponse;
-import Capstone.capstoneProject.dto.ChatRoom;
+import Capstone.capstoneProject.global.ApiResponse;
+import Capstone.capstoneProject.dto.Chats.ChatMessage;
+import Capstone.capstoneProject.dto.Chats.ChatRoom;
 import Capstone.capstoneProject.service.ChatService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.List;
 
@@ -16,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChatController {
     private final ChatService chatService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     // 챗 목록 조회
     @GetMapping("/chatList")
@@ -47,6 +55,22 @@ public class ChatController {
         ChatRoom room = chatService.findRoomById(roomId);
         model.addAttribute("room",room);   //현재 방에 들어오기위해서 필요한데...... 접속자 수 등등은 실시간으로 보여줘야 돼서 여기서는 못함
         return "chat/chatRoom";
+    }
+
+    // 클라이언트 -> 서버
+    @Operation(summary = "챌린지방에서 메시지 보내기", description = "챌린지방에서 메시지 보낼 때 사용하는 API 입니다.")
+    @MessageMapping("/room/{roomId}")   //pub일 때, send일 때만 옴
+    public void sendMessage(
+            @DestinationVariable String roomId,
+            ChatMessage message,
+            Message<?> msg
+    ) {
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(msg);  //매 새로운 메시지마다 생성됨.
+        Object sessionUser = accessor.getSessionAttributes().get("user");  //interceptor에서 인증 성공 후 저장한 user정보
+        Authentication auth=(Authentication) sessionUser;
+        String username = auth.getName();
+        message.setSender(username);
+        messagingTemplate.convertAndSend("/sub/room/" + roomId, message);  //여기에서 해당 방(구독자들에만 메세지 전송
     }
 
 

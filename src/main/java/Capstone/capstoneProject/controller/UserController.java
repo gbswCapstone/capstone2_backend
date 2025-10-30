@@ -1,12 +1,11 @@
 package Capstone.capstoneProject.controller;
 
-import Capstone.capstoneProject.dto.ApiResponse;
+import Capstone.capstoneProject.global.ApiResponse;
 import Capstone.capstoneProject.dto.ProfilePatchDTO;
 import Capstone.capstoneProject.dto.SecuritySignupRequest;
 import Capstone.capstoneProject.dto.UserResponseDTO;
 import Capstone.capstoneProject.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

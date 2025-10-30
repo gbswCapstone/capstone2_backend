@@ -2,6 +2,7 @@ package Capstone.capstoneProject.controller;
 
 import Capstone.capstoneProject.dto.*;
 import Capstone.capstoneProject.entity.challenges.Challenges;
+import Capstone.capstoneProject.global.ApiResponse;
 import Capstone.capstoneProject.service.ChallengeService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
