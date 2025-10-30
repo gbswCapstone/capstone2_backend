@@ -1,8 +1,7 @@
-package Capstone.capstoneProject.dto;
+package Capstone.capstoneProject.global;
 
 
 
-import jakarta.annotation.Nullable;
 import lombok.*;
 
 @Getter

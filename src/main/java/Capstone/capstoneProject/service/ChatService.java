@@ -1,9 +1,8 @@
 package Capstone.capstoneProject.service;
 
-import Capstone.capstoneProject.dto.ChatRoom;
+import Capstone.capstoneProject.dto.Chats.ChatRoom;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.entity.challenges.Challenges;
-import Capstone.capstoneProject.exceptions.AlreadyJoinedException;
 import Capstone.capstoneProject.exceptions.ChallengeNotFoundException;
 import Capstone.capstoneProject.repository.ChallengeRepository;
 import Capstone.capstoneProject.repository.ChallengeUsersRepository;

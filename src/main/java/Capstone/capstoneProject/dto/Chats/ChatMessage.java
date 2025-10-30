@@ -1,10 +1,8 @@
-package Capstone.capstoneProject.dto;
+package Capstone.capstoneProject.dto.Chats;
 
 import Capstone.capstoneProject.enums.MessageType;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.awt.*;
 
 @Getter
 @Setter

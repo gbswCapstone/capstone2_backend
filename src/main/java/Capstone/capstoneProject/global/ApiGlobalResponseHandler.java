@@ -1,6 +1,5 @@
-package Capstone.capstoneProject.config;
+package Capstone.capstoneProject.global;
 
-import Capstone.capstoneProject.dto.ApiResponse;
 import Capstone.capstoneProject.exceptions.*;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.http.HttpStatus;

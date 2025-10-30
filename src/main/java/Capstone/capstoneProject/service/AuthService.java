@@ -7,6 +7,7 @@ import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.entity.UserProfile;
 import Capstone.capstoneProject.enums.UserRole;
 import Capstone.capstoneProject.exceptions.RefreshTokenNotFoundException;
+import Capstone.capstoneProject.global.ApiResponse;
 import Capstone.capstoneProject.repository.AuthTokenRepository;
 
 import Capstone.capstoneProject.repository.UserProfileRepository;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthTokenRepository authTokenRepository;
+    private final UserProfileRepository userProfileRepository;
 
     @Transactional
     public TokenResponse login(LoginRequest request) {
@@ -81,7 +84,109 @@ public class AuthService {
         return new TokenResponse(newAccessToken, newRefreshToken);
     }
 
-}
+    @Transactional
+    public TokenResponse googleLogin(OauthRequest request) {
+        String provider = "google";
+        String email = request.getEmail();
+        String nickname = request.getNickname();
+
+        Optional<Users> optionalUser = userRepository.findByEmail(email);
+        Users user;
+        UserProfile profile;
+        // db에 사용자가 없을 때 회원가입된 후 토큰 반환
+        if (optionalUser.isEmpty()) {
+            user = Users.builder()
+                    .email(email) // 로그인 아이디
+                    .password("SOCIAL_LOGIN") // 소셜 로그인용 임의 비번
+                    .provider(provider)
+                    .providerId(email)
+                    .role(UserRole.USER)
+                    .build();
+            userRepository.save(user);
+
+            profile = UserProfile.builder() // 상태메시지랑, 프로필 이미지 null
+                    .user(user)
+                    .nickname(nickname)
+                    .build();
+            userProfileRepository.save(profile);
+
+        } else {
+            user = optionalUser.get();
+            // 기존 유저라면 provider 정보 업데이트
+            if (!user.getProvider().equals(provider)) {
+                user.setProvider(provider);
+                user.setProviderId(email);
+            }
+            // 기존 refresh token 삭제
+            authTokenRepository.deleteByUser(user);
+        }
+        // JWT 발급
+        String accessToken = jwtTokenProvider.createToken(user.getEmail());
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
+
+        AuthToken tokenEntity = AuthToken.builder()
+                .user(user)
+                .refreshToken(refreshToken)
+                .expiresAt(LocalDateTime.now().plusDays(7))
+                .createdAt(LocalDateTime.now())
+                .build();
+        authTokenRepository.save(tokenEntity);
+        return new TokenResponse(accessToken, refreshToken);
+        }
+
+    @Transactional
+    public TokenResponse kakaoLogin(OauthRequest request) {
+        String provider = "kakao";
+        String email = request.getEmail();
+        String nickname = request.getNickname();
+
+        Optional<Users> optionalUser = userRepository.findByEmail(email);
+        Users user;
+        UserProfile profile;
+        // db에 사용자가 없을 때 회원가입된 후 토큰 반환
+        if (optionalUser.isEmpty()) {
+            user = Users.builder()
+                    .email(email) // 로그인 아이디
+                    .password("SOCIAL_LOGIN") // 소셜 로그인용 임의 비번
+                    .provider(provider)
+                    .providerId(email)
+                    .role(UserRole.USER)
+                    .build();
+            userRepository.save(user);
+
+            profile = UserProfile.builder() // 상태메시지랑, 프로필 이미지 null
+                    .user(user)
+                    .nickname(nickname)
+                    .build();
+            userProfileRepository.save(profile);
+
+        } else {
+            user = optionalUser.get();
+            // 기존 유저라면 provider 정보 업데이트
+            if (!user.getProvider().equals(provider)) {
+                user.setProvider(provider);
+                user.setProviderId(email);
+            }
+            // 기존 refresh token 삭제
+            authTokenRepository.deleteByUser(user);
+        }
+        // JWT 발급
+        String accessToken = jwtTokenProvider.createToken(user.getEmail());
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
+
+        AuthToken tokenEntity = AuthToken.builder()
+                .user(user)
+                .refreshToken(refreshToken)
+                .expiresAt(LocalDateTime.now().plusDays(7))
+                .createdAt(LocalDateTime.now())
+                .build();
+        authTokenRepository.save(tokenEntity);
+        return new TokenResponse(accessToken, refreshToken);
+    }
+
+    }
+
+
 
 
 
