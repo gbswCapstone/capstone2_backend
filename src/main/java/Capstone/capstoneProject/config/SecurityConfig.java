@@ -66,7 +66,7 @@ public class SecurityConfig {
                         .requestMatchers("/sub/**").permitAll() // 메시지 받을때
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll().requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll().requestMatchers(HttpMethod.GET, "/api/users/signup").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll().requestMatchers(HttpMethod.POST, "/api/users/signup").permitAll()
                         .requestMatchers("/login/**").permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",
