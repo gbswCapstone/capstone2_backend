@@ -1,5 +1,5 @@
 # Java 21을 사용하는 이미지
-FROM openjdk:21-jdk-slim
+FROM gradle:8.9-jdk21 AS builder
 
 # 빌드한 jar파일을 컨테이너에 복사
 COPY build/libs/*.jar app.jar
