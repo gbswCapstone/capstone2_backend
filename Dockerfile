@@ -3,7 +3,8 @@ WORKDIR /app
 
 COPY . .
 
-RUN chmod +x gradlew
+RUN chmod +x ./gradlew
+
 RUN ./gradlew clean bootJar -x test --no-daemon
 
 FROM eclipse-temurin:21-jdk
@@ -15,6 +16,7 @@ ENV PORT=8004
 EXPOSE ${PORT}
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
 
 
 
