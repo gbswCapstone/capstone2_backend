@@ -45,8 +45,7 @@ public class UserService {
                 .nickname(request.getNickname())
                 .statusMessage(request.getStatusMessage())
                 .profileImg(request.getProfileImg())
-                .user(user)
-                .build();
+                .user(user).build();
 
         userProfileRepository.save(profile);
     }
