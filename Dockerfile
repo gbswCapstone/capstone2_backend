@@ -1,11 +1,12 @@
-# Java 21을 사용하는 이미지
+# 빌드 단계
 FROM gradle:8.9-jdk21 AS builder
+WORKDIR /app
+COPY . .
+RUN gradle clean build -x test
 
-# 빌드한 jar파일을 컨테이너에 복사
-COPY build/libs/*.jar app.jar
-
-
+# 실행 단계
+FROM eclipse-temurin:21-jdk
+WORKDIR /app
+COPY --from=builder /app/build/libs/*.jar app.jar
 EXPOSE 8004
-
-# 컨테이너가 시작되면 실행할 명령어
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=docker"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
