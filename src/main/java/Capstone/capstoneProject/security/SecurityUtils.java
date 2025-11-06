@@ -1,6 +1,7 @@
 package Capstone.capstoneProject.security;
 
 import Capstone.capstoneProject.exceptions.NotAuthenticatedException;
+import Capstone.capstoneProject.exceptions.UserNotFoundException;
 import Capstone.capstoneProject.repository.UserRepository;
 import Capstone.capstoneProject.security.oauth.CustomOauth2UserDetails;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class SecurityUtils {
 
         if (principal instanceof org.springframework.security.core.userdetails.User springUser) {
             return userRepository.findByEmail(springUser.getUsername())
-                    .orElseThrow(() -> new NotAuthenticatedException("사용자를 찾을 수 없습니다."))
+                    .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."))
                     .getId();
         } else if (principal instanceof CustomOauth2UserDetails oauthUser) {
             return oauthUser.getUser().getId();

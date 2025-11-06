@@ -38,16 +38,16 @@ public class ChallengeUserStats {
     private String monthYear; // yyyy-mm
 
     @Column(name = "total_spent", nullable = false, precision = 15, scale = 2)
-    private BigDecimal totalSpent = BigDecimal.ZERO;
+    private BigDecimal totalSpent;
 
     @Column(name = "goal_amount", nullable = false, precision = 15, scale = 2)
-    private BigDecimal goalAmount = BigDecimal.ZERO;
+    private BigDecimal goalAmount;
 
     @Column(name = "participation_count", nullable = false)
-    private int participationCount = 0;
+    private int participationCount;
 
     @Column(name = "total_days", nullable = false)
-    private int totalDays = 0;
+    private int totalDays;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
