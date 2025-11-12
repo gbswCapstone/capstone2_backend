@@ -9,10 +9,9 @@ version = '0.0.1-SNAPSHOT'
 description = 'capstoneProject'
 
 java {
-//	toolchain {
-//		languageVersion = JavaLanguageVersion.of(21)
-//		vendor = JvmVendorSpec.AMAZON
-//	}
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
 }
 
 configurations {
