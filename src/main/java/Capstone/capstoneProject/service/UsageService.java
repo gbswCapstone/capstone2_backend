@@ -3,6 +3,7 @@ package Capstone.capstoneProject.service;
 import Capstone.capstoneProject.dto.IncomeRequest;
 import Capstone.capstoneProject.dto.OutlayRequest;
 import Capstone.capstoneProject.dto.UsageResponse;
+import Capstone.capstoneProject.dto.UsageSearchTypeDTO;
 import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.enums.HistoryType;
@@ -12,8 +13,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -37,9 +44,9 @@ public class UsageService {
             category = (String) response.getBody().get("category");
         }
         // 값이 안 오면 null
-        LocalDateTime proDate = (request.getProDate() != null)
+        LocalDate proDate = (request.getProDate() != null)
                 ? request.getProDate()
-                : LocalDateTime.now();
+                : LocalDate.now();
 
         UsageHistory usageHistory = UsageHistory.builder()
                 .users(user)
@@ -48,6 +55,7 @@ public class UsageService {
                 .proDate(proDate)
                 .category(category)
                 .historyType(HistoryType.INCOME)
+                .createdAt(LocalDateTime.now())
                 .build();
         usageHistoryRepository.save(usageHistory);
 
@@ -68,9 +76,9 @@ public class UsageService {
             category = (String) response.getBody().get("category");
         }
         // 값이 안 오면 null
-        LocalDateTime proDate = (request.getProDate() != null)
+        LocalDate proDate = (request.getProDate() != null)
                 ? request.getProDate()
-                : LocalDateTime.now();
+                : LocalDate.now();
 
         UsageHistory usageHistory = UsageHistory.builder()
                 .users(user)
@@ -79,11 +87,76 @@ public class UsageService {
                 .proDate(proDate)
                 .category(category)
                 .historyType(HistoryType.OUTLAY)
+                .createdAt(LocalDateTime.now())
                 .build();
         usageHistoryRepository.save(usageHistory);
 
         return new UsageResponse(usageHistory);
     }
+
+//    public List<UsageResponse> getUsageList(UsageSearchTypeDTO typeDTO) {
+//        Users user = authenticatedUserUtils.getCurrentUser();
+//
+//        LocalDate start = Optional.ofNullable(typeDTO.getStartDate())
+//                .orElse(LocalDate.of(2000, 1, 1));
+//        LocalDate end = Optional.ofNullable(typeDTO.getEndDate())
+//                .orElse(LocalDate.now().plusDays(1));
+//
+//        if (typeDTO.getYear() != null && typeDTO.getMonth() != null) {
+//            start = LocalDate.of(typeDTO.getYear(), typeDTO.getMonth(), 1);
+//            end = start.withDayOfMonth(start.lengthOfMonth());
+//        } else if (typeDTO.getYear() != null) {
+//            start = LocalDate.of(typeDTO.getYear(), 1, 1);
+//            end = LocalDate.of(typeDTO.getYear(), 12, 31);
+//        }
+//
+//        List<UsageHistory> list = usageHistoryRepository.findByUserAndTypeDTO(
+//                user, typeDTO.getType(), start, end);
+//
+//        return list.stream()
+//                .map(UsageResponse::new)
+//                .toList();
+//    }
+
+    public List<UsageResponse> getUsageList(UsageSearchTypeDTO typeDTO) {
+        Users user = authenticatedUserUtils.getCurrentUser();
+
+        // type 처리 (OUTLAY, IMCOME, ALL)
+        HistoryType type = typeDTO.getType();
+        if (type == HistoryType.ALL) type = null;
+
+        LocalDate start = typeDTO.getStartDate();
+        LocalDate end = typeDTO.getEndDate();
+
+        // preset 처리 (today, thisWeek)
+        if ("today".equalsIgnoreCase(typeDTO.getPreset())) {
+            start = LocalDate.now();
+            end = LocalDate.now();
+        } else if ("thisWeek".equalsIgnoreCase(typeDTO.getPreset())) {
+            LocalDate now = LocalDate.now();
+            start = now.with(DayOfWeek.MONDAY);
+            end = now.with(DayOfWeek.SUNDAY);
+        }
+        // year/month
+        if (typeDTO.getYear() != null && typeDTO.getMonth() != null) {
+            start = LocalDate.of(typeDTO.getYear(), typeDTO.getMonth(), 1);
+            end = start.withDayOfMonth(start.lengthOfMonth());
+        } else if (typeDTO.getYear() != null) {
+            start = LocalDate.of(typeDTO.getYear(), 1, 1);
+            end = LocalDate.of(typeDTO.getYear(), 12, 31);
+        }
+
+        // 기본값 보정
+        if (start == null) start = LocalDate.of(2000,1,1);
+        if (end == null) end = LocalDate.now();
+
+
+        // 조회 (Repository가 LocalDate 파라미터 받아야함)
+        List<UsageHistory> list = usageHistoryRepository.findByUserAndTypeDTO(user, type, start, end.plusDays(1));
+
+        return list.stream().map(UsageResponse::new).toList();
+    }
+
 
 
 

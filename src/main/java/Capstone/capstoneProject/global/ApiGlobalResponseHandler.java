@@ -13,7 +13,6 @@ import java.rmi.AlreadyBoundException;
 
 @Hidden
 @RestControllerAdvice(annotations = RestController.class)
-
 public class ApiGlobalResponseHandler {
 
     // 404 에러 핸들링

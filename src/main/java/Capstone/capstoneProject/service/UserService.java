@@ -2,6 +2,7 @@ package Capstone.capstoneProject.service;
 
 import Capstone.capstoneProject.dto.ProfilePatchDTO;
 import Capstone.capstoneProject.dto.SecuritySignupRequest;
+import Capstone.capstoneProject.dto.UserDeleteDTO;
 import Capstone.capstoneProject.dto.UserResponseDTO;
 import Capstone.capstoneProject.entity.UserProfile;
 import Capstone.capstoneProject.entity.Users;
@@ -14,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 
@@ -25,7 +28,7 @@ public class UserService {
 
     //회원가입
     public void signup(SecuritySignupRequest request) {
-        if(userRepository.findByEmail(request.getEmail()).isPresent()) {
+        if(userRepository.findByEmailAndDeletedAtIsNull(request.getEmail()).isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 계정입니다.");
         }
         if (!request.getPassword().equals(request.getPasswordCheck())) {
@@ -57,8 +60,8 @@ public class UserService {
         // userProfile 정보 가져오기
         UserProfile profile = userProfileRepository.findByUserId(user.getId());
         // 엔티티 → DTO 변환
-        UserResponseDTO dto = new UserResponseDTO(user, profile);
-        return dto;
+        UserResponseDTO result = new UserResponseDTO(user, profile);
+        return result;
     }
 
     // 마이프로필 수정
@@ -67,7 +70,11 @@ public class UserService {
         Users user = authenticatedUserUtils.getCurrentUser();
         // userProfile 정보 가져오기
         UserProfile profile = userProfileRepository.findByUserId(user.getId());
-        user.setPassword(dto.getPassword());
+        // 비밀번호 수정 시 암호화 적용
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            String encodedPassword = passwordEncoder.encode(dto.getPassword());
+            user.setPassword(encodedPassword);
+        }
         profile.setNickname(dto.getNickname());
         profile.setProfileImg(dto.getProfileImg());
         profile.setStatusMessage(dto.getStatusMessage());
@@ -78,10 +85,19 @@ public class UserService {
         return result;
     }
 
-//    @Transactional
-//    public void deleteUser() {
-//        // user 정보 가져오기 (baarer token에서 추출)
-//        Users user = authenticatedUserUtils.getCurrentUser();
-//
-//    }
+    @Transactional
+    public UserDeleteDTO deleteUser() {
+        // user 정보 가져오기 (baarer token에서 추출)
+        Users user = authenticatedUserUtils.getCurrentUser();
+        UserProfile profile = userProfileRepository.findByUserId(user.getId());
+        user.setDeletedAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        return UserDeleteDTO.builder()
+                .email(user.getEmail())
+                .nickname(profile.getNickname())
+                .profileImg(profile.getProfileImg())
+                .deletedAt(user.getDeletedAt())
+                .build();
+    }
 }

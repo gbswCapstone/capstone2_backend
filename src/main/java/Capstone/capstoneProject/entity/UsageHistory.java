@@ -4,8 +4,10 @@ package Capstone.capstoneProject.entity;
 import Capstone.capstoneProject.enums.HistoryType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -34,8 +36,12 @@ public class UsageHistory {
     @Column(nullable = false)
     private String category;
 
-    @Column(nullable = false)
-    private LocalDateTime proDate;
+    @Column(name="pro_date")
+    private LocalDate proDate;
+
+    @Column(name="created_at", nullable = false)
+    @CreatedDate
+    private LocalDateTime createdAt;
 
     @Column(name="history_type", nullable = false)
     @Enumerated(EnumType.STRING)

@@ -6,5 +6,5 @@ import lombok.Setter;
 
 @Getter
 public enum HistoryType {
-    INCOME, OUTLAY
+    INCOME, ALL, OUTLAY
 }
