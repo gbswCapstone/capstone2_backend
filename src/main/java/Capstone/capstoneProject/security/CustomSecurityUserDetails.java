@@ -1,6 +1,7 @@
 package Capstone.capstoneProject.security;
 
 import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.exceptions.UserNotFoundException;
 import Capstone.capstoneProject.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,8 +22,8 @@ CustomSecurityUserDetails implements UserDetailsService {
     // email을 기준으로 분류
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Users user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email));
+        Users user = userRepository.findByEmailAndDeletedAtIsNull(email)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())

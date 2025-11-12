@@ -5,14 +5,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
 public class OutlayRequest {
     private String productName;
     private BigDecimal price;
-    private LocalDateTime proDate;
+    private LocalDate proDate;
 }
 
 

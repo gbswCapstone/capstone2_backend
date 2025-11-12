@@ -5,7 +5,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+
 
 @Getter
 @Setter
@@ -13,6 +14,6 @@ import java.time.LocalDateTime;
 public class IncomeRequest {
     private String importer;
     private BigDecimal price;
-    private LocalDateTime proDate;
+    private LocalDate proDate;
 
 }

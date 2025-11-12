@@ -26,7 +26,7 @@ public class ApiResponse<T> {
         return ApiResponse.<T>builder()
                 .success(true)
                 .data(data)
-                .message("요청이 성공적으로 처리되었습니다.")
+                .message(message)
                 .build();
     }
 
@@ -34,7 +34,7 @@ public class ApiResponse<T> {
         return ApiResponse.<T>builder()
                 .success(true)
                 .data(null)
-                .message("요청이 성공적으로 처리되었습니다.")
+                .message(message)
                 .build();
     }
 

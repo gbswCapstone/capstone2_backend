@@ -4,6 +4,7 @@ import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.exceptions.UserNotFoundException;
 import Capstone.capstoneProject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,8 +20,7 @@ public class AuthenticatedUserUtils {
     public Users getCurrentUser() {
         Long userId = securityUtils.getCurrentUserId();
 
-
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+        return userRepository.findByIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
     }
 }

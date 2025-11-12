@@ -7,6 +7,7 @@ import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.entity.UserProfile;
 import Capstone.capstoneProject.enums.UserRole;
 import Capstone.capstoneProject.exceptions.RefreshTokenNotFoundException;
+import Capstone.capstoneProject.exceptions.UserNotFoundException;
 import Capstone.capstoneProject.global.ApiResponse;
 import Capstone.capstoneProject.repository.AuthTokenRepository;
 
@@ -36,8 +37,8 @@ public class AuthService {
 
     @Transactional
     public TokenResponse login(LoginRequest request) {
-        Users user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("계정이 존재하지 않습니다."));
+        Users user = userRepository.findByEmailAndDeletedAtIsNull(request.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("계정이 존재하지 않습니다."));
 
         Authentication authentication;
         try {
@@ -76,7 +77,7 @@ public class AuthService {
         // 토큰으로 사용자 추출
         String email = jwtTokenProvider.getUsername(refreshToken);
 
-        Users user = userRepository.findByEmail(email)
+        Users user = userRepository.findByEmailAndDeletedAtIsNull(email)
                 .orElseThrow(() -> new IllegalArgumentException("계정이 존재하지 않습니다."));
         // 새로운 accessToken, RefreshToken 생성
         String newAccessToken = jwtTokenProvider.createToken(user.getEmail());
@@ -90,7 +91,7 @@ public class AuthService {
         String email = request.getEmail();
         String nickname = request.getNickname();
 
-        Optional<Users> optionalUser = userRepository.findByEmail(email);
+        Optional<Users> optionalUser = userRepository.findByEmailAndDeletedAtIsNull(email);
         Users user;
         UserProfile profile;
         // db에 사용자가 없을 때 회원가입된 후 토큰 반환
@@ -140,7 +141,7 @@ public class AuthService {
         String email = request.getEmail();
         String nickname = request.getNickname();
 
-        Optional<Users> optionalUser = userRepository.findByEmail(email);
+        Optional<Users> optionalUser = userRepository.findByEmailAndDeletedAtIsNull(email);
         Users user;
         UserProfile profile;
         // db에 사용자가 없을 때 회원가입된 후 토큰 반환
@@ -184,7 +185,7 @@ public class AuthService {
         return new TokenResponse(accessToken, refreshToken);
     }
 
-    }
+}
 
 
 

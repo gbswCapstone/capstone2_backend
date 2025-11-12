@@ -51,7 +51,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         }
 
         // 사용자 조회
-        Users user = userRepository.findByEmail(email)
+        Users user = userRepository.findByEmailAndDeletedAtIsNull(email)
                 .orElseThrow(() -> new UserNotFoundException("사용자가 존재하지 않습니다."));
 
         // JWT 발급

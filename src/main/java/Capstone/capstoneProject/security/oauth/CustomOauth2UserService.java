@@ -52,7 +52,7 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
         String nickname = oAuth2UserInfo.getNickname();
 
 
-        Optional<Users> optionalUser = userRepository.findByEmail(email);
+        Optional<Users> optionalUser = userRepository.findByEmailAndDeletedAtIsNull(email);
         Users user;
         UserProfile profile;
         // db에 사용자가 없을 때 회원가입된 후 토큰 반환

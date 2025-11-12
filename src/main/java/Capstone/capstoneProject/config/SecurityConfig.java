@@ -2,6 +2,7 @@ package Capstone.capstoneProject.config;
 
 import Capstone.capstoneProject.global.ApiResponse;
 
+import Capstone.capstoneProject.security.CustomAuthenticationEntryPoint;
 import Capstone.capstoneProject.repository.AuthTokenRepository;
 
 import Capstone.capstoneProject.security.CustomSecurityUserDetails;
@@ -39,7 +40,7 @@ public class SecurityConfig {
     private final AuthTokenRepository authTokenRepository;
     private final CustomOauth2UserService customOauth2UserService;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter(tokenProvider, userDetailsService);
@@ -79,6 +80,10 @@ public class SecurityConfig {
                         .requestMatchers("/room.html").permitAll() // 테스트용 나중에 빼야함
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(exception ->
+                        exception.authenticationEntryPoint(customAuthenticationEntryPoint)
+                )
+
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2LoginSuccessHandler)
@@ -96,8 +101,10 @@ public class SecurityConfig {
                                     new ObjectMapper().writeValueAsString(ApiResponse.error(message))
                             );
                         })
+
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOauth2UserService))
                 );
+
 
         return http.build();
     }

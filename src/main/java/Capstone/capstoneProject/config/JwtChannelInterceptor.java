@@ -57,7 +57,7 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
         UserDetails userDetails;
         if (jwtTokenProvider.isOauthUser(token)) {
             // OAuth2사용자
-            Users user = userRepository.findByEmail(username)
+            Users user = userRepository.findByEmailAndDeletedAtIsNull(username)
                     .orElseThrow(() -> new UserNotFoundException("OAuth2 사용자 없음"));
 
             userDetails = new CustomOauth2UserDetails(user, Map.of());

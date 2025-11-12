@@ -1,5 +1,6 @@
 package Capstone.capstoneProject.controller;
 
+import Capstone.capstoneProject.dto.UserDeleteDTO;
 import Capstone.capstoneProject.global.ApiResponse;
 import Capstone.capstoneProject.dto.ProfilePatchDTO;
 import Capstone.capstoneProject.dto.SecuritySignupRequest;
@@ -23,12 +24,12 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
-//    @DeleteMapping("/quit")
-//    @Operation(summary = "회원탈퇴", description = "회원탈퇴 시 사용하는 API 입니다.")
-//    public ResponseEntity<ApiResponse<Void>> deleteUser() {
-//        userService.deleteUser();
-//        return ResponseEntity.ok(ApiResponse.ok());
-//    }
+    @DeleteMapping("/quit")
+    @Operation(summary = "회원탈퇴", description = "회원탈퇴 시 사용하는 API 입니다.")
+    public ResponseEntity<ApiResponse<UserDeleteDTO>> deleteUser() {
+        UserDeleteDTO result = userService.deleteUser();
+        return ResponseEntity.ok(ApiResponse.ok(result, "삭제되었습니다."));
+    }
 
     @GetMapping("/profile")
     @Operation(summary = "프로필 조회하기", description = "프로필 조회 시 사용하는 API 입니다.")
