@@ -3,6 +3,7 @@ package Capstone.capstoneProject.service;
 import Capstone.capstoneProject.dto.ChallengeCreate;
 import Capstone.capstoneProject.dto.ChallengeListDTO;
 import Capstone.capstoneProject.dto.Chats.ChatRoom;
+import Capstone.capstoneProject.dto.LikeResponseDTO;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.entity.challenges.*;
 import Capstone.capstoneProject.enums.UserJobs;
@@ -112,30 +113,31 @@ public class ChallengeService {
         return challenges;
     }
 
-
-
-
-
     @Transactional
-    public int toggleLike(Long id) {
+    public LikeResponseDTO toggleLike(Long id) {
         // user 정보 가져오기 (baarer token에서 추출)
         Users user = authenticatedUserUtils.getCurrentUser();
         Challenges challenges = challengeRepository.findById(id)
                 .orElseThrow(() -> new ChallengeNotFoundException("해당 챌린지를 찾을 수 없습니다."));
-        Optional<Likes> existing = likeRepository.findByUserAndChallenges(user, challenges);
+        // 좋아요 여부 판별
+        Optional<ChallengeLikes> existing = likeRepository.findByUserAndChallenges(user, challenges);
+        boolean liked;
         if (existing.isPresent()) {
             likeRepository.delete(existing.get()); // 좋아요 취소
 
             challenges.setLikeCount(challenges.getLikeCount() - 1);
             challengeRepository.save(challenges);
+            liked = false;
         } else {
-            Likes like = Likes.builder().user(user).challenges(challenges).build();
+            ChallengeLikes like = ChallengeLikes.builder().user(user).challenges(challenges).build();
             likeRepository.save(like); // 좋아요 추가
 
             challenges.setLikeCount(challenges.getLikeCount() + 1);
             challengeRepository.save(challenges);
+            liked = true;
         }
-        return likeRepository.countByChallenges(challenges);
+        int likeCount = likeRepository.countByChallenges(challenges);
+        return new LikeResponseDTO(liked, likeCount);
     }
 
     public Challenges findById(Long id) {
@@ -292,7 +294,7 @@ public class ChallengeService {
         // user 정보 가져오기 (baarer token에서 추출)
         Users user = authenticatedUserUtils.getCurrentUser();
         // 유저가 좋아요한 챌린지 목록
-        List<Likes> likes = likeRepository.findAllByUserOrderByCreatedAtDesc(user);
+        List<ChallengeLikes> likes = likeRepository.findAllByUserOrderByCreatedAtDesc(user);
 
         // dto 변환
         return likes.stream()

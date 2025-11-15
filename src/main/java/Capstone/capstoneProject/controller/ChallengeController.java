@@ -51,9 +51,9 @@ public class ChallengeController {
 
     @PostMapping("/like/{id}")
     @Operation(summary = "챌린지방 좋아요/취소", description = "챌린지방 좋아요 or 좋아요 취소 시 사용하는 API 입니다.")
-    public ResponseEntity<ApiResponse<ChallengeLikeResponse>> likeOrUnlike(@PathVariable Long id) {
-        int updatedLikeCount = challengeService.toggleLike(id);
-        return ResponseEntity.ok(ApiResponse.ok(new ChallengeLikeResponse(updatedLikeCount)));
+    public ResponseEntity<ApiResponse<LikeResponseDTO>> likeOrUnlike(@PathVariable Long id) {
+        LikeResponseDTO result = challengeService.toggleLike(id);
+        return ResponseEntity.ok(ApiResponse.ok(result, "처리되었습니다."));
     }
 
     @PutMapping("/{id}")

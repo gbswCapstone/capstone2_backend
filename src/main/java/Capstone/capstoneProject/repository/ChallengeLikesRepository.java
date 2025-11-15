@@ -1,8 +1,8 @@
 package Capstone.capstoneProject.repository;
 
-import Capstone.capstoneProject.entity.challenges.Likes;
+import Capstone.capstoneProject.entity.challenges.ChallengeLikes;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ChallengeLikesRepository extends JpaRepository<Likes, Long> {
+public interface ChallengeLikesRepository extends JpaRepository<ChallengeLikes, Long> {
 
 }
