@@ -1,4 +1,4 @@
-package Capstone.capstoneProject.dto;
+package Capstone.capstoneProject.dto.Usages;
 
 import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.enums.HistoryType;
@@ -23,6 +23,7 @@ public class UsageResponse {
     private LocalDateTime createdAt;
     private String category;
     private HistoryType historyType;
+    private int amount;
 
     public UsageResponse(UsageHistory usageHistory) {
         this.id = usageHistory.getId();
@@ -32,5 +33,6 @@ public class UsageResponse {
         this.category = usageHistory.getCategory();
         this.historyType = usageHistory.getHistoryType();
         this.createdAt = usageHistory.getCreatedAt();
+        this.amount = usageHistory.getAmount();
     }
 }

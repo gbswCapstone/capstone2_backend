@@ -1,4 +1,4 @@
-package Capstone.capstoneProject.dto;
+package Capstone.capstoneProject.dto.Usages;
 
 import Capstone.capstoneProject.enums.HistoryType;
 import lombok.Getter;

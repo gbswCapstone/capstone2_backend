@@ -39,6 +39,9 @@ public class UsageHistory {
     @Column(name="pro_date")
     private LocalDate proDate;
 
+    @Column(name="amount", nullable = false)
+    private int amount;
+
     @Column(name="created_at", nullable = false)
     @CreatedDate
     private LocalDateTime createdAt;

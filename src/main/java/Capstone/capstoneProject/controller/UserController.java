@@ -1,10 +1,7 @@
 package Capstone.capstoneProject.controller;
 
-import Capstone.capstoneProject.dto.UserDeleteDTO;
+import Capstone.capstoneProject.dto.*;
 import Capstone.capstoneProject.global.ApiResponse;
-import Capstone.capstoneProject.dto.ProfilePatchDTO;
-import Capstone.capstoneProject.dto.SecuritySignupRequest;
-import Capstone.capstoneProject.dto.UserResponseDTO;
 import Capstone.capstoneProject.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -32,19 +29,26 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    @Operation(summary = "프로필 조회하기", description = "프로필 조회 시 사용하는 API 입니다.")
+    @Operation(summary = "내 프로필 조회하기", description = "프로필 조회 시 사용하는 API 입니다.")
     public ResponseEntity<ApiResponse<UserResponseDTO>> myProfile() {
         UserResponseDTO result = userService.getMyProfile();
         return ResponseEntity.ok(ApiResponse.ok(result));
     }
 
     @PutMapping("/profile")
-    @Operation(summary = "프로필 수정하기", description = "프로필 수정 시 사용하는 API 입니다.")
+    @Operation(summary = "내 프로필 수정하기", description = "프로필 수정 시 사용하는 API 입니다.")
     public ResponseEntity<ApiResponse<ProfilePatchDTO>> myProfilePatch(
             @RequestBody ProfilePatchDTO dto
     ) {
         ProfilePatchDTO result = userService.patchMyProfile(dto);
         return ResponseEntity.ok(ApiResponse.ok(result));
+    }
+
+    @PutMapping("/password")
+    @Operation(summary = "내 비밀번호 수정하기", description = "비밀번호 수정 시 사용하는 API 입니다.")
+    public ResponseEntity<ApiResponse<Void>> myPasswordPatch(@RequestBody PasswordPatchDTO dto) {
+        userService.patchMyPassword(dto);
+        return ResponseEntity.ok(ApiResponse.ok("비밀번호가 변경되었습니다."));
     }
 
 

@@ -1,6 +1,9 @@
 package Capstone.capstoneProject.controller;
 
-import Capstone.capstoneProject.dto.*;
+import Capstone.capstoneProject.dto.Usages.IncomeRequest;
+import Capstone.capstoneProject.dto.Usages.OutlayRequest;
+import Capstone.capstoneProject.dto.Usages.UsageResponse;
+import Capstone.capstoneProject.dto.Usages.UsageSearchTypeDTO;
 import Capstone.capstoneProject.global.ApiResponse;
 import Capstone.capstoneProject.service.UsageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,8 +39,5 @@ public class UsageController {
             List<UsageResponse> result = usageService.getUsageList(typeDTO);
             return ResponseEntity.ok(ApiResponse.ok(result, "조회되었습니다."));
     }
-
-
-
 
 }

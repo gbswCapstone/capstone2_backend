@@ -8,18 +8,17 @@ import Capstone.capstoneProject.entity.UserProfile;
 import Capstone.capstoneProject.enums.UserRole;
 import Capstone.capstoneProject.exceptions.RefreshTokenNotFoundException;
 import Capstone.capstoneProject.exceptions.UserNotFoundException;
-import Capstone.capstoneProject.global.ApiResponse;
 import Capstone.capstoneProject.repository.AuthTokenRepository;
 
 import Capstone.capstoneProject.repository.UserProfileRepository;
 import Capstone.capstoneProject.repository.UserRepository;
+import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import Capstone.capstoneProject.security.JwtTokenProvider;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 
@@ -34,6 +33,8 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthTokenRepository authTokenRepository;
     private final UserProfileRepository userProfileRepository;
+    private final AuthenticatedUserUtils authenticatedUserUtils;
+
 
     @Transactional
     public TokenResponse login(LoginRequest request) {
@@ -183,6 +184,12 @@ public class AuthService {
                 .build();
         authTokenRepository.save(tokenEntity);
         return new TokenResponse(accessToken, refreshToken);
+    }
+
+    @Transactional
+    public void logOut() {
+        Users user = authenticatedUserUtils.getCurrentUser();
+        authTokenRepository.deleteByUser(user); // 토큰 삭제
     }
 
 }

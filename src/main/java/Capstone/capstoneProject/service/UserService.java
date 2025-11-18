@@ -1,12 +1,10 @@
 package Capstone.capstoneProject.service;
 
-import Capstone.capstoneProject.dto.ProfilePatchDTO;
-import Capstone.capstoneProject.dto.SecuritySignupRequest;
-import Capstone.capstoneProject.dto.UserDeleteDTO;
-import Capstone.capstoneProject.dto.UserResponseDTO;
+import Capstone.capstoneProject.dto.*;
 import Capstone.capstoneProject.entity.UserProfile;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.enums.UserRole;
+import Capstone.capstoneProject.exceptions.PasswordMismatchException;
 import Capstone.capstoneProject.repository.UserProfileRepository;
 import Capstone.capstoneProject.repository.UserRepository;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
@@ -70,11 +68,7 @@ public class UserService {
         Users user = authenticatedUserUtils.getCurrentUser();
         // userProfile 정보 가져오기
         UserProfile profile = userProfileRepository.findByUserId(user.getId());
-        // 비밀번호 수정 시 암호화 적용
-        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
-            String encodedPassword = passwordEncoder.encode(dto.getPassword());
-            user.setPassword(encodedPassword);
-        }
+
         profile.setNickname(dto.getNickname());
         profile.setProfileImg(dto.getProfileImg());
         profile.setStatusMessage(dto.getStatusMessage());
@@ -84,6 +78,16 @@ public class UserService {
         ProfilePatchDTO result = new ProfilePatchDTO(user, profile);
         return result;
     }
+
+    public void patchMyPassword(PasswordPatchDTO dto) {
+        Users user = authenticatedUserUtils.getCurrentUser();
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+            throw new PasswordMismatchException("비밀번호가 일치하지 않습니다.");
+        }
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
+    }
+
 
     @Transactional
     public UserDeleteDTO deleteUser() {

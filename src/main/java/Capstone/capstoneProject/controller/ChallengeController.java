@@ -1,6 +1,9 @@
 package Capstone.capstoneProject.controller;
 
 import Capstone.capstoneProject.dto.*;
+import Capstone.capstoneProject.dto.Challenges.ChallengeCreate;
+import Capstone.capstoneProject.dto.Challenges.ChallengeDetailResponse;
+import Capstone.capstoneProject.dto.Challenges.ChallengeListDTO;
 import Capstone.capstoneProject.entity.challenges.Challenges;
 import Capstone.capstoneProject.global.ApiResponse;
 import Capstone.capstoneProject.service.ChallengeService;

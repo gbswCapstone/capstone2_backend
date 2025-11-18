@@ -65,4 +65,12 @@ public class ApiGlobalResponseHandler {
                 .body(ApiResponse.error("참여 인원이 가득 찼습니다."));
     }
 
+    @ExceptionHandler(PasswordMismatchException.class)
+    public ResponseEntity<ApiResponse<Void>> handlePasswordMismatchException(PasswordMismatchException e) {
+        return ResponseEntity.status(401)
+                .body(ApiResponse.error("비밀번호가 일치하지 않습니다."));
+    }
+
+
+
 }
