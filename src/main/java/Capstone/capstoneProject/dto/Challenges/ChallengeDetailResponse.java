@@ -1,5 +1,6 @@
-package Capstone.capstoneProject.dto;
+package Capstone.capstoneProject.dto.Challenges;
 
+import Capstone.capstoneProject.dto.UserResponseDTO;
 import Capstone.capstoneProject.entity.challenges.Challenges;
 import Capstone.capstoneProject.enums.UserJobs;
 import com.fasterxml.jackson.annotation.JsonProperty;

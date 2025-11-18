@@ -32,6 +32,7 @@ public class AuthController {
     @PostMapping("api/auth/log-out")
     @Operation(summary = "로그아웃", description = "클라이언트에서 토큰 삭제&로그인화면처리")
     public ResponseEntity<ApiResponse<Void>> logout() {
+        authService.logOut();
         return ResponseEntity.ok(ApiResponse.ok("로그아웃 되었습니다."));
     }
 

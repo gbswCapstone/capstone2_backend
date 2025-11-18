@@ -1,6 +1,6 @@
 package Capstone.capstoneProject.repository;
 
-import Capstone.capstoneProject.dto.ChallengeListDTO;
+import Capstone.capstoneProject.dto.Challenges.ChallengeListDTO;
 import Capstone.capstoneProject.entity.challenges.Challenges;
 import Capstone.capstoneProject.enums.UserJobs;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,13 +8,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface ChallengeRepository extends JpaRepository<Challenges, Long> {
 
     // job없이 조회 최신순
     @Query("""
-    SELECT new Capstone.capstoneProject.dto.ChallengeListDTO(
+    SELECT new Capstone.capstoneProject.dto.Challenges.ChallengeListDTO(
         c.id,
         c.title,
         c.maxPersonnel,
@@ -32,7 +31,7 @@ public interface ChallengeRepository extends JpaRepository<Challenges, Long> {
 
     // job없이 조회 인기순(좋아요순)
     @Query("""
-    SELECT new Capstone.capstoneProject.dto.ChallengeListDTO(
+    SELECT new Capstone.capstoneProject.dto.Challenges.ChallengeListDTO(
         c.id,
         c.title,
         c.maxPersonnel,
@@ -51,7 +50,7 @@ public interface ChallengeRepository extends JpaRepository<Challenges, Long> {
 
     // job 검색 최신순
     @Query("""
-    SELECT new Capstone.capstoneProject.dto.ChallengeListDTO(
+    SELECT new Capstone.capstoneProject.dto.Challenges.ChallengeListDTO(
         c.id,
         c.title,
         c.maxPersonnel,
@@ -70,7 +69,7 @@ public interface ChallengeRepository extends JpaRepository<Challenges, Long> {
 
     // job 검색 인기순(좋아요순)
     @Query("""
-    SELECT new Capstone.capstoneProject.dto.ChallengeListDTO(
+    SELECT new Capstone.capstoneProject.dto.Challenges.ChallengeListDTO(
         c.id,
         c.title,
         c.maxPersonnel,

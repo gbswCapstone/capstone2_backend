@@ -1,9 +1,9 @@
 package Capstone.capstoneProject.service;
 
-import Capstone.capstoneProject.dto.IncomeRequest;
-import Capstone.capstoneProject.dto.OutlayRequest;
-import Capstone.capstoneProject.dto.UsageResponse;
-import Capstone.capstoneProject.dto.UsageSearchTypeDTO;
+import Capstone.capstoneProject.dto.Usages.IncomeRequest;
+import Capstone.capstoneProject.dto.Usages.OutlayRequest;
+import Capstone.capstoneProject.dto.Usages.UsageResponse;
+import Capstone.capstoneProject.dto.Usages.UsageSearchTypeDTO;
 import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.enums.HistoryType;
@@ -14,12 +14,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 
 @Service
@@ -47,13 +47,16 @@ public class UsageService {
         LocalDate proDate = (request.getProDate() != null)
                 ? request.getProDate()
                 : LocalDate.now();
+        // 가격 계산 (가격 * 수량)
+        BigDecimal price = request.getPrice().multiply(BigDecimal.valueOf(request.getAmount()));
 
         UsageHistory usageHistory = UsageHistory.builder()
                 .users(user)
                 .name(request.getImporter())
-                .price(request.getPrice())
+                .price(price)
                 .proDate(proDate)
                 .category(category)
+                .amount(request.getAmount())
                 .historyType(HistoryType.INCOME)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -79,13 +82,16 @@ public class UsageService {
         LocalDate proDate = (request.getProDate() != null)
                 ? request.getProDate()
                 : LocalDate.now();
+        // 가격 계산 (가격 * 수량)
+        BigDecimal price = request.getPrice().multiply(BigDecimal.valueOf(request.getAmount()));
 
         UsageHistory usageHistory = UsageHistory.builder()
                 .users(user)
                 .name(request.getProductName())
-                .price(request.getPrice())
+                .price(price)
                 .proDate(proDate)
                 .category(category)
+                .amount(request.getAmount())
                 .historyType(HistoryType.OUTLAY)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -93,30 +99,6 @@ public class UsageService {
 
         return new UsageResponse(usageHistory);
     }
-
-//    public List<UsageResponse> getUsageList(UsageSearchTypeDTO typeDTO) {
-//        Users user = authenticatedUserUtils.getCurrentUser();
-//
-//        LocalDate start = Optional.ofNullable(typeDTO.getStartDate())
-//                .orElse(LocalDate.of(2000, 1, 1));
-//        LocalDate end = Optional.ofNullable(typeDTO.getEndDate())
-//                .orElse(LocalDate.now().plusDays(1));
-//
-//        if (typeDTO.getYear() != null && typeDTO.getMonth() != null) {
-//            start = LocalDate.of(typeDTO.getYear(), typeDTO.getMonth(), 1);
-//            end = start.withDayOfMonth(start.lengthOfMonth());
-//        } else if (typeDTO.getYear() != null) {
-//            start = LocalDate.of(typeDTO.getYear(), 1, 1);
-//            end = LocalDate.of(typeDTO.getYear(), 12, 31);
-//        }
-//
-//        List<UsageHistory> list = usageHistoryRepository.findByUserAndTypeDTO(
-//                user, typeDTO.getType(), start, end);
-//
-//        return list.stream()
-//                .map(UsageResponse::new)
-//                .toList();
-//    }
 
     public List<UsageResponse> getUsageList(UsageSearchTypeDTO typeDTO) {
         Users user = authenticatedUserUtils.getCurrentUser();

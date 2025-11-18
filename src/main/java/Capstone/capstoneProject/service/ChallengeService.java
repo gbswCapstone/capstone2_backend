@@ -1,7 +1,7 @@
 package Capstone.capstoneProject.service;
 
-import Capstone.capstoneProject.dto.ChallengeCreate;
-import Capstone.capstoneProject.dto.ChallengeListDTO;
+import Capstone.capstoneProject.dto.Challenges.ChallengeCreate;
+import Capstone.capstoneProject.dto.Challenges.ChallengeListDTO;
 import Capstone.capstoneProject.dto.Chats.ChatRoom;
 import Capstone.capstoneProject.dto.LikeResponseDTO;
 import Capstone.capstoneProject.entity.Users;
