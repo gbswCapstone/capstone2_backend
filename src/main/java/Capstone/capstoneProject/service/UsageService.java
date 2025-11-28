@@ -35,7 +35,7 @@ public class UsageService {
         Users user = authenticatedUserUtils.getCurrentUser();
 
         // 외부 AI 서버로 importer 전송
-        String url = "http://54.180.227.15/income";
+        String url = "http://13.125.64.51:8080/income/income";
         Map<String, String> requestBody = Map.of("income_name", request.getImporter());
         ResponseEntity<Map> response = restTemplate.postForEntity(url, requestBody, Map.class);
         // 응답에서 category 추출
@@ -69,8 +69,8 @@ public class UsageService {
         // user 정보 가져오기 (baarer token에서 추출)
         Users user = authenticatedUserUtils.getCurrentUser();
 
-        // 외부 AI 서버로 importer 전송
-        String url = "http://54.180.227.15/category";
+        // 외부 AI 서버로 productName 전송
+        String url = "http://13.125.64.51:8080/category/category";
         Map<String, String> requestBody = Map.of("product_name", request.getProductName());
         ResponseEntity<Map> response = restTemplate.postForEntity(url, requestBody, Map.class);
         // 응답에서 category 추출

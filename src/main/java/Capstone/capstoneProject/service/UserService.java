@@ -1,28 +1,43 @@
 package Capstone.capstoneProject.service;
 
 import Capstone.capstoneProject.dto.*;
+import Capstone.capstoneProject.dto.Boards.BoardImageDTO;
+import Capstone.capstoneProject.dto.Boards.BoardLikesDTO;
+import Capstone.capstoneProject.dto.Boards.BoardListDTO;
+import Capstone.capstoneProject.dto.Comments.CommentListDTO;
+import Capstone.capstoneProject.entity.Boards.BoardLikes;
+import Capstone.capstoneProject.entity.Boards.Boards;
+import Capstone.capstoneProject.entity.Comments;
 import Capstone.capstoneProject.entity.UserProfile;
 import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.enums.SortType;
+import Capstone.capstoneProject.enums.UserJobs;
 import Capstone.capstoneProject.enums.UserRole;
 import Capstone.capstoneProject.exceptions.PasswordMismatchException;
-import Capstone.capstoneProject.repository.UserProfileRepository;
-import Capstone.capstoneProject.repository.UserRepository;
+import Capstone.capstoneProject.repository.*;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.SecondaryRow;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-
+@Transactional
 public class UserService {
     private final AuthenticatedUserUtils authenticatedUserUtils;
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
     private final PasswordEncoder passwordEncoder;
+    private final BoardLikeRepository boardLikeRepository;
+    private final BoardRepository boardRepository;
+    private final CommentRepository commentRepository;
 
     //회원가입
     public void signup(SecuritySignupRequest request) {
@@ -103,5 +118,101 @@ public class UserService {
                 .profileImg(profile.getProfileImg())
                 .deletedAt(user.getDeletedAt())
                 .build();
+    }
+
+    public List<BoardListDTO> getMyLikeBoards(SortType sortType) {
+        Users user = authenticatedUserUtils.getCurrentUser();
+        List<BoardLikes> boardLikes;
+        // 기본값
+        SortType finalSort = (sortType == null) ? SortType.RECENT : sortType;
+
+        if (finalSort == SortType.RECENT) {
+            boardLikes = boardLikeRepository
+                    .findByUsersAndBoards_DeletedAtIsNullOrderByCreatedAtDesc(user);
+        } else if (finalSort == SortType.OLDEST) {
+            boardLikes = boardLikeRepository
+                    .findByUsersAndBoards_DeletedAtIsNullOrderByCreatedAtAsc(user);
+        } else if (finalSort == SortType.POPULAR) {
+            boardLikes = boardLikeRepository
+                    .findByUsersAndBoards_DeletedAtIsNullOrderByBoards_LikeCountDescCreatedAtDesc(user);
+        } else {
+            boardLikes = boardLikeRepository
+                    .findByUsersAndBoards_DeletedAtIsNullOrderByCreatedAtDesc(user);
+        }
+
+        List<Boards> boards = boardLikes.stream()
+                .map(BoardLikes::getBoards)
+                .collect(Collectors.toList());
+
+        return boards.stream().map(board -> {
+                boolean isLiked = boardLikeRepository.existsByUsersAndBoardsAndBoards_DeletedAtIsNull(user, board); // 내가 눌렀는지 여부
+            return BoardListDTO.builder()
+                    .id(board.getId())
+                    .user(UserSummaryDTO.from(board.getUsers()))
+                    .title(board.getTitle())
+                    .category(board.getCategory())
+                    .content(board.getContent())
+                    .likes(BoardLikesDTO.builder()
+                            .likeCount(board.getLikeCount())
+                            .isLiked(isLiked)
+                            .build())
+                    .commentCount(board.getCommentCount())
+                    .createdAt(board.getCreatedAt())
+                    .image(BoardImageDTO.from(board))
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    public List<BoardListDTO> getMyBoards(SortType sortType) {
+        Users user = authenticatedUserUtils.getCurrentUser();
+        // 기본값
+        SortType finalSort = (sortType == null) ? SortType.RECENT : sortType;
+
+        List<Boards> boards;
+        if (finalSort == SortType.RECENT) {
+            // 최신순
+            boards = boardRepository.findByUsersAndDeletedAtIsNullOrderByCreatedAtDesc(user);
+        } else if (finalSort == SortType.OLDEST) {
+            // 오래된순
+            boards = boardRepository.findByUsersAndDeletedAtIsNullOrderByCreatedAtAsc(user);
+        } else {
+            // 기본 최신순
+            boards = boardRepository.findByUsersAndDeletedAtIsNullOrderByCreatedAtDesc(user);
+        }
+        return boards.stream().map(board -> {
+            boolean isLiked = boardLikeRepository.existsByUsersAndBoardsAndBoards_DeletedAtIsNull(user, board); // 내가 눌렀는지 여부
+
+            return BoardListDTO.builder()
+                    .id(board.getId())
+                    .user(UserSummaryDTO.from(board.getUsers()))
+                    .title(board.getTitle())
+                    .category(board.getCategory())
+                    .content(board.getContent())
+                    .likes(BoardLikesDTO.builder()
+                            .likeCount(board.getLikeCount())
+                            .isLiked(isLiked)
+                            .build())
+                    .commentCount(board.getCommentCount())
+                    .createdAt(board.getCreatedAt())
+                    .image(BoardImageDTO.from(board))
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    public List<CommentListDTO> getMyComments(SortType sortType) {
+        Users user = authenticatedUserUtils.getCurrentUser();
+
+        List<Comments> comments;
+        // 기본값
+        SortType finalSort = (sortType == null) ? SortType.RECENT : sortType;
+
+        if (finalSort == SortType.OLDEST) {
+            comments = commentRepository.findByUsersOrderByCreatedAtAsc(user);
+        } else if (finalSort == SortType.POPULAR) {
+            comments = commentRepository.findByUsersOrderByLikeCountDescCreatedAtDesc(user);
+        } else {
+            comments = commentRepository.findByUsersOrderByCreatedAtDesc(user);
+        }
+        return CommentListDTO.fromComments(comments, user);
     }
 }

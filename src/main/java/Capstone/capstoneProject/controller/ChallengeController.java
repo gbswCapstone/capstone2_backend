@@ -5,9 +5,13 @@ import Capstone.capstoneProject.dto.Challenges.ChallengeCreate;
 import Capstone.capstoneProject.dto.Challenges.ChallengeDetailResponse;
 import Capstone.capstoneProject.dto.Challenges.ChallengeListDTO;
 import Capstone.capstoneProject.entity.challenges.Challenges;
+import Capstone.capstoneProject.enums.SortType;
+import Capstone.capstoneProject.enums.UserJobs;
 import Capstone.capstoneProject.global.ApiResponse;
 import Capstone.capstoneProject.service.ChallengeService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +38,10 @@ public class ChallengeController {
     @GetMapping
     @Operation(summary = "챌린지 전체조회", description = "챌린지방 전체 조회 시 사용하는 API 입니다.")
     public ResponseEntity<ApiResponse<List<ChallengeListDTO>>> getChallengeList(
-            @RequestParam(required = false) String sortType, @RequestParam(required = false) String job
+            @Parameter(description = "정렬", schema = @Schema(allowableValues = {"RECENT", "POPULAR"}))
+            @RequestParam(required = false) SortType sortType,
+
+            @RequestParam(required = false) UserJobs job
     ) {
         List<ChallengeListDTO> result = challengeService.getChallengeList(sortType, job);
         return ResponseEntity.ok(ApiResponse.ok(result));
@@ -113,8 +120,5 @@ public class ChallengeController {
         List<ChallengeListDTO> result = challengeService.getMyLikeChallengeList();
         return ResponseEntity.ok(ApiResponse.ok(result));
     }
-
-
-
 
 }

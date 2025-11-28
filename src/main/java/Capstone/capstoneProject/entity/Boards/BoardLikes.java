@@ -1,38 +1,37 @@
-package Capstone.capstoneProject.entity;
+package Capstone.capstoneProject.entity.Boards;
 
+import Capstone.capstoneProject.entity.Users;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="auth_tokens")
+@Table(name="board_likes")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-public class AuthToken {
+public class BoardLikes {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long tokenId;
+    private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
+    @JoinColumn(name="board_id", nullable = false)
+    private Boards boards;
 
-    @Column(name = "refresh_token", nullable = false, unique = true)
-    private String refreshToken;
+    @ManyToOne
+    @JoinColumn(name="user_id", nullable = false)
+    private Users users;
 
-    @Column(name = "expires_at", nullable = false)
-    private LocalDateTime expiresAt;
-
-    @Column(name = "created_at", nullable = false)
+    @Column(name="created_at", nullable = false)
     @CreatedDate
     private LocalDateTime createdAt;
+
 }
