@@ -43,7 +43,7 @@ public class ApiGlobalResponseHandler {
 
     @ExceptionHandler(RefreshTokenNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleRefreshTokenNotFoundException(RefreshTokenNotFoundException e) {
-        return ResponseEntity.status(404)
+        return ResponseEntity.status(403)
                 .body(ApiResponse.error("유효하지 않은 리프레시 토큰입니다."));
     }
 
@@ -71,6 +71,28 @@ public class ApiGlobalResponseHandler {
                 .body(ApiResponse.error("비밀번호가 일치하지 않습니다."));
     }
 
+    @ExceptionHandler(BoardNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBoardNotFoundException(BoardNotFoundException e) {
+        return ResponseEntity.status(404)
+                .body(ApiResponse.error("해당 게시글을 찾을 수 없습니다."));
+    }
 
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCommentNotFoundException(CommentNotFoundException e) {
+        return ResponseEntity.status(404)
+                .body(ApiResponse.error("해당 댓글을 찾을 수 없습니다."));
+    }
+
+    @ExceptionHandler(NotCommentOwnerException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotCommentOwnerException(NotCommentOwnerException e) {
+        return ResponseEntity.status(403)
+                .body(ApiResponse.error("해당 댓글에 관한 권한이 없습니다."));
+    }
+
+    @ExceptionHandler(NotBoardOwnerException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotBoardOwnerException(NotBoardOwnerException e) {
+        return ResponseEntity.status(403)
+                .body(ApiResponse.error("해당 게시글에 관한 권한이 없습니다."));
+    }
 
 }

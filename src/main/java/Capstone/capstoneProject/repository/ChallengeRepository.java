@@ -28,6 +28,24 @@ public interface ChallengeRepository extends JpaRepository<Challenges, Long> {
 """)
     List<ChallengeListDTO> findAllActiveOrderByCreatedAtDescWithCurrentPersonnel();
 
+    // job 없이 오래된 순
+    @Query("""
+    SELECT new Capstone.capstoneProject.dto.Challenges.ChallengeListDTO(
+        c.id,
+        c.title,
+        c.maxPersonnel,
+        COUNT(cu.id),
+        c.likeCount
+    )
+    FROM Challenges c
+    LEFT JOIN ChallengeUsers cu ON cu.challenge.id = c.id
+    WHERE c.deletedAt IS NULL
+    GROUP BY c.id, c.title, c.maxPersonnel, c.likeCount
+    ORDER BY c.createdAt ASC
+""")
+    List<ChallengeListDTO> findAllActiveOrderByCreatedAtAscWithCurrentPersonnel();
+
+
 
     // job없이 조회 인기순(좋아요순)
     @Query("""
@@ -64,6 +82,24 @@ public interface ChallengeRepository extends JpaRepository<Challenges, Long> {
     ORDER BY c.createdAt DESC
 """)
     List<ChallengeListDTO> findAllActiveByJobOrderByCreatedAtDescWithCurrentPersonnel(UserJobs job);
+
+
+    // job 검색 오래된순
+    @Query("""
+    SELECT new Capstone.capstoneProject.dto.Challenges.ChallengeListDTO(
+        c.id,
+        c.title,
+        c.maxPersonnel,
+        COUNT(cu.id),
+        c.likeCount
+    )
+    FROM Challenges c
+    LEFT JOIN ChallengeUsers cu ON cu.challenge.id = c.id
+    WHERE c.deletedAt IS NULL AND c.job = :job
+    GROUP BY c.id, c.title, c.maxPersonnel, c.likeCount
+    ORDER BY c.createdAt ASC
+""")
+    List<ChallengeListDTO> findAllActiveByJobOrderByCreatedAtAscWithCurrentPersonnel(UserJobs job);
 
 
 

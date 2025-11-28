@@ -6,6 +6,7 @@ import Capstone.capstoneProject.dto.Chats.ChatRoom;
 import Capstone.capstoneProject.dto.LikeResponseDTO;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.entity.challenges.*;
+import Capstone.capstoneProject.enums.SortType;
 import Capstone.capstoneProject.enums.UserJobs;
 import Capstone.capstoneProject.exceptions.AlreadyJoinedException;
 import Capstone.capstoneProject.exceptions.ChallengeFullException;
@@ -14,6 +15,7 @@ import Capstone.capstoneProject.repository.*;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -83,30 +85,24 @@ public class ChallengeService {
     }
 
 
-    public List<ChallengeListDTO> getChallengeList(String sortType, String job) {
+    public List<ChallengeListDTO> getChallengeList(SortType sortType, UserJobs job) {
 
-        UserJobs finalJob;
-        if (job == null || job.isEmpty() || job.equalsIgnoreCase("NONE")) {
-            finalJob = UserJobs.NONE;
-        } else {
-            try {
-                finalJob = UserJobs.valueOf(job.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("유효하지 않은 직업입니다. job: " + job);
-            }
-        }
-
-        String finalSort = (sortType == null || sortType.isEmpty()) ? "RECENT" : sortType.toUpperCase();
+        SortType finalSort = (sortType == null) ? SortType.RECENT : sortType;
+        UserJobs finalJob = (job == null) ? UserJobs.NONE : job;
 
         List<ChallengeListDTO> challenges;
-        // job 없을 때
-        if (finalJob == UserJobs.NONE) {
-            challenges = finalSort.equals("POPULAR")
+
+        if (finalSort == SortType.POPULAR) {
+            challenges = (finalJob == UserJobs.NONE)
                     ? challengeRepository.findAllActiveOrderByLikeCountDescWithCurrentPersonnel()
-                    : challengeRepository.findAllActiveOrderByCreatedAtDescWithCurrentPersonnel();
-        } else {  // job 있을 때
-            challenges = finalSort.equals("POPULAR")
-                    ? challengeRepository.findAllActiveByJobOrderByLikeCountDescWithCurrentPersonnel(finalJob)
+                    : challengeRepository.findAllActiveByJobOrderByLikeCountDescWithCurrentPersonnel(finalJob);
+        } else if (finalSort == SortType.OLDEST) {
+            challenges = (finalJob == UserJobs.NONE)
+                    ? challengeRepository.findAllActiveOrderByCreatedAtAscWithCurrentPersonnel()
+                    : challengeRepository.findAllActiveByJobOrderByCreatedAtAscWithCurrentPersonnel(finalJob);
+        } else { // RECENT
+            challenges = (finalJob == UserJobs.NONE)
+                    ? challengeRepository.findAllActiveOrderByCreatedAtDescWithCurrentPersonnel()
                     : challengeRepository.findAllActiveByJobOrderByCreatedAtDescWithCurrentPersonnel(finalJob);
         }
 
