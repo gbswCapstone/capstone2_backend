@@ -230,22 +230,27 @@ public class ChallengeService {
         challengeRepository.save(challenges);
     }
 
-    public List<Challenges> searchChallenge(String hashtag, String keyword) {
+    public List<ChallengeListDTO> searchChallenge(String hashtag, String keyword) {
         boolean isHashtagEmpty = (hashtag == null || hashtag.isBlank());
         boolean isKeywordEmpty = (keyword == null || keyword.isBlank());
 
+        List<Challenges> challenges;
         if (!isHashtagEmpty && !isKeywordEmpty) {
             // 해시태그+제목 검색
-            return challengeRepository.searchByHashtagAndKeyword(hashtag, keyword);
+            challenges = challengeRepository.searchByHashtagAndKeyword(hashtag, keyword);
         } else if (!isHashtagEmpty) {
             // 해시태그만 검색
-            return challengeRepository.findByHashtagNameContaining(hashtag);
+            challenges = challengeRepository.findByHashtagNameContaining(hashtag);
         } else if (!isKeywordEmpty) {
             // 제목만 검색
-            return challengeRepository.findByTitleContaining(keyword);
+            challenges = challengeRepository.findByTitleContaining(keyword);
         } else {
             throw new IllegalArgumentException("잘못된 검색입니다.(제목, 해시태그 입력없음)");
         }
+
+        return challenges.stream()
+                .map(ChallengeListDTO::new)
+                .toList();
     }
 
     public void joinChallenge(Long id) {

@@ -90,11 +90,7 @@ public class ChallengeController {
     @Operation(summary = "챌린지 방 검색", description =  "해시태그, 제목으로 검색할 수 있는 API 입니다.")
     public ResponseEntity<ApiResponse<List<ChallengeListDTO>>> searchHashtagChallenges(
             @RequestParam(required = false) String hashtag, @RequestParam(required = false) String keyword) {
-        List<Challenges> challenges = challengeService.searchChallenge(hashtag, keyword);
-        List<ChallengeListDTO> response = challenges.stream()
-                .map(ChallengeListDTO::new)
-                .toList();
-
+        List<ChallengeListDTO> response = challengeService.searchChallenge(hashtag, keyword);
         return ResponseEntity.ok(ApiResponse.ok(response));
     }
 
