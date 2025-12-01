@@ -1,9 +1,6 @@
 package Capstone.capstoneProject.controller;
 
-import Capstone.capstoneProject.dto.Usages.IncomeRequest;
-import Capstone.capstoneProject.dto.Usages.OutlayRequest;
-import Capstone.capstoneProject.dto.Usages.UsageResponse;
-import Capstone.capstoneProject.dto.Usages.UsageSearchTypeDTO;
+import Capstone.capstoneProject.dto.Usages.*;
 import Capstone.capstoneProject.global.ApiResponse;
 import Capstone.capstoneProject.service.UsageService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,6 +28,15 @@ public class UsageController {
         UsageResponse result = usageService.plusOutlayHistory(request);
         return ResponseEntity.ok(ApiResponse.ok(result, "추가되었습니다."));
     }
+
+    @PostMapping("/receipt")
+    @Operation(summary = "영수증 지출 추가", description = "영수증 지출 추가 시 사용하는 API 입니다.")
+    public ResponseEntity<ApiResponse<List<UsageResponse>>> plusReceiptOutlay
+            (@RequestBody ReceiptRequest request) {
+        List<UsageResponse> result = usageService.plusReceiptOutlay(request);
+        return ResponseEntity.ok(ApiResponse.ok(result, "추가되었습니다."));
+    }
+
 
     @GetMapping
     @Operation(summary = "사용내역 조회", description = "사용내역 조회 시 사용하는 API 입니다.")

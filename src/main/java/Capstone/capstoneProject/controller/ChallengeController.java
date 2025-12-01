@@ -25,15 +25,15 @@ public class ChallengeController {
 
     private final ChallengeService challengeService;
 
-    @PostMapping
-    @Operation(summary = "챌린지 생성", description = "챌린지방 신규 생성 시 사용하는 API 입니다.")
-    public ResponseEntity<ApiResponse<ChallengeDetailResponse>> createChallenge(@RequestBody ChallengeCreate dto) {
-        Challenges challenges = challengeService.create(dto);
-        boolean isLiked = false;
-        // 엔티티를 dto로 변환
-        ChallengeDetailResponse challengeDetailResponse = ChallengeDetailResponse.fromEntity(challenges, isLiked);
-        return ResponseEntity.ok(ApiResponse.ok(challengeDetailResponse));
-    }
+//    @PostMapping
+//    @Operation(summary = "챌린지 생성", description = "챌린지방 신규 생성 시 사용하는 API 입니다.")
+//    public ResponseEntity<ApiResponse<ChallengeDetailResponse>> createChallenge(@RequestBody ChallengeCreate dto) {
+//        Challenges challenges = challengeService.create(dto);
+//        boolean isLiked = false;
+//        // 엔티티를 dto로 변환
+//        ChallengeDetailResponse challengeDetailResponse = ChallengeDetailResponse.fromEntity(challenges, isLiked);
+//        return ResponseEntity.ok(ApiResponse.ok(challengeDetailResponse));
+//    }
 
     @GetMapping
     @Operation(summary = "챌린지 전체조회", description = "챌린지방 전체 조회 시 사용하는 API 입니다.")

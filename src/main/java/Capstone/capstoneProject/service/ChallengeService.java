@@ -2,7 +2,6 @@ package Capstone.capstoneProject.service;
 
 import Capstone.capstoneProject.dto.Challenges.ChallengeCreate;
 import Capstone.capstoneProject.dto.Challenges.ChallengeListDTO;
-import Capstone.capstoneProject.dto.Chats.ChatRoom;
 import Capstone.capstoneProject.dto.LikeResponseDTO;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.entity.challenges.*;
@@ -35,54 +34,54 @@ public class ChallengeService {
     private final ChatService chatService;
 
     @Transactional
-    public Challenges create(ChallengeCreate dto) {
-        // user 정보 가져오기 (baarer token에서 추출)
-        Users user = authenticatedUserUtils.getCurrentUser();
-        // 챗방생성
-        ChatRoom chatRoom = chatService.createRoom(dto.getTitle());
-
-        Challenges challenge = Challenges.builder()
-                .createdBy(user)
-                .title(dto.getTitle())
-                .maxPersonnel(dto.getMaxPersonnel())
-                .job(dto.getJob())
-                .goal(dto.getGoal())
-                .roomId(chatRoom.getRoomId())
-                .image(dto.getImage())
-                .build();
-        challengeRepository.save(challenge);
-
-
-        // 작성자를 자동 참여자로 추가
-        ChallengeUsers challengeUser = ChallengeUsers.builder()
-                .challenge(challenge)
-                .user(user)
-                .joinedAt(LocalDateTime.now())
-                .build();
-        challengeUsersRepository.save(challengeUser);
-
-        // 해시태그 넣어주기
-        if (dto.getHashtags() != null && !dto.getHashtags().isEmpty()) {
-            List<Hashtag> hashtags = new ArrayList<>();
-
-            for (String name : dto.getHashtags()) {
-                Hashtag tag = hashtagRepository.findByName(name)
-                        .orElseGet(() -> {
-                            Hashtag newTag = new Hashtag();
-                            newTag.setName(name);
-                            return hashtagRepository.save(newTag);
-                        });
-                hashtags.add(tag);
-            }
-
-            List<ChallengeHashtag> challengeHashtags = hashtags.stream()
-                    .map(tag -> ChallengeHashtag.of(challenge, tag))
-                    .toList();
-            challengeHashtagRepository.saveAll(challengeHashtags);
-        }
-
-        return challenge;
-    }
+//    public Challenges create(ChallengeCreate dto) {
+//        // user 정보 가져오기 (baarer token에서 추출)
+//        Users user = authenticatedUserUtils.getCurrentUser();
+//        // 챗방생성
+//        ChatRoom chatRoom = chatService.createRoom(dto.getTitle());
+//
+//        Challenges challenge = Challenges.builder()
+//                .createdBy(user)
+//                .title(dto.getTitle())
+//                .maxPersonnel(dto.getMaxPersonnel())
+//                .job(dto.getJob())
+//                .goal(dto.getGoal())
+//                .roomId(chatRoom.getRoomId())
+//                .image(dto.getImage())
+//                .build();
+//        challengeRepository.save(challenge);
+//
+//
+//        // 작성자를 자동 참여자로 추가
+//        ChallengeUsers challengeUser = ChallengeUsers.builder()
+//                .challenge(challenge)
+//                .user(user)
+//                .joinedAt(LocalDateTime.now())
+//                .build();
+//        challengeUsersRepository.save(challengeUser);
+//
+//        // 해시태그 넣어주기
+//        if (dto.getHashtags() != null && !dto.getHashtags().isEmpty()) {
+//            List<Hashtag> hashtags = new ArrayList<>();
+//
+//            for (String name : dto.getHashtags()) {
+//                Hashtag tag = hashtagRepository.findByName(name)
+//                        .orElseGet(() -> {
+//                            Hashtag newTag = new Hashtag();
+//                            newTag.setName(name);
+//                            return hashtagRepository.save(newTag);
+//                        });
+//                hashtags.add(tag);
+//            }
+//
+//            List<ChallengeHashtag> challengeHashtags = hashtags.stream()
+//                    .map(tag -> ChallengeHashtag.of(challenge, tag))
+//                    .toList();
+//            challengeHashtagRepository.saveAll(challengeHashtags);
+//        }
+//
+//        return challenge;
+//    }
 
 
     public List<ChallengeListDTO> getChallengeList(SortType sortType, UserJobs job) {

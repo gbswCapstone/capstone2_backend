@@ -56,8 +56,6 @@ public class Challenges {
     @Column(nullable = false, name="like_count")
     private int likeCount;
 
-    @Column(nullable = false, name="room_id")
-    private String roomId;
 
     @Column(nullable = false, name="created_at")
     @CreatedDate

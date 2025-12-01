@@ -1,0 +1,53 @@
+package Capstone.capstoneProject.entity.Chats;
+
+import Capstone.capstoneProject.entity.Missions.Missions;
+import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.enums.MessageType;
+import jakarta.persistence.*;
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "chat_messages")
+public class ChatMessages {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name="mission_id")
+    private Missions missions;
+
+    @ManyToOne
+    @JoinColumn(name="sender", nullable = false)
+    private Users users;
+
+    @ManyToOne
+    @JoinColumn(name="chat_room_id", nullable = false)
+    private ChatRooms chatRooms;
+
+    @Column(name="type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private MessageType messageType;
+
+    @Column(name="content", columnDefinition = "TEXT")
+    private String content;
+
+    @Column(name="created_at", nullable = false)
+    @CreatedDate
+    private LocalDateTime createdAt;
+
+    @Column(name="updated_at", nullable = false)
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+}

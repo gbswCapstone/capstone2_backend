@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 @Table(name = "challenge_user_stats",
         uniqueConstraints = @UniqueConstraint(name = "uk_challenge_user_month", columnNames = {"challenge_id", "user_id", "month_year"}))
 @EntityListeners(AuditingEntityListener.class)
@@ -46,15 +45,24 @@ public class ChallengeUserStats {
     @Column(name = "participation_count", nullable = false)
     private int participationCount;
 
+    @Column(name="saving_rate")
+    private BigDecimal savingRate;
+
+    @Column(name="achievement_rate")
+    private BigDecimal achievementRate;
+
+    @Column(name="challenge_xp")
+    private int challengeXp;
+
     @Column(name = "total_days", nullable = false)
     private int totalDays;
 
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
 }
