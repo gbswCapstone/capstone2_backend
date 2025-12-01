@@ -2,10 +2,7 @@ package Capstone.capstoneProject.dto.Usages;
 
 import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.enums.HistoryType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,6 +12,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UsageResponse {
     private Long id;
     private String name;
