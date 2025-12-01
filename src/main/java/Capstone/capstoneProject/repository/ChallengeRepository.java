@@ -13,67 +13,61 @@ public interface ChallengeRepository extends JpaRepository<Challenges, Long> {
 
     // job 없이 조회 최신순
     @Query("""
-    SELECT c
+    SELECT DISTINCT c
     FROM Challenges c
     LEFT JOIN FETCH c.challengeUsers cu
     WHERE c.deletedAt IS NULL
-    GROUP BY c
     ORDER BY c.createdAt DESC
 """)
     List<Challenges> findAllActiveOrderByCreatedAtDesc();
 
-    // job 없이 오래된 순
+    // job 없이 조회 최신순
     @Query("""
-    SELECT c
+    SELECT DISTINCT c
     FROM Challenges c
     LEFT JOIN FETCH c.challengeUsers cu
     WHERE c.deletedAt IS NULL
-    GROUP BY c
-    ORDER BY c.createdAt ASC
+    ORDER BY c.createdAt DESC
 """)
     List<Challenges> findAllActiveOrderByCreatedAtAsc();
 
     // job 없이 인기순(좋아요순)
     @Query("""
-    SELECT c
+    SELECT DISTINCT c
     FROM Challenges c
     LEFT JOIN FETCH c.challengeUsers cu
     WHERE c.deletedAt IS NULL
-    GROUP BY c
     ORDER BY c.likeCount DESC
 """)
     List<Challenges> findAllActiveOrderByLikeCountDesc();
 
-    // job 검색 최신순
+    // job 없이 인기순(좋아요순)
     @Query("""
-    SELECT c
+    SELECT DISTINCT c
     FROM Challenges c
     LEFT JOIN FETCH c.challengeUsers cu
-    WHERE c.deletedAt IS NULL AND c.job = :job
-    GROUP BY c
-    ORDER BY c.createdAt DESC
+    WHERE c.deletedAt IS NULL
+    ORDER BY c.likeCount DESC
 """)
     List<Challenges> findAllActiveByJobOrderByCreatedAtDesc(UserJobs job);
 
     // job 검색 오래된순
     @Query("""
-    SELECT c
+    SELECT DISTINCT c
     FROM Challenges c
     LEFT JOIN FETCH c.challengeUsers cu
     WHERE c.deletedAt IS NULL AND c.job = :job
-    GROUP BY c
     ORDER BY c.createdAt ASC
 """)
     List<Challenges> findAllActiveByJobOrderByCreatedAtAsc(UserJobs job);
 
-    // job 검색 인기순(좋아요순)
+    // job 검색 오래된순
     @Query("""
-    SELECT c
+    SELECT DISTINCT c
     FROM Challenges c
     LEFT JOIN FETCH c.challengeUsers cu
     WHERE c.deletedAt IS NULL AND c.job = :job
-    GROUP BY c
-    ORDER BY c.likeCount DESC
+    ORDER BY c.createdAt ASC
 """)
     List<Challenges> findAllActiveByJobOrderByLikeCountDesc(UserJobs job);
 

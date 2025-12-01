@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -118,17 +119,34 @@ public class UsageService {
         Map<String, Object> message = (Map<String, Object>) response.getBody().get("message");
         List<Map<String, Object>> dataList = (List<Map<String, Object>>) message.get("data");
 
+        List<UsageResponse> usageList = new ArrayList<>();
 
-        List<UsageResponse> usageList = dataList.stream().map(item -> {
-            UsageResponse usage = new UsageResponse();
-            usage.setName((String) item.get("prductName"));
-            usage.setPrice(new BigDecimal((String) item.get("price")));
-            usage.setAmount(Integer.parseInt((String) item.get("quantity")));
-            usage.setProDate(LocalDate.parse((String) item.get("date")));
-            usage.setCategory((String) item.get("category"));
-            return usage;
-        }).collect(Collectors.toList());
+        for (Map<String, Object> item : dataList) {
+            BigDecimal price = new BigDecimal((String) item.get("price"));
+            int amount = Integer.parseInt((String) item.get("quantity"));
+            LocalDate proDate = LocalDate.parse((String) item.get("date"));
+            String name = (String) item.get("productName");
+            String category = (String) item.get("category");
 
+            // 엔티티 저장
+            UsageHistory usageHistory = UsageHistory.builder()
+                    .users(user)
+                    .name(name)
+                    .price(price)
+                    .proDate(proDate)
+                    .category(category)
+                    .amount(amount)
+                    .historyType(HistoryType.OUTLAY)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+
+            UsageHistory savedHistory = usageHistoryRepository.save(usageHistory);
+
+            // 저장된 엔티티 기반 DTO 변환
+            UsageResponse usageResponse = new UsageResponse(savedHistory);
+
+            usageList.add(usageResponse);
+        }
         return usageList;
     }
 
