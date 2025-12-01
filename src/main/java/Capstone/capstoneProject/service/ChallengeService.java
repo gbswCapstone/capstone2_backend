@@ -3,6 +3,8 @@ package Capstone.capstoneProject.service;
 import Capstone.capstoneProject.dto.Challenges.ChallengeCreate;
 import Capstone.capstoneProject.dto.Challenges.ChallengeListDTO;
 import Capstone.capstoneProject.dto.LikeResponseDTO;
+import Capstone.capstoneProject.entity.Chats.ChatRoomUsers;
+import Capstone.capstoneProject.entity.Chats.ChatRooms;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.entity.challenges.*;
 import Capstone.capstoneProject.enums.SortType;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ChallengeService {
     private final ChallengeRepository challengeRepository;
     private final AuthenticatedUserUtils authenticatedUserUtils;
@@ -32,56 +35,65 @@ public class ChallengeService {
     private final LikeRepository likeRepository;
     private final UserRepository userRepository;
     private final ChatService chatService;
+    private final ChatRoomUsersRepository chatRoomUsersRepository;
 
-    @Transactional
-//    public Challenges create(ChallengeCreate dto) {
-//        // user 정보 가져오기 (baarer token에서 추출)
-//        Users user = authenticatedUserUtils.getCurrentUser();
-//        // 챗방생성
-//        ChatRoom chatRoom = chatService.createRoom(dto.getTitle());
-//
-//        Challenges challenge = Challenges.builder()
-//                .createdBy(user)
-//                .title(dto.getTitle())
-//                .maxPersonnel(dto.getMaxPersonnel())
-//                .job(dto.getJob())
-//                .goal(dto.getGoal())
-//                .roomId(chatRoom.getRoomId())
-//                .image(dto.getImage())
-//                .build();
-//        challengeRepository.save(challenge);
-//
-//
-//        // 작성자를 자동 참여자로 추가
-//        ChallengeUsers challengeUser = ChallengeUsers.builder()
-//                .challenge(challenge)
-//                .user(user)
-//                .joinedAt(LocalDateTime.now())
-//                .build();
-//        challengeUsersRepository.save(challengeUser);
-//
-//        // 해시태그 넣어주기
-//        if (dto.getHashtags() != null && !dto.getHashtags().isEmpty()) {
-//            List<Hashtag> hashtags = new ArrayList<>();
-//
-//            for (String name : dto.getHashtags()) {
-//                Hashtag tag = hashtagRepository.findByName(name)
-//                        .orElseGet(() -> {
-//                            Hashtag newTag = new Hashtag();
-//                            newTag.setName(name);
-//                            return hashtagRepository.save(newTag);
-//                        });
-//                hashtags.add(tag);
-//            }
-//
-//            List<ChallengeHashtag> challengeHashtags = hashtags.stream()
-//                    .map(tag -> ChallengeHashtag.of(challenge, tag))
-//                    .toList();
-//            challengeHashtagRepository.saveAll(challengeHashtags);
-//        }
-//
-//        return challenge;
-//    }
+
+    public Challenges create(ChallengeCreate dto) {
+        // user 정보 가져오기 (baarer token에서 추출)
+        Users user = authenticatedUserUtils.getCurrentUser();
+
+
+        Challenges challenge = Challenges.builder()
+                .createdBy(user)
+                .title(dto.getTitle())
+                .maxPersonnel(dto.getMaxPersonnel())
+                .job(dto.getJob())
+                .goal(dto.getGoal())
+                .image(dto.getImage())
+                .build();
+        challengeRepository.save(challenge);
+
+        // 챗방생성
+        ChatRooms chatRooms = chatService.createRoom(challenge);
+
+        // 작성자를 자동 참여자로 추가
+        ChallengeUsers challengeUser = ChallengeUsers.builder()
+                .challenge(challenge)
+                .user(user)
+                .joinedAt(LocalDateTime.now())
+                .build();
+        challengeUsersRepository.save(challengeUser);
+
+        // 채팅방에도 작성자를 자동 참여자로 추가
+        ChatRoomUsers chatRoomUser = ChatRoomUsers.builder()
+                .chatRooms(chatRooms)
+                .users(user)
+                .createdAt(LocalDateTime.now())
+                .build();
+        chatRoomUsersRepository.save(chatRoomUser);
+
+        // 해시태그 넣어주기
+        if (dto.getHashtags() != null && !dto.getHashtags().isEmpty()) {
+            List<Hashtag> hashtags = new ArrayList<>();
+
+            for (String name : dto.getHashtags()) {
+                Hashtag tag = hashtagRepository.findByName(name)
+                        .orElseGet(() -> {
+                            Hashtag newTag = new Hashtag();
+                            newTag.setName(name);
+                            return hashtagRepository.save(newTag);
+                        });
+                hashtags.add(tag);
+            }
+
+            List<ChallengeHashtag> challengeHashtags = hashtags.stream()
+                    .map(tag -> ChallengeHashtag.of(challenge, tag))
+                    .toList();
+            challengeHashtagRepository.saveAll(challengeHashtags);
+        }
+
+        return challenge;
+    }
 
 
     public List<ChallengeListDTO> getChallengeList(SortType sortType, UserJobs job) {
