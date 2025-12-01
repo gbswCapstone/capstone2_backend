@@ -17,7 +17,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setAllowedOrigins("*") // cors 에러 방지
                 .withSockJS();
 
-
         // postman test
         registry.addEndpoint("/ws-chat")
                 .setAllowedOriginPatterns("*");

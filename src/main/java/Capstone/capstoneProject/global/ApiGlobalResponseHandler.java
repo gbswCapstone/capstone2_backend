@@ -95,4 +95,11 @@ public class ApiGlobalResponseHandler {
                 .body(ApiResponse.error("해당 게시글에 관한 권한이 없습니다."));
     }
 
+    // 영수증 ai 호출 실패
+    @ExceptionHandler(ReceiptAiServerException.class)
+    public ResponseEntity<ApiResponse<Void>> handleReceiptAiServerException(ReceiptAiServerException e) {
+        return ResponseEntity.status(500)
+                .body(ApiResponse.error("영수증 AI 호출에 실패했습니다."));
+    }
+
 }

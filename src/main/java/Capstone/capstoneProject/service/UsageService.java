@@ -1,12 +1,11 @@
 package Capstone.capstoneProject.service;
 
-import Capstone.capstoneProject.dto.Usages.IncomeRequest;
-import Capstone.capstoneProject.dto.Usages.OutlayRequest;
-import Capstone.capstoneProject.dto.Usages.UsageResponse;
-import Capstone.capstoneProject.dto.Usages.UsageSearchTypeDTO;
+import Capstone.capstoneProject.dto.Usages.*;
 import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.enums.HistoryType;
+import Capstone.capstoneProject.enums.PresetType;
+import Capstone.capstoneProject.exceptions.ReceiptAiServerException;
 import Capstone.capstoneProject.repository.UsageHistoryRepository;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -100,6 +100,42 @@ public class UsageService {
         return new UsageResponse(usageHistory);
     }
 
+    public List<UsageResponse> plusReceiptOutlay(ReceiptRequest request) {
+        Users user = authenticatedUserUtils.getCurrentUser();
+
+        String url = "http://13.125.64.51:8080/ocr/receipt";
+        Map<String, String> requestBody = Map.of(
+                "image_url", request.getImageUrl(),
+                "filename", "receipt"
+        );
+
+        ResponseEntity<Map> response = restTemplate.postForEntity(url, requestBody, Map.class);
+
+        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+            throw new ReceiptAiServerException("영수증 AI 서버 호출 실패");
+        }
+
+        Map<String, Object> message = (Map<String, Object>) response.getBody().get("message");
+        List<Map<String, Object>> dataList = (List<Map<String, Object>>) message.get("data");
+
+
+        List<UsageResponse> usageList = dataList.stream().map(item -> {
+            UsageResponse usage = new UsageResponse();
+            usage.setName((String) item.get("prductName"));
+            usage.setPrice(new BigDecimal((String) item.get("price")));
+            usage.setAmount(Integer.parseInt((String) item.get("quantity")));
+            usage.setProDate(LocalDate.parse((String) item.get("date")));
+            usage.setCategory((String) item.get("category"));
+            return usage;
+        }).collect(Collectors.toList());
+
+        return usageList;
+    }
+
+
+
+
+
     public List<UsageResponse> getUsageList(UsageSearchTypeDTO typeDTO) {
         Users user = authenticatedUserUtils.getCurrentUser();
 
@@ -110,11 +146,11 @@ public class UsageService {
         LocalDate start = typeDTO.getStartDate();
         LocalDate end = typeDTO.getEndDate();
 
-        // preset 처리 (today, thisWeek)
-        if ("today".equalsIgnoreCase(typeDTO.getPreset())) {
+
+        if (typeDTO.getPresetType() == PresetType.TODAY) {
             start = LocalDate.now();
             end = LocalDate.now();
-        } else if ("thisWeek".equalsIgnoreCase(typeDTO.getPreset())) {
+        } else if (typeDTO.getPresetType() == PresetType.THIS_WEEK) {
             LocalDate now = LocalDate.now();
             start = now.with(DayOfWeek.MONDAY);
             end = now.with(DayOfWeek.SUNDAY);
@@ -138,6 +174,8 @@ public class UsageService {
 
         return list.stream().map(UsageResponse::new).toList();
     }
+
+
 
 
 
