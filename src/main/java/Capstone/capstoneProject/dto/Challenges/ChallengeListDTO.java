@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,6 +19,8 @@ public class ChallengeListDTO {
     private int maxPersonnel;
     private Long currentPersonnel; // 현재 참여인원
     private int likeCount; // 좋아요수
+    private String goal; // 목표
+    private List<String> hashtags;
 
     public ChallengeListDTO(Challenges challenge) {
         this.id = challenge.getId();
@@ -23,5 +28,11 @@ public class ChallengeListDTO {
         this.maxPersonnel = challenge.getMaxPersonnel();
         this.currentPersonnel = 0L; // 임시값
         this.likeCount = getLikeCount();
+        this.goal = challenge.getGoal();
+        this.hashtags = challenge.getChallengeHashtags()
+                .stream()
+                .map(ch -> ch.getHashtag().getName())
+                .collect(Collectors.toList());
+
     }
 }
