@@ -22,6 +22,7 @@ public class ChallengeListDTO {
     private int likeCount; // 좋아요수
     private String goal; // 목표
     private List<String> hashtags;
+    private String image; // 이미지
 
     public ChallengeListDTO(Challenges challenge) {
         this.id = challenge.getId();
@@ -34,6 +35,7 @@ public class ChallengeListDTO {
                 .stream()
                 .map(ch -> ch.getHashtag().getName())
                 .collect(Collectors.toList());
+        this.image = challenge.getImage();
 
     }
 }
