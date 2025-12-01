@@ -89,23 +89,30 @@ public class ChallengeService {
         SortType finalSort = (sortType == null) ? SortType.RECENT : sortType;
         UserJobs finalJob = (job == null) ? UserJobs.NONE : job;
 
-        List<ChallengeListDTO> challenges;
+        List<Challenges> challenges;
 
         if (finalSort == SortType.POPULAR) {
             challenges = (finalJob == UserJobs.NONE)
-                    ? challengeRepository.findAllActiveOrderByLikeCountDescWithCurrentPersonnel()
-                    : challengeRepository.findAllActiveByJobOrderByLikeCountDescWithCurrentPersonnel(finalJob);
+                    ? challengeRepository.findAllActiveOrderByCreatedAtDesc()
+                    : challengeRepository.findAllActiveByJobOrderByCreatedAtDesc(finalJob);
         } else if (finalSort == SortType.OLDEST) {
             challenges = (finalJob == UserJobs.NONE)
-                    ? challengeRepository.findAllActiveOrderByCreatedAtAscWithCurrentPersonnel()
-                    : challengeRepository.findAllActiveByJobOrderByCreatedAtAscWithCurrentPersonnel(finalJob);
+                    ? challengeRepository.findAllActiveOrderByCreatedAtAsc()
+                    : challengeRepository.findAllActiveByJobOrderByCreatedAtAsc(finalJob);
         } else { // RECENT
             challenges = (finalJob == UserJobs.NONE)
-                    ? challengeRepository.findAllActiveOrderByCreatedAtDescWithCurrentPersonnel()
-                    : challengeRepository.findAllActiveByJobOrderByCreatedAtDescWithCurrentPersonnel(finalJob);
+                    ? challengeRepository.findAllActiveOrderByLikeCountDesc()
+                    : challengeRepository.findAllActiveByJobOrderByLikeCountDesc(finalJob);
         }
 
-        return challenges;
+        return challenges.stream()
+                .map(ch -> {
+                    ChallengeListDTO dto = new ChallengeListDTO(ch);
+                    // 현재 참여인원 계산
+                    dto.setCurrentPersonnel((long) ch.getChallengeUsers().size());
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -248,8 +255,13 @@ public class ChallengeService {
         }
 
         return challenges.stream()
-                .map(ChallengeListDTO::new)
-                .toList();
+                .map(ch -> {
+                    ChallengeListDTO dto = new ChallengeListDTO(ch);
+                    // 현재 참여인원 계산
+                    dto.setCurrentPersonnel((long) ch.getChallengeUsers().size());
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     public void joinChallenge(Long id) {
