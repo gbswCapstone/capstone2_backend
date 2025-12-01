@@ -4,6 +4,7 @@ import Capstone.capstoneProject.entity.Users;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Table(name = "chat_room_users")
+@EntityListeners(AuditingEntityListener.class)
 public class ChatRoomUsers {
 
     @Id
