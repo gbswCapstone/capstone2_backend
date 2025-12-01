@@ -11,114 +11,71 @@ import java.util.List;
 
 public interface ChallengeRepository extends JpaRepository<Challenges, Long> {
 
-    // job없이 조회 최신순
+    // job 없이 조회 최신순
     @Query("""
-    SELECT new Capstone.capstoneProject.dto.Challenges.ChallengeListDTO(
-        c.id,
-        c.title,
-        c.maxPersonnel,
-        COUNT(cu.id),
-        c.likeCount
-    )
+    SELECT c
     FROM Challenges c
-    LEFT JOIN ChallengeUsers cu ON cu.challenge.id = c.id
+    LEFT JOIN FETCH c.challengeUsers cu
     WHERE c.deletedAt IS NULL
-    GROUP BY c.id, c.title, c.maxPersonnel, c.likeCount
+    GROUP BY c
     ORDER BY c.createdAt DESC
 """)
-    List<ChallengeListDTO> findAllActiveOrderByCreatedAtDescWithCurrentPersonnel();
+    List<Challenges> findAllActiveOrderByCreatedAtDesc();
 
     // job 없이 오래된 순
     @Query("""
-    SELECT new Capstone.capstoneProject.dto.Challenges.ChallengeListDTO(
-        c.id,
-        c.title,
-        c.maxPersonnel,
-        COUNT(cu.id),
-        c.likeCount
-    )
+    SELECT c
     FROM Challenges c
-    LEFT JOIN ChallengeUsers cu ON cu.challenge.id = c.id
+    LEFT JOIN FETCH c.challengeUsers cu
     WHERE c.deletedAt IS NULL
-    GROUP BY c.id, c.title, c.maxPersonnel, c.likeCount
+    GROUP BY c
     ORDER BY c.createdAt ASC
 """)
-    List<ChallengeListDTO> findAllActiveOrderByCreatedAtAscWithCurrentPersonnel();
+    List<Challenges> findAllActiveOrderByCreatedAtAsc();
 
-
-
-    // job없이 조회 인기순(좋아요순)
+    // job 없이 인기순(좋아요순)
     @Query("""
-    SELECT new Capstone.capstoneProject.dto.Challenges.ChallengeListDTO(
-        c.id,
-        c.title,
-        c.maxPersonnel,
-        COUNT(cu.id),
-        c.likeCount
-    )
+    SELECT c
     FROM Challenges c
-    LEFT JOIN ChallengeUsers cu ON cu.challenge.id = c.id
+    LEFT JOIN FETCH c.challengeUsers cu
     WHERE c.deletedAt IS NULL
-    GROUP BY c.id, c.title, c.maxPersonnel, c.likeCount
+    GROUP BY c
     ORDER BY c.likeCount DESC
 """)
-    List<ChallengeListDTO> findAllActiveOrderByLikeCountDescWithCurrentPersonnel();
-
-
+    List<Challenges> findAllActiveOrderByLikeCountDesc();
 
     // job 검색 최신순
     @Query("""
-    SELECT new Capstone.capstoneProject.dto.Challenges.ChallengeListDTO(
-        c.id,
-        c.title,
-        c.maxPersonnel,
-        COUNT(cu.id),
-        c.likeCount
-    )
+    SELECT c
     FROM Challenges c
-    LEFT JOIN ChallengeUsers cu ON cu.challenge.id = c.id
+    LEFT JOIN FETCH c.challengeUsers cu
     WHERE c.deletedAt IS NULL AND c.job = :job
-    GROUP BY c.id, c.title, c.maxPersonnel, c.likeCount
+    GROUP BY c
     ORDER BY c.createdAt DESC
 """)
-    List<ChallengeListDTO> findAllActiveByJobOrderByCreatedAtDescWithCurrentPersonnel(UserJobs job);
-
+    List<Challenges> findAllActiveByJobOrderByCreatedAtDesc(UserJobs job);
 
     // job 검색 오래된순
     @Query("""
-    SELECT new Capstone.capstoneProject.dto.Challenges.ChallengeListDTO(
-        c.id,
-        c.title,
-        c.maxPersonnel,
-        COUNT(cu.id),
-        c.likeCount
-    )
+    SELECT c
     FROM Challenges c
-    LEFT JOIN ChallengeUsers cu ON cu.challenge.id = c.id
+    LEFT JOIN FETCH c.challengeUsers cu
     WHERE c.deletedAt IS NULL AND c.job = :job
-    GROUP BY c.id, c.title, c.maxPersonnel, c.likeCount
+    GROUP BY c
     ORDER BY c.createdAt ASC
 """)
-    List<ChallengeListDTO> findAllActiveByJobOrderByCreatedAtAscWithCurrentPersonnel(UserJobs job);
-
-
+    List<Challenges> findAllActiveByJobOrderByCreatedAtAsc(UserJobs job);
 
     // job 검색 인기순(좋아요순)
     @Query("""
-    SELECT new Capstone.capstoneProject.dto.Challenges.ChallengeListDTO(
-        c.id,
-        c.title,
-        c.maxPersonnel,
-        COUNT(cu.id),
-        c.likeCount
-    )
+    SELECT c
     FROM Challenges c
-    LEFT JOIN ChallengeUsers cu ON cu.challenge.id = c.id
+    LEFT JOIN FETCH c.challengeUsers cu
     WHERE c.deletedAt IS NULL AND c.job = :job
-    GROUP BY c.id, c.title, c.maxPersonnel, c.likeCount
+    GROUP BY c
     ORDER BY c.likeCount DESC
 """)
-    List<ChallengeListDTO> findAllActiveByJobOrderByLikeCountDescWithCurrentPersonnel(UserJobs job);
+    List<Challenges> findAllActiveByJobOrderByLikeCountDesc(UserJobs job);
 
     // 해시태그
     @Query("""

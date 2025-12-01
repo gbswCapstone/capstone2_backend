@@ -9,7 +9,9 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -48,11 +50,6 @@ public class Challenges {
     @Column(name="goal") // 목표
     private String goal;
 
-    // 해시태그랑 매핑
-    @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private Set<ChallengeHashtag> challengeHashtags = new HashSet<>();
-
     @Column(nullable = false, name="like_count")
     private int likeCount;
 
@@ -68,8 +65,15 @@ public class Challenges {
     @Column(name="deleted_at")
     private LocalDateTime deletedAt;
 
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
-    }
+    // 해시태그랑 매핑
+    @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<ChallengeHashtag> challengeHashtags = new HashSet<>();
+
+    // 챌린지 유저랑 매핑
+    @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ChallengeUsers> challengeUsers = new ArrayList<>();
+
 
 }
