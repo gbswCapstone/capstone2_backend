@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface ChallengeUsersRepository extends JpaRepository<ChallengeUsers, Long> {
     boolean existsByChallengeIdAndUserId(Long challengeId, Long userId);
-    int countByChallengeId(Long challengeId);
+
+    int countByChallenge_IdAndChallenge_DeletedAtIsNull(Long challengeId);
+
     List<ChallengeUsers> findByUserId(Long userId);
 }

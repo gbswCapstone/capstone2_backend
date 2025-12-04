@@ -13,18 +13,19 @@ import java.util.List;
 public class ChallengeDetailResponse {
     private final Long id;
 
-    @JsonProperty("created_by")
     private final UserResponseDTO createdBy;
     private final String title;
-    @JsonProperty("max_personnel") // 인원 제한
-    private int maxPersonnel;
     private String image;
     private UserJobs job;
     private String goal;
-    @JsonProperty("created_at")
     private LocalDateTime createdAt;
     private final List<String> hashtags;// 이것만 챌린지해시태그 엔티티
     private boolean isLiked; // 내가 좋아요를 눌렀는지
+    private boolean joined; // 현재 로그인 유저가 참여했는지
+    private String roomId; // 참여한 경우만 WebSocket 구독용
+    private int likeCount;
+    private int maxPersonnel;
+    private int currentPersonnel; // 현재 참여인원
 
     public ChallengeDetailResponse(Long id,
                                    UserResponseDTO createdBy,
@@ -35,7 +36,9 @@ public class ChallengeDetailResponse {
                                    String goal,
                                    LocalDateTime createdAt,
                                    boolean isLiked,
-                                   List<String> hashtags) {
+                                   List<String> hashtags, int likeCount,
+                                   int currentPersonnel
+                                   ) {
         this.id = id;
         this.createdBy = createdBy;
         this.title = title;
@@ -46,10 +49,13 @@ public class ChallengeDetailResponse {
         this.createdAt = createdAt;
         this.hashtags = hashtags;
         this.isLiked = isLiked;
+        this.joined = false; // 기본값 false
+        this.roomId = null;   // 기본값 null
+        this.likeCount = likeCount;
+        this.currentPersonnel = currentPersonnel;
     }
 
 
-    //엔티티 -> DTO 변환 편의 메서드
     public static ChallengeDetailResponse fromEntity(Challenges challenge, boolean isLiked) {
         List<String> hashtagNames = challenge.getChallengeHashtags()  // ChallengeHashtag Set 필요
                 .stream()
@@ -66,8 +72,18 @@ public class ChallengeDetailResponse {
                 challenge.getGoal(),
                 challenge.getCreatedAt(),
                 isLiked,
-                hashtagNames
+                hashtagNames,
+                challenge.getLikeCount(),
+                challenge.getChallengeUsers().size()
         );
+    }
+
+    public void setJoined(boolean joined) {
+        this.joined = joined;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
 }
 

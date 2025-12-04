@@ -14,13 +14,10 @@ public class AuthenticatedUserUtils {
     private final UserRepository userRepository; // Users 조회용
 
     public Long getCurrentUserId() {
-        return securityUtils.getCurrentUserId();
+        return securityUtils.getCurrentUser().getId();
     }
 
     public Users getCurrentUser() {
-        Long userId = securityUtils.getCurrentUserId();
-
-        return userRepository.findByIdAndDeletedAtIsNull(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
+        return securityUtils.getCurrentUser();
     }
 }

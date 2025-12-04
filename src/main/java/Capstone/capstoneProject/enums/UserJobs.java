@@ -8,6 +8,5 @@ public enum UserJobs {
     HOMEMAKER, // 주부
     JOB_SEEKER, // 취준생
     WORKER, // 직장인
-    STUDENT, // 학생
-    UNIVERSITY_STUDENT // 대학생
+    STUDENT // 학생
 }

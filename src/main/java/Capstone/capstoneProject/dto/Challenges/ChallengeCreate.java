@@ -15,7 +15,6 @@ public class ChallengeCreate {
     private String goal; // 목표입력
     private UserJobs job; // 직업선택
     private List<String> hashtags; // 해시태그 입력
-    @JsonProperty("max_personnel")
     private int maxPersonnel; // 방 정원 입력
 
 }

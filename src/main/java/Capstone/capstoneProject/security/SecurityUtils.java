@@ -1,16 +1,13 @@
 package Capstone.capstoneProject.security;
 
+import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.exceptions.NotAuthenticatedException;
-import Capstone.capstoneProject.exceptions.UserNotFoundException;
 import Capstone.capstoneProject.repository.UserRepository;
 import Capstone.capstoneProject.security.oauth.CustomOauth2UserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -18,21 +15,18 @@ public class SecurityUtils {
 
     private final UserRepository userRepository;
 
-    public Long getCurrentUserId() {
+    public Users getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new NotAuthenticatedException("로그인이 필요합니다.");
         }
-
         Object principal = authentication.getPrincipal();
-
-        if (principal instanceof org.springframework.security.core.userdetails.User springUser) {
-            return userRepository.findByEmailAndDeletedAtIsNull(springUser.getUsername())
-                    .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."))
-                    .getId();
+        if (principal instanceof org.springframework.security.core.userdetails.User userDetails) {
+            return userRepository.findByEmailAndDeletedAtIsNull(userDetails.getUsername())
+                    .orElseThrow(() -> new NotAuthenticatedException("사용자를 찾을 수 없습니다."));
         } else if (principal instanceof CustomOauth2UserDetails oauthUser) {
-            return oauthUser.getUser().getId();
+            return oauthUser.getUser();
         } else {
             throw new NotAuthenticatedException("로그인이 필요합니다.");
         }

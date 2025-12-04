@@ -1,6 +1,7 @@
 package Capstone.capstoneProject.service;
 
 import Capstone.capstoneProject.dto.Challenges.ChallengeCreate;
+import Capstone.capstoneProject.dto.Challenges.ChallengeDetailResponse;
 import Capstone.capstoneProject.dto.Challenges.ChallengeListDTO;
 import Capstone.capstoneProject.dto.LikeResponseDTO;
 import Capstone.capstoneProject.entity.Chats.ChatRoomUsers;
@@ -12,11 +13,11 @@ import Capstone.capstoneProject.enums.UserJobs;
 import Capstone.capstoneProject.exceptions.AlreadyJoinedException;
 import Capstone.capstoneProject.exceptions.ChallengeFullException;
 import Capstone.capstoneProject.exceptions.ChallengeNotFoundException;
+import Capstone.capstoneProject.exceptions.NotChallengeOwnerException;
 import Capstone.capstoneProject.repository.*;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -36,12 +37,12 @@ public class ChallengeService {
     private final UserRepository userRepository;
     private final ChatService chatService;
     private final ChatRoomUsersRepository chatRoomUsersRepository;
+    private final ChatRoomsRepository chatRoomsRepository;
 
 
-    public Challenges create(ChallengeCreate dto) {
+    public ChallengeDetailResponse create(ChallengeCreate dto) {
         // user 정보 가져오기 (baarer token에서 추출)
         Users user = authenticatedUserUtils.getCurrentUser();
-
 
         Challenges challenge = Challenges.builder()
                 .createdBy(user)
@@ -92,12 +93,20 @@ public class ChallengeService {
             challengeHashtagRepository.saveAll(challengeHashtags);
         }
 
-        return challenge;
+        boolean isLiked = false;
+        ChallengeDetailResponse challengeDetailResponse = ChallengeDetailResponse.fromEntity(challenge, isLiked);
+
+        // 작성자이기 때문에 참여
+        challengeDetailResponse.setJoined(true);
+
+        chatRoomsRepository.findByChallenge(challenge)
+                .ifPresent(cr -> challengeDetailResponse.setRoomId(cr.getRoomId()));
+        return challengeDetailResponse;
     }
 
 
     public List<ChallengeListDTO> getChallengeList(SortType sortType, UserJobs job) {
-
+        Users user = authenticatedUserUtils.getCurrentUser();
         SortType finalSort = (sortType == null) ? SortType.RECENT : sortType;
         UserJobs finalJob = (job == null) ? UserJobs.NONE : job;
 
@@ -105,23 +114,32 @@ public class ChallengeService {
 
         if (finalSort == SortType.POPULAR) {
             challenges = (finalJob == UserJobs.NONE)
-                    ? challengeRepository.findAllActiveOrderByCreatedAtDesc()
-                    : challengeRepository.findAllActiveByJobOrderByCreatedAtDesc(finalJob);
+                    ? challengeRepository.findAllByOrderByLikeCountDescCreatedAtDesc()
+                    : challengeRepository.findAllByJobOrderByLikeCountDescCreatedAtDesc(finalJob);
         } else if (finalSort == SortType.OLDEST) {
             challenges = (finalJob == UserJobs.NONE)
-                    ? challengeRepository.findAllActiveOrderByCreatedAtAsc()
-                    : challengeRepository.findAllActiveByJobOrderByCreatedAtAsc(finalJob);
+                    ? challengeRepository.findAllByOrderByCreatedAtAsc()
+                    : challengeRepository.findAllByJobOrderByCreatedAtAsc(finalJob);
         } else { // RECENT
             challenges = (finalJob == UserJobs.NONE)
-                    ? challengeRepository.findAllActiveOrderByLikeCountDesc()
-                    : challengeRepository.findAllActiveByJobOrderByLikeCountDesc(finalJob);
+                    ? challengeRepository.findAllByOrderByCreatedAtDesc()
+                    : challengeRepository.findAllByJobOrderByCreatedAtDesc(finalJob);
         }
 
         return challenges.stream()
                 .map(ch -> {
                     ChallengeListDTO dto = new ChallengeListDTO(ch);
-                    // 현재 참여인원 계산
-                    dto.setCurrentPersonnel((long) ch.getChallengeUsers().size());
+
+                    // 참여여부 체크
+                    boolean isJoined = ch.getChallengeUsers().stream()
+                            .anyMatch(cu -> cu.getUser().getId().equals(user.getId()));
+                    dto.setJoined(isJoined);
+
+                    // 참여한 경우에만 roomId 세팅
+                    if (isJoined) {
+                        chatRoomsRepository.findByChallenge(ch)
+                                .ifPresent(cr -> dto.setRoomId(cr.getRoomId()));
+                    }
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -131,8 +149,9 @@ public class ChallengeService {
     public LikeResponseDTO toggleLike(Long id) {
         // user 정보 가져오기 (baarer token에서 추출)
         Users user = authenticatedUserUtils.getCurrentUser();
-        Challenges challenges = challengeRepository.findById(id)
-                .orElseThrow(() -> new ChallengeNotFoundException("해당 챌린지를 찾을 수 없습니다."));
+        Challenges challenges = challengeRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(() -> new ChallengeNotFoundException("해당 챌린지 방을 찾을 수 없습니다."));
+
         // 좋아요 여부 판별
         Optional<ChallengeLikes> existing = likeRepository.findByUserAndChallenges(user, challenges);
         boolean liked;
@@ -155,38 +174,55 @@ public class ChallengeService {
     }
 
     public Challenges findById(Long id) {
-        Challenges challenges = challengeRepository.findById(id)
-                .filter(c -> c.getDeletedAt() == null)
+        Challenges challenges = challengeRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ChallengeNotFoundException("해당 챌린지방을 찾을 수 없습니다."));
         return challenges;
     }
 
-    public boolean isLikedByUser(Challenges challenges) {
+    public ChallengeDetailResponse getChallenge(Long id) {
+        Challenges challenges = findById(id);
         // user 정보 가져오기 (baarer token에서 추출)
         Users user = authenticatedUserUtils.getCurrentUser();
-        return likeRepository.findByUserAndChallenges(userRepository.findById(user.getId())
+
+        boolean isLiked = isLikedByUser(challenges, user);
+
+
+        ChallengeDetailResponse challengeDetailResponse = ChallengeDetailResponse.fromEntity(challenges, isLiked);
+
+        // 작성자이기 때문에 참여
+        challengeDetailResponse.setJoined(true);
+
+        chatRoomsRepository.findByChallenge(challenges)
+                .ifPresent(cr -> challengeDetailResponse.setRoomId(cr.getRoomId()));
+        return challengeDetailResponse;
+    }
+
+    public boolean isLikedByUser(Challenges challenges, Users user) {
+        boolean isLiked = likeRepository.findByUserAndChallenges(userRepository.findById(user.getId())
                 .orElseThrow(), challenges).isPresent();
+        return isLiked;
     }
 
     @Transactional
-    public Challenges update(Long id, ChallengeCreate dto) {
-        Challenges challenges = findById(id);
+    public ChallengeDetailResponse update(Long id, ChallengeCreate request) {
+        Challenges challenges = challengeRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(() -> new ChallengeNotFoundException("해당 챌린지 방을 찾을 수 없습니다."));
         // user 정보 가져오기 (bearer token에서 추출)
         Users user = authenticatedUserUtils.getCurrentUser();
 
         // 수정하는 사람이 작성자인지 확인
         if (!challenges.getCreatedBy().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("작성자가 아니면 수정할 수 없습니다.");
+            throw new NotChallengeOwnerException("챌린지 방에 관한 권한이 없습니다.");
         }
 
-        challenges.setTitle(dto.getTitle());
-        challenges.setImage(dto.getImage());
-        challenges.setGoal(dto.getGoal());
-        challenges.setJob(dto.getJob());
-        challenges.setMaxPersonnel(dto.getMaxPersonnel());
+        challenges.setTitle(request.getTitle());
+        challenges.setImage(request.getImage());
+        challenges.setGoal(request.getGoal());
+        challenges.setJob(request.getJob());
+        challenges.setMaxPersonnel(request.getMaxPersonnel());
 
         // 해시태그 수정
-        if (dto.getHashtags() != null) {
+        if (request.getHashtags() != null) {
             // 기존 연결된 해시태그 가져오기
             List<ChallengeHashtag> existingRelations =
                     challengeHashtagRepository.findByChallenge(challenges);
@@ -197,7 +233,7 @@ public class ChallengeService {
                     .collect(Collectors.toSet());
 
             // 새로 들어온 해시태그 이름 목록
-            Set<String> newNames = new HashSet<>(dto.getHashtags());
+            Set<String> newNames = new HashSet<>(request.getHashtags());
 
             // 삭제해야 할 해시태그 관계 (기존에 있었지만 새 목록에 없는 것)
             List<ChallengeHashtag> relationsToDelete = existingRelations.stream()
@@ -233,44 +269,48 @@ public class ChallengeService {
                 challengeHashtagRepository.saveAll(newRelations);
             }
         }
-        return challenges;
+        boolean isLiked = isLikedByUser(challenges, user);
+        ChallengeDetailResponse challengeDetailResponse = ChallengeDetailResponse.fromEntity(challenges, isLiked);
+
+        // 작성자이기 때문에 참여
+        challengeDetailResponse.setJoined(true);
+
+        chatRoomsRepository.findByChallenge(challenges)
+                .ifPresent(cr -> challengeDetailResponse.setRoomId(cr.getRoomId()));
+        return challengeDetailResponse;
     }
 
     public void delete(Long id) {
-        Challenges challenges = findById(id);
+        Challenges challenges = challengeRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(() -> new ChallengeNotFoundException("해당 챌린지방을 찾을 수 없습니다."));
         // user 정보 가져오기 (bearer token에서 추출)
         Users user = authenticatedUserUtils.getCurrentUser();
         // 작성자인지 확인
         if (!challenges.getCreatedBy().getId().equals(user.getId())) {
-            throw new IllegalArgumentException("작성자가 아니면 삭제할 수 없습니다.");
+            throw new NotChallengeOwnerException("챌린지 방에 관한 권한이 없습니다.");
         }
         challenges.setDeletedAt(LocalDateTime.now());
         challengeRepository.save(challenges);
     }
 
-    public List<ChallengeListDTO> searchChallenge(String hashtag, String keyword) {
-        boolean isHashtagEmpty = (hashtag == null || hashtag.isBlank());
-        boolean isKeywordEmpty = (keyword == null || keyword.isBlank());
-
-        List<Challenges> challenges;
-        if (!isHashtagEmpty && !isKeywordEmpty) {
-            // 해시태그+제목 검색
-            challenges = challengeRepository.searchByHashtagAndKeyword(hashtag, keyword);
-        } else if (!isHashtagEmpty) {
-            // 해시태그만 검색
-            challenges = challengeRepository.findByHashtagNameContaining(hashtag);
-        } else if (!isKeywordEmpty) {
-            // 제목만 검색
-            challenges = challengeRepository.findByTitleContaining(keyword);
-        } else {
-            throw new IllegalArgumentException("잘못된 검색입니다.(제목, 해시태그 입력없음)");
-        }
-
+    public List<ChallengeListDTO> searchChallenge(String hashtag, String keyword, SortType sortType, UserJobs userJobs) {
+        Users user = authenticatedUserUtils.getCurrentUser();
+        List<Challenges> challenges = challengeRepository.searchDynamic(hashtag, keyword, sortType, userJobs);
         return challenges.stream()
                 .map(ch -> {
                     ChallengeListDTO dto = new ChallengeListDTO(ch);
-                    // 현재 참여인원 계산
-                    dto.setCurrentPersonnel((long) ch.getChallengeUsers().size());
+
+
+                    // 참여여부 체크
+                    boolean isJoined = ch.getChallengeUsers().stream()
+                            .anyMatch(cu -> cu.getUser().getId().equals(user.getId()));
+                    dto.setJoined(isJoined);
+
+                    // 참여한 경우에만 roomId 세팅
+                    if (isJoined) {
+                        chatRoomsRepository.findByChallenge(ch)
+                                .ifPresent(cr -> dto.setRoomId(cr.getRoomId()));
+                    }
                     return dto;
                 })
                 .collect(Collectors.toList());
@@ -288,7 +328,8 @@ public class ChallengeService {
         if (isAlreadyJoined) {
             throw new AlreadyJoinedException("이미 참여한 챌린지입니다.");
         }
-        int currentParticipants = challengeUsersRepository.countByChallengeId(id);
+
+        int currentParticipants = challengeUsersRepository.countByChallenge_IdAndChallenge_DeletedAtIsNull(id);
         if (currentParticipants >= challenge.getMaxPersonnel()) {
             throw new ChallengeFullException("참여 인원이 가득 찼습니다.");
         }
@@ -299,6 +340,8 @@ public class ChallengeService {
                 .joinedAt(LocalDateTime.now())
                 .build();
 
+        chatService.enterChatRoom(challenge, user);
+
         challengeUsersRepository.save(join);
     }
 
@@ -307,9 +350,19 @@ public class ChallengeService {
         Users user = authenticatedUserUtils.getCurrentUser();
 
         List<ChallengeUsers> joined = challengeUsersRepository.findByUserId(user.getId());
-        // ChallengeListDTO로 매핑
+
         return joined.stream()
-                .map(cu -> new ChallengeListDTO(cu.getChallenge()))
+                .map(cu -> {
+                    Challenges challenge = cu.getChallenge();
+                    ChallengeListDTO dto = new ChallengeListDTO(challenge);
+
+
+                    dto.setJoined(true);
+                    // roomId 세팅
+                    chatRoomsRepository.findByChallenge(challenge)
+                            .ifPresent(cr -> dto.setRoomId(cr.getRoomId()));
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -320,10 +373,24 @@ public class ChallengeService {
         // 유저가 좋아요한 챌린지 목록
         List<ChallengeLikes> likes = likeRepository.findAllByUserOrderByCreatedAtDesc(user);
 
-        // dto 변환
+
         return likes.stream()
-                .map(like -> new ChallengeListDTO(like.getChallenges()))
-                .toList();
+                .map(like -> {
+                    Challenges challenge = like.getChallenges();
+                    ChallengeListDTO dto = new ChallengeListDTO(challenge);
+                    // 현재 참여 여부
+                    boolean isJoined = challenge.getChallengeUsers().stream()
+                            .anyMatch(cu -> cu.getUser().getId().equals(user.getId()));
+                    dto.setJoined(isJoined);
+
+                    if (isJoined) {
+                        chatRoomsRepository.findByChallenge(challenge)
+                                .ifPresent(cr -> dto.setRoomId(cr.getRoomId()));
+                    }
+
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
 }
