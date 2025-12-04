@@ -11,15 +11,12 @@ import Capstone.capstoneProject.entity.Comments;
 import Capstone.capstoneProject.entity.UserProfile;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.enums.SortType;
-import Capstone.capstoneProject.enums.UserJobs;
 import Capstone.capstoneProject.enums.UserRole;
 import Capstone.capstoneProject.exceptions.PasswordMismatchException;
 import Capstone.capstoneProject.repository.*;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.annotations.SecondaryRow;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

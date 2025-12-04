@@ -53,6 +53,9 @@ public class CustomOauth2UserDetails implements UserDetails, OAuth2User {
         return user.getPassword();
     }
 
+
+    public Users getUser() { return user; }
+
     // 이메일로 분류
     @Override
     public String getUsername() {

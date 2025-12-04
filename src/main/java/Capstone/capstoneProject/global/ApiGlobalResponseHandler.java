@@ -83,6 +83,12 @@ public class ApiGlobalResponseHandler {
                 .body(ApiResponse.error("해당 댓글을 찾을 수 없습니다."));
     }
 
+    @ExceptionHandler(NotChallengeOwnerException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotChallengeOwnerException(NotChallengeOwnerException e) {
+        return ResponseEntity.status(403)
+                .body(ApiResponse.error("해당 챌린지방에 관한 권한이 없습니다."));
+    }
+
     @ExceptionHandler(NotCommentOwnerException.class)
     public ResponseEntity<ApiResponse<Void>> handleNotCommentOwnerException(NotCommentOwnerException e) {
         return ResponseEntity.status(403)
@@ -101,5 +107,37 @@ public class ApiGlobalResponseHandler {
         return ResponseEntity.status(500)
                 .body(ApiResponse.error("영수증 AI 호출에 실패했습니다."));
     }
+
+    // 챌린지 방 채팅방 참가자가 아닐 때 예외처리
+    @ExceptionHandler(ChatRoomAccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleChatRoomAccessDeniedException(ChatRoomAccessDeniedException e) {
+        return ResponseEntity.status(403)
+                .body(ApiResponse.error("해당 채팅방에 관한 권한이 없습니다."));
+    }
+
+    // 챌린지방 채팅방이 없을 때 예외처리
+    @ExceptionHandler(ChatRoomNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleChatRoomNotFoundException(ChatRoomNotFoundException e) {
+        return ResponseEntity.status(404)
+                .body(ApiResponse.error("해당 채팅방을 찾을 수 없습니다."));
+    }
+
+
+    // 챌린지 방 참가자가 아닐 때 예외처리
+    @ExceptionHandler(ChallengeAccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleChallengeAccessDeniedException(ChallengeAccessDeniedException e) {
+        return ResponseEntity.status(403)
+                .body(ApiResponse.error("챌린지방 참가자가 아닙니다."));
+    }
+
+
+
+    // jwt 토큰이 없거나 인증 실패
+    @ExceptionHandler(InvalidJwtAuthenticationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidJwtAuthenticationException(InvalidJwtAuthenticationException e) {
+        return ResponseEntity.status(403)
+                .body(ApiResponse.error("jwt 토큰이 없거나 유효하지 않습니다."));
+    }
+
 
 }

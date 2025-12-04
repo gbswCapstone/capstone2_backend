@@ -1,7 +1,6 @@
 package Capstone.capstoneProject.security;
 
 import Capstone.capstoneProject.entity.Users;
-import Capstone.capstoneProject.exceptions.UserNotFoundException;
 import Capstone.capstoneProject.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -9,10 +8,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class
-CustomSecurityUserDetails implements UserDetailsService {
+public class CustomSecurityUserDetails implements UserDetailsService {
 
     private final UserRepository userRepository;
+
 
     public CustomSecurityUserDetails(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -28,11 +27,7 @@ CustomSecurityUserDetails implements UserDetailsService {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())
                 .password(user.getPassword())
-                .authorities(user.getRole().toString())
+                .roles(user.getRole().toString())
                 .build();
-    }
-    Users user;
-    public Users getUser() {
-        return user;
     }
 }
