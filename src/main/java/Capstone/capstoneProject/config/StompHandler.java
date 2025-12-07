@@ -1,9 +1,15 @@
 package Capstone.capstoneProject.config;
 
 import Capstone.capstoneProject.dto.Chats.ChatMessageDTO;
+import Capstone.capstoneProject.entity.Chats.ChatMessages;
+import Capstone.capstoneProject.entity.Chats.ChatRoomUsers;
+import Capstone.capstoneProject.entity.Chats.ChatRooms;
 import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.enums.MessageType;
 import Capstone.capstoneProject.exceptions.ChatRoomAccessDeniedException;
+import Capstone.capstoneProject.repository.ChatMessagesRepository;
 import Capstone.capstoneProject.repository.ChatRoomUsersRepository;
+import Capstone.capstoneProject.repository.ChatRoomsRepository;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
@@ -21,6 +27,8 @@ public class StompHandler implements ChannelInterceptor {
     private final AuthenticatedUserUtils authenticatedUserUtils;
     private final ChatRoomUsersRepository chatRoomUsersRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final ChatMessagesRepository chatMessagesRepository;
+    private final ChatRoomsRepository chatRoomsRepository;
 
 
     @Override
@@ -32,40 +40,74 @@ public class StompHandler implements ChannelInterceptor {
         if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
 
             String destination = accessor.getDestination();
-            Long roomId = extractRoomId(destination);
+            String roomId = extractRoomId(destination);
 
             Users user = authenticatedUserUtils.getCurrentUser();
 
             // 유저가 해당 채팅방 멤버인지 검증
-            chatRoomUsersRepository.findByChatRoomsIdAndUsersId(roomId, user.getId())
+            ChatRoomUsers chatRoomUser = chatRoomUsersRepository
+                    .findByChatRooms_RoomIdAndUsers(roomId, user)
                     .orElseThrow(() -> new ChatRoomAccessDeniedException("방 참가자가 아닙니다."));
 
+            ChatRooms chatRoom = chatRoomUser.getChatRooms();
             // 입장 메시지 전송
-            ChatMessageDTO enterMessage =
-                    ChatMessageDTO.enter(roomId, user.getProfile().getNickname());
+            ChatMessages enterEntity = ChatMessages.builder()
+                    .chatRooms(chatRoom)
+                    .users(user)
+                    .messageType(MessageType.ENTER)
+                    .content(user.getProfile().getNickname() + "님이 입장했습니다.")
+                    .build();
+
+            enterEntity = chatMessagesRepository.save(enterEntity);
+
+
+            ChatMessageDTO enterMessage = ChatMessageDTO.from(enterEntity);
+
 
             messagingTemplate.convertAndSend("/sub/chat/room/" + roomId, enterMessage);
+
+            // 세션에 roomId 저장 (DISCONNECT에서 사용)
+            accessor.getSessionAttributes().put("roomId", roomId);
+            accessor.getSessionAttributes().put("user", user);
         }
 
         // 방 나감
         if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
 
             Users user = (Users) accessor.getSessionAttributes().get("user");
-            Long roomId = (Long) accessor.getSessionAttributes().get("roomId");
+            String roomId = (String) accessor.getSessionAttributes().get("roomId");
             if (user != null && roomId != null) {
-                ChatMessageDTO leaveMessage =
-                        ChatMessageDTO.leave(roomId, user);
 
-                messagingTemplate.convertAndSend("/sub/chat/room/" + roomId, leaveMessage);
+
+                ChatRooms chatRoom = chatRoomsRepository
+                        .findByRoomId(roomId)
+                        .orElse(null);
+
+                if (chatRoom != null) {
+
+                    ChatMessages leaveEntity = ChatMessages.builder()
+                            .chatRooms(chatRoom)
+                            .users(user)
+                            .messageType(MessageType.LEAVE)
+                            .content(user.getProfile().getNickname() + "님이 퇴장했습니다.")
+                            .build();
+
+                    leaveEntity = chatMessagesRepository.save(leaveEntity);
+
+                    ChatMessageDTO leaveMessage = ChatMessageDTO.from(leaveEntity);
+
+                    messagingTemplate.convertAndSend("/sub/chat/room/" + roomId, leaveMessage);
+                }
             }
         }
 
         return message;
     }
 
-    private Long extractRoomId(String destination) {
-        return Long.parseLong(destination.split("/room/")[1]);
-        // 만약 /sub/chat/room/10 -> 10 추출
+
+    private String extractRoomId(String destination) {
+        return destination.split("/room/")[1];
     }
+
 
 }
