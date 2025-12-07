@@ -36,6 +36,21 @@ public class ChatService {
         return chatRoomsRepository.save(chatRooms);
     }
 
+    public void enterChatRoom(Challenges challenges, Users user) {
+        ChatRooms chatRooms = chatRoomsRepository.findByChallenge(challenges)
+                .orElseThrow(() -> new ChatRoomNotFoundException("해당 채팅방을 찾을 수 없습니다."));
+
+//         채팅방 참여자 등록
+        chatRoomUsersRepository.findByChatRoomsAndUsers(chatRooms, user)
+                .orElseGet(() -> {
+                    ChatRoomUsers chatRoomUsers = ChatRoomUsers.builder()
+                            .chatRooms(chatRooms)
+                            .users(user)
+                            .build();
+                    return chatRoomUsersRepository.save(chatRoomUsers);
+                });
+    }
+
 
 
 }
