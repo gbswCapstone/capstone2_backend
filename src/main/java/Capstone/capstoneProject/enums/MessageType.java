@@ -9,5 +9,7 @@ public enum MessageType {
     MISSION,       // 미션  메시지
     NOTICE,        // 공지 메시지
     EXPENSE_SHARE, // 지출 공유 메시지
-    SYSTEM         // 시스템 메시지 (입장/퇴장)
+    ENTER,
+    LEAVE,
+    SYSTEM         // 기타 시스템 메시지
 }
