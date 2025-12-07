@@ -4,15 +4,17 @@ import Capstone.capstoneProject.dto.Usages.*;
 import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.enums.HistoryType;
-import Capstone.capstoneProject.enums.PresetType;
+import Capstone.capstoneProject.enums.UsageSortType;
+import Capstone.capstoneProject.exceptions.ConflictingSearchCriteriaException;
+import Capstone.capstoneProject.exceptions.InvalidDateRangeException;
 import Capstone.capstoneProject.exceptions.ReceiptAiServerException;
+import Capstone.capstoneProject.exceptions.WeekNotInMonthException;
 import Capstone.capstoneProject.repository.UsageHistoryRepository;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -20,8 +22,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 
 @Service
 @RequiredArgsConstructor
@@ -151,44 +151,173 @@ public class UsageService {
     }
 
 
-
-
-
-    public List<UsageResponse> getUsageList(UsageSearchTypeDTO typeDTO) {
+    public List<UsageResponse> getUsageList(UsageSearchTypeDTO dto, UsageSortType usageSortType) {
         Users user = authenticatedUserUtils.getCurrentUser();
 
-        // type 처리 (OUTLAY, IMCOME, ALL)
-        HistoryType type = typeDTO.getType();
-        if (type == HistoryType.ALL) type = null;
+        boolean hasPreset = dto.getPresetType() != null;
+        boolean hasCustomDates = dto.getStartDate() != null || dto.getEndDate() != null;
 
-        LocalDate start = typeDTO.getStartDate();
-        LocalDate end = typeDTO.getEndDate();
+        boolean hasYMW = dto.getYear() != null || dto.getMonth() != null || dto.getWeek() != null;
 
+        int activeGroupCount = 0;
+        if (hasPreset) activeGroupCount++;
+        if (hasCustomDates) activeGroupCount++;
+        if (hasYMW) activeGroupCount++;
 
-        if (typeDTO.getPresetType() == PresetType.TODAY) {
-            start = LocalDate.now();
-            end = LocalDate.now();
-        } else if (typeDTO.getPresetType() == PresetType.THIS_WEEK) {
-            LocalDate now = LocalDate.now();
-            start = now.with(DayOfWeek.MONDAY);
-            end = now.with(DayOfWeek.SUNDAY);
+        // 검색 조건 그룹(Preset, 커스텀 날짜, 연/월/주) 중복 선택 시 예외 처리
+        if (activeGroupCount > 1) {
+            throw new ConflictingSearchCriteriaException("검색 조건(간편조회타입, (시작날짜, 끝날짜), 연/월/주)은 하나만 선택해야 합니다.");
         }
-        // year/month
-        if (typeDTO.getYear() != null && typeDTO.getMonth() != null) {
-            start = LocalDate.of(typeDTO.getYear(), typeDTO.getMonth(), 1);
+
+        HistoryType type = (dto.getType() == HistoryType.ALL) ? null : dto.getType();
+        LocalDate start = null;
+        LocalDate end = null;
+
+        if (dto.getPresetType() != null) {
+            switch (dto.getPresetType()) {
+                case TODAY:
+                    start = LocalDate.now();
+                    end = LocalDate.now();
+                    break;
+
+                case THIS_WEEK:
+                    LocalDate now = LocalDate.now();
+                    start = now.with(DayOfWeek.MONDAY);
+                    end = now.with(DayOfWeek.SUNDAY);
+                    break;
+
+                case THIS_MONTH:
+                    LocalDate m = LocalDate.now();
+                    start = m.withDayOfMonth(1);
+                    end = m.withDayOfMonth(m.lengthOfMonth());
+                    break;
+            }
+        }
+
+        else if (dto.getYear() != null && dto.getMonth() != null && dto.getWeek() != null) {
+            // 월별 주차 처리
+            int year = dto.getYear();
+            int month = dto.getMonth();
+            int week = dto.getWeek();
+
+            LocalDate monthStart = LocalDate.of(year, month, 1);
+            int monthLength = monthStart.lengthOfMonth();
+
+            int startDay = (week - 1) * 7 + 1;
+            int endDay = week * 7;
+
+            // 주차 예외처리
+            if (startDay > monthLength) {
+                throw new WeekNotInMonthException("해당 월(" + year + "년 " + month + "월)에는 요청한 주차(" + week + "주차)가 존재하지 않습니다.");
+            }
+
+            if (endDay > monthLength) {
+                endDay = monthLength;
+            }
+
+            start = LocalDate.of(year, month, startDay);
+            end = LocalDate.of(year, month, endDay);
+        }
+
+        else if (dto.getMonth() != null && dto.getWeek() != null) {
+            int year = LocalDate.now().getYear(); // 현재 연도
+            int month = dto.getMonth();
+            int week = dto.getWeek();
+
+            LocalDate monthStart = LocalDate.of(year, month, 1);
+            int monthLength = monthStart.lengthOfMonth();
+
+            int startDay = (week - 1) * 7 + 1;
+            int endDay = week * 7;
+
+            if (startDay > monthLength) {
+                throw new WeekNotInMonthException(
+                        "해당 월(" + year + "년 " + month + "월)에는 요청한 주차(" + week + "주차)가 존재하지 않습니다."
+                );
+            }
+
+            if (endDay > monthLength) endDay = monthLength;
+
+            start = LocalDate.of(year, month, startDay);
+            end = LocalDate.of(year, month, endDay);
+        }
+
+        else if (dto.getWeek() != null) {
+
+            int year = LocalDate.now().getYear();
+            int month = LocalDate.now().getMonthValue();
+            int week = dto.getWeek();
+
+
+            LocalDate monthStart = LocalDate.of(year, month, 1);
+            int monthLength = monthStart.lengthOfMonth();
+
+            int startDay = (week - 1) * 7 + 1;
+            int endDay = week * 7;
+
+            if (startDay > monthLength) {
+                throw new WeekNotInMonthException("이번 달(" + year + "년 " + month + "월)에는 요청한 주차(" + week + "주차)가 존재하지 않습니다.");
+            }
+
+            if (endDay > monthLength) {
+                endDay = monthLength;
+            }
+            start = LocalDate.of(year, month, startDay);
+            end = LocalDate.of(year, month, endDay);
+        }
+
+        else if (dto.getYear() != null && dto.getMonth() != null) {
+            start = LocalDate.of(dto.getYear(), dto.getMonth(), 1);
             end = start.withDayOfMonth(start.lengthOfMonth());
-        } else if (typeDTO.getYear() != null) {
-            start = LocalDate.of(typeDTO.getYear(), 1, 1);
-            end = LocalDate.of(typeDTO.getYear(), 12, 31);
+        }
+        else if (dto.getMonth() != null) {
+            int currentYear = LocalDate.now().getYear();
+            start = LocalDate.of(currentYear, dto.getMonth(), 1);
+            end = start.withDayOfMonth(start.lengthOfMonth());
+        }
+        else if (dto.getYear() != null) {
+            start = LocalDate.of(dto.getYear(), 1, 1);
+            end = LocalDate.of(dto.getYear(), 12, 31);
+        }
+        else {
+            start = dto.getStartDate();
+            end = dto.getEndDate();
+
+            // start만 오면 startDate 이후의 날짜로 처리
+            if (start != null && end == null) {
+                end = LocalDate.now();
+            }
+            // end만 오면 endDate 이전의 날짜로 처리
+            else if (start == null && end != null) {
+                start = LocalDate.of(2000, 1, 1); // 충분히 먼 과거
+            }
+
+            // 유효성 검사: 시작일이 종료일보다 늦으면 예외 처리
+            if (start != null && end != null && start.isAfter(end)) {
+                throw new InvalidDateRangeException("시작 날짜는 종료 날짜보다 늦을 수 없습니다.");
+            }
         }
 
-        // 기본값 보정
-        if (start == null) start = LocalDate.of(2000,1,1);
-        if (end == null) end = LocalDate.now();
+        // 아무 값도 없으면 최근 1개월 조회
+        if (start == null && end == null) {
+            end = LocalDate.now();
+            start = end.minusMonths(1);
+        }
 
-
-        // 조회 (Repository가 LocalDate 파라미터 받아야함)
-        List<UsageHistory> list = usageHistoryRepository.findByUserAndTypeDTO(user, type, start, end.plusDays(1));
+        else {
+            if (start == null) start = LocalDate.of(2000, 1, 1);
+            if (end == null) end = LocalDate.now();
+        }
+        if (usageSortType == null) {
+            usageSortType = UsageSortType.RECENT;
+        }
+        List<UsageHistory> list = usageHistoryRepository.searchDynamic(
+                user.getId(),
+                type,
+                start,
+                end,
+                usageSortType
+        );
 
         return list.stream().map(UsageResponse::new).toList();
     }

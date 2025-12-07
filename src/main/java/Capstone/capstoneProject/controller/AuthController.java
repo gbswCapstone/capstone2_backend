@@ -4,6 +4,7 @@ import Capstone.capstoneProject.dto.*;
 import Capstone.capstoneProject.global.ApiResponse;
 import Capstone.capstoneProject.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,15 +17,19 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @Operation(summary = "로그인", description = "일반 로그인 시 사용하는 API 입니다.")
+
     @PostMapping("api/auth/login")
+    @Operation(summary = "로그인", description = "일반 로그인 시 사용하는 API 입니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200", description = "요청 성공"
             ), @io.swagger.v3.oas.annotations.responses.ApiResponse(
-            responseCode = "401", description = "비밀번호가 일치하지 않습니다."),
+            responseCode = "401", description = "비밀번호가 일치하지 않습니다.",
+            content = @Content
+            ),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404", description = "계정이 존재하지 않습니다."
+                    responseCode = "404", description = "계정이 존재하지 않습니다.",
+                    content = @Content
             )
     })
     public ResponseEntity<ApiResponse<TokenResponse>> login(@RequestBody LoginRequest request) {
@@ -38,9 +43,11 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200", description = "요청 성공"
             ), @io.swagger.v3.oas.annotations.responses.ApiResponse(
-            responseCode = "403", description = "유효하지 않은 리프레시 토큰 입니다."),
+            responseCode = "403", description = "유효하지 않은 리프레시 토큰 입니다.",
+            content = @Content),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "404", description = "계정이 존재하지 않습니다."
+                    responseCode = "404", description = "계정이 존재하지 않습니다.",
+                    content = @Content
             )
     })
     @PostMapping("api/auth/auto-login")
@@ -55,7 +62,8 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200", description = "요청 성공"
             ), @io.swagger.v3.oas.annotations.responses.ApiResponse(
-            responseCode = "401", description = "로그인이 필요합니다.")
+            responseCode = "401", description = "로그인이 필요합니다.",
+            content = @Content)
     })
     public ResponseEntity<ApiResponse<Void>> logout() {
         authService.logOut();

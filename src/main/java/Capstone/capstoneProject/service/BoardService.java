@@ -261,7 +261,7 @@ public class BoardService {
 
         if (isLiked) {
             BoardLikes boardLikes = boardLikeRepository.findByUsersAndBoardsAndBoards_DeletedAtIsNull(user, board)
-                    .orElseThrow(() -> new IllegalArgumentException("데이터 불일치 오류"));
+                    .orElseThrow(() -> new BoardLikeNotFoundException("해당 게시글의 좋아요 데이터가 존재하지 않습니다."));
 
             boardLikeRepository.delete(boardLikes);
             board.setLikeCount(board.getLikeCount() - 1);

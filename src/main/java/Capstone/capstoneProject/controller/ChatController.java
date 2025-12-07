@@ -18,7 +18,7 @@ public class ChatController {
     private final ChatService chatService;
 
     @PostMapping("/sub/chat/room/{roomId}")
-    @Operation(summary = "챌린지 채팅방 구독", description = "챌린지 채팅방 구독 시 사용하는 API 입니다.")
+    @Operation(summary = "챌린지 채팅방 연결", description = "챌린지 채팅방 연결 시 사용하는 API 입니다.")
     public String chatSubcribe() {
         return "Swagger 표시용 엔드포인트입니다.";
     }

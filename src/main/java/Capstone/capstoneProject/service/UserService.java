@@ -4,15 +4,19 @@ import Capstone.capstoneProject.dto.*;
 import Capstone.capstoneProject.dto.Boards.BoardImageDTO;
 import Capstone.capstoneProject.dto.Boards.BoardLikesDTO;
 import Capstone.capstoneProject.dto.Boards.BoardListDTO;
+import Capstone.capstoneProject.dto.Challenges.ChallengeListDTO;
 import Capstone.capstoneProject.dto.Comments.CommentListDTO;
 import Capstone.capstoneProject.entity.Boards.BoardLikes;
 import Capstone.capstoneProject.entity.Boards.Boards;
 import Capstone.capstoneProject.entity.Comments;
 import Capstone.capstoneProject.entity.UserProfile;
 import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.challenges.ChallengeLikes;
+import Capstone.capstoneProject.entity.challenges.Challenges;
 import Capstone.capstoneProject.enums.SortType;
 import Capstone.capstoneProject.enums.UserRole;
 import Capstone.capstoneProject.exceptions.PasswordMismatchException;
+import Capstone.capstoneProject.exceptions.UserAlreadyExistsException;
 import Capstone.capstoneProject.repository.*;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import jakarta.transaction.Transactional;
@@ -35,11 +39,13 @@ public class UserService {
     private final BoardLikeRepository boardLikeRepository;
     private final BoardRepository boardRepository;
     private final CommentRepository commentRepository;
+    private final LikeRepository likeRepository;
+    private final ChatRoomsRepository chatRoomsRepository;
 
     //회원가입
     public void signup(SecuritySignupRequest request) {
         if(userRepository.findByEmailAndDeletedAtIsNull(request.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 계정입니다.");
+            throw new UserAlreadyExistsException("이미 존재하는 계정입니다.");
         }
         if (!request.getPassword().equals(request.getPasswordCheck())) {
             throw new IllegalArgumentException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
@@ -211,5 +217,32 @@ public class UserService {
             comments = commentRepository.findByUsersOrderByCreatedAtDesc(user);
         }
         return CommentListDTO.fromComments(comments, user);
+    }
+
+    // 내가 좋아요한 챌린지방 조회
+    public List<ChallengeListDTO> getMyLikeChallengeList() {
+        // user 정보 가져오기 (baarer token에서 추출)
+        Users user = authenticatedUserUtils.getCurrentUser();
+        // 유저가 좋아요한 챌린지 목록
+        List<ChallengeLikes> likes = likeRepository.findAllByUserOrderByCreatedAtDesc(user);
+
+
+        return likes.stream()
+                .map(like -> {
+                    Challenges challenge = like.getChallenges();
+                    ChallengeListDTO dto = new ChallengeListDTO(challenge);
+                    // 현재 참여 여부
+                    boolean isJoined = challenge.getChallengeUsers().stream()
+                            .anyMatch(cu -> cu.getUser().getId().equals(user.getId()));
+                    dto.setJoined(isJoined);
+
+                    if (isJoined) {
+                        chatRoomsRepository.findByChallenge(challenge)
+                                .ifPresent(cr -> dto.setRoomId(cr.getRoomId()));
+                    }
+
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 }
