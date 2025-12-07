@@ -30,10 +30,9 @@ public class ChatController {
     }
 
 //    @GetMapping("api/chat/rooms/{roomId}/messages")
-//    @Operation(summary = "챌린지 채팅방 메시지 조회",
-//            description = ""
-//    )
-
+////    @Operation(summary = "챌린지 채팅방 메시지 조회",
+////            description = ""
+////    )
 
 
 }
