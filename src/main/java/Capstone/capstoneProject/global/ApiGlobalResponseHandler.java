@@ -4,6 +4,8 @@ import Capstone.capstoneProject.exceptions.*;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -52,6 +54,56 @@ public class ApiGlobalResponseHandler {
         return ResponseEntity.status(404)
                 .body(ApiResponse.error("해당 챌린지방을 찾을 수 없습니다."));
     }
+
+    // 이미 사용자 계정이 있을 때
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUserAlreadyExistsException(UserAlreadyExistsException e) {
+        return ResponseEntity.status(409)
+                .body(ApiResponse.error("이미 존재하는 계정입니다."));
+    }
+
+    // 해당 월에 요청하느 주차가 없을 때
+    @ExceptionHandler(WeekNotInMonthException.class)
+    public ResponseEntity<ApiResponse<Void>> handleWeekNotInMonthException(WeekNotInMonthException e) {
+        return ResponseEntity.status(400)
+                .body(ApiResponse.error("해당 월에 요청하는 주차가 없습니다."));
+    }
+
+    // 검색 조건이 서로 충돌
+    @ExceptionHandler(ConflictingSearchCriteriaException.class)
+    public ResponseEntity<ApiResponse<Void>> handleConflictingSearchCriteriaException(ConflictingSearchCriteriaException e) {
+        return ResponseEntity.status(400)
+                .body(ApiResponse.error("검색 조건(Preset, 커스텀 날짜, 연/월/주)은 하나만 선택해야 합니다."));
+    }
+
+    // 시작날짜를 끝날짜 보다 늦은 날짜인 경우
+    @ExceptionHandler(InvalidDateRangeException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidDateRangeException(InvalidDateRangeException e) {
+        return ResponseEntity.status(400)
+                .body(ApiResponse.error("시작 날짜는 종료 날짜보다 늦을 수 없습니다."));
+    }
+
+    // @Min, @Max 예외처리
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        String errorMessage = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(FieldError::getDefaultMessage)
+                .findFirst()
+                .orElse("입력 값이 올바르지 않습니다.");
+
+        return ResponseEntity.badRequest().body(ApiResponse.error(errorMessage));
+    }
+
+    // 게시글 좋아요 불일치 오류
+    @ExceptionHandler(BoardLikeNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBoardLikeNotFoundException(BoardLikeNotFoundException e) {
+        return ResponseEntity.status(404)
+                .body(ApiResponse.error("해당 게시글의 좋아요 데이터가 존재하지 않습니다."));
+    }
+
+
 
     @ExceptionHandler(AlreadyBoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleAlreadyBoundException(AlreadyBoundException e) {

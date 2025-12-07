@@ -366,32 +366,7 @@ public class ChallengeService {
                 .collect(Collectors.toList());
     }
 
-    // 내가 좋아요한 챌린지방 조회
-    public List<ChallengeListDTO> getMyLikeChallengeList() {
-        // user 정보 가져오기 (baarer token에서 추출)
-        Users user = authenticatedUserUtils.getCurrentUser();
-        // 유저가 좋아요한 챌린지 목록
-        List<ChallengeLikes> likes = likeRepository.findAllByUserOrderByCreatedAtDesc(user);
 
-
-        return likes.stream()
-                .map(like -> {
-                    Challenges challenge = like.getChallenges();
-                    ChallengeListDTO dto = new ChallengeListDTO(challenge);
-                    // 현재 참여 여부
-                    boolean isJoined = challenge.getChallengeUsers().stream()
-                            .anyMatch(cu -> cu.getUser().getId().equals(user.getId()));
-                    dto.setJoined(isJoined);
-
-                    if (isJoined) {
-                        chatRoomsRepository.findByChallenge(challenge)
-                                .ifPresent(cr -> dto.setRoomId(cr.getRoomId()));
-                    }
-
-                    return dto;
-                })
-                .collect(Collectors.toList());
-    }
 
 }
 

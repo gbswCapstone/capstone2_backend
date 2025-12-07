@@ -1,7 +1,6 @@
 package Capstone.capstoneProject.dto.Challenges;
 
 import Capstone.capstoneProject.enums.UserJobs;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 

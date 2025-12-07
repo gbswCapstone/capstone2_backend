@@ -10,9 +10,6 @@ import java.util.Optional;
 
 public interface AuthTokenRepository extends JpaRepository<AuthToken, Long> {
 
-    // 유저로 refresh token 조회
-    Optional<AuthToken> findByUser(Users user);
-
     // 유저의 기존 토큰 삭제
     void deleteByUser(Users user);
 
