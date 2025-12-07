@@ -70,7 +70,7 @@ public class UsageController {
 
 
     @GetMapping
-    @Operation(summary = "사용내역 조회", description = "사용내역 조회 시 사용하는 API 입니다.")
+    @Operation(summary = "사용내역 조회", description = "사용내역 조회 시 사용하는 API 입니다.\n검색 조건(간편조회타입, (시작날짜, 끝날짜), 연/월/주)은 하나만 선택해야 합니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200", description = "요청 성공"

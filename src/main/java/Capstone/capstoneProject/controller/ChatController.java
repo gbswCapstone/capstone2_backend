@@ -29,12 +29,11 @@ public class ChatController {
         return "Swagger 표시용 엔드포인트입니다.";
     }
 
-    //    @PostMapping("/{challengeId}/chat/enter")
-//    @Operation(summary = "챌린지 채팅방 입장", description = "챌린지 채팅방 입장 시 사용하는 API 입니다.")
-//    public ResponseEntity<ApiResponse<ChatRoomEnterResponse>> enterChatRoom(@PathVariable Long challengeId) {
-//        ChatRoomEnterResponse result = chatService.enterChatRoom(challengeId);
-//        return ResponseEntity.ok(ApiResponse.ok(result, "입장하였습니다."));
-//    }
+//    @GetMapping("api/chat/rooms/{roomId}/messages")
+//    @Operation(summary = "챌린지 채팅방 메시지 조회",
+//            description = ""
+//    )
+
 
 
 }
