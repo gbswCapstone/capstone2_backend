@@ -36,50 +36,6 @@ public class ChatService {
         return chatRoomsRepository.save(chatRooms);
     }
 
-    public void enterChatRoom(Challenges challenges, Users user) {
-        ChatRooms chatRooms = chatRoomsRepository.findByChallenge(challenges)
-                .orElseThrow(() -> new ChatRoomNotFoundException("해당 채팅방을 찾을 수 없습니다."));
 
-//         채팅방 참여자 등록
-        chatRoomUsersRepository.findByChatRoomsAndUsers(chatRooms, user)
-                .orElseGet(() -> {
-                    ChatRoomUsers chatRoomUsers = ChatRoomUsers.builder()
-                            .chatRooms(chatRooms)
-                            .users(user)
-                            .build();
-                    return chatRoomUsersRepository.save(chatRoomUsers);
-                });
-    }
-
-//    public ChatRoomEnterResponse enterChatRoom(Long challengeId) {
-//        Users user = authenticatedUserUtils.getCurrentUser();
-//
-//        Challenges challenges = challengeRepository.findByIdAndDeletedAtIsNull(challengeId)
-//                .orElseThrow(() -> new ChallengeNotFoundException("챌린지방을 찾을 수 없습니다."));
-//
-//        // 챌린지 참여자인지 확인
-//        boolean isParticipant = challenges.getChallengeUsers().stream()
-//                .anyMatch(cu -> cu.getUser().getId().equals(user.getId()));
-//        if (!isParticipant) {
-//            throw new ChallengeAccessDeniedException("챌린지방 참가자가 아닙니다.");
-//        }
-//
-//        // 채팅방 조회
-//        ChatRooms chatRooms = chatRoomsRepository.findByChallenge(challenges)
-//                .orElseThrow(() -> new ChatRoomNotFoundException("해당 채팅방을 찾을 수 없습니다."));
-//
-//        // 채팅방 참여자 등록
-//        chatRoomUsersRepository.findByChatRoomsAndUsers(chatRooms, user)
-//                .orElseGet(() -> {
-//                    ChatRoomUsers chatRoomUsers = ChatRoomUsers.builder()
-//                            .chatRooms(chatRooms)
-//                            .users(user)
-//                            .build();
-//                    return chatRoomUsersRepository.save(chatRoomUsers);
-//                });
-//
-//        // roomId 반환 (클라이언트는 이걸로 webSocket 구독)
-//        return ResponseEntity.ok(new ChatRoomEnterResponse(chatRooms.getRoomId()));
-//    }
 
 }
