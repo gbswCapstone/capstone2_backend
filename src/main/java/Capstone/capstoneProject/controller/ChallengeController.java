@@ -3,6 +3,7 @@ package Capstone.capstoneProject.controller;
 import Capstone.capstoneProject.dto.*;
 import Capstone.capstoneProject.dto.Challenges.ChallengeCreate;
 import Capstone.capstoneProject.dto.Challenges.ChallengeDetailResponse;
+import Capstone.capstoneProject.dto.Challenges.ChallengeJoinResponse;
 import Capstone.capstoneProject.dto.Challenges.ChallengeListDTO;
 import Capstone.capstoneProject.enums.SortType;
 import Capstone.capstoneProject.enums.UserJobs;
@@ -246,11 +247,11 @@ public class ChallengeController {
                     )
             }
     )
-    public ResponseEntity<ApiResponse<Void>> joinChallenge(
+    public ResponseEntity<ApiResponse<ChallengeJoinResponse>> joinChallenge(
             @PathVariable Long id
     ) {
-        challengeService.joinChallenge(id);
-        return ResponseEntity.ok(ApiResponse.ok());
+        ChallengeJoinResponse result = challengeService.joinChallenge(id);
+        return ResponseEntity.ok(ApiResponse.ok(result, "가입되었습니다."));
     }
 
     @GetMapping("/myChallenges")

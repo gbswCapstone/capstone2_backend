@@ -50,7 +50,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.ok(result, "삭제되었습니다."));
     }
 
-    @GetMapping("/profile")
+    @GetMapping("/my-profile")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200", description = "요청 성공"
@@ -63,6 +63,23 @@ public class UserController {
         UserResponseDTO result = userService.getMyProfile();
         return ResponseEntity.ok(ApiResponse.ok(result));
     }
+
+    @GetMapping("/profile/{userId}")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200", description = "요청 성공"
+            ), @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404", description = "존재하지 않는 유저입니다.",
+            content = @Content),
+                @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "403", description = "로그인이 필요합니다.",
+            content = @Content)
+    })
+    public ResponseEntity<ApiResponse<UserSummaryDTO>> getProfile(@PathVariable Long userId) {
+        UserSummaryDTO result = userService.getProfile(userId);
+        return ResponseEntity.ok(ApiResponse.ok(result, "조회되었습니다."));
+    }
+
 
     @PutMapping("/profile")
     @ApiResponses(value = {
