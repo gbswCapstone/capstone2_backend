@@ -7,6 +7,7 @@ import Capstone.capstoneProject.service.UsageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -91,5 +92,24 @@ public class UsageController {
             List<UsageResponse> result = usageService.getUsageList(typeDTO, usageSortType);
             return ResponseEntity.ok(ApiResponse.ok(result, "조회되었습니다."));
     }
+
+
+    @GetMapping("/summary")
+    @Operation(summary = "유저 소비습관 분석 요약", description = "유저의 앱내에서의 전체기간 사용내역 요약 조회 API 입니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200", description = "요청 성공"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401", description = "로그인이 필요합니다.",
+                    content = @Content(schema = @Schema(implementation = UsageSummaryResponse.class)))
+    })
+    public ResponseEntity<ApiResponse<UsageSummaryResponse>> getUsageSummary() {
+        UsageSummaryResponse result = usageService.getUsageSummary();
+        return ResponseEntity.ok(ApiResponse.ok(result, "조회되었습니다."));
+    }
+
+
+
 
 }

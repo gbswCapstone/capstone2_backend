@@ -36,6 +36,9 @@ public class UserMissions {
     @Enumerated(EnumType.STRING)
     private MissionStatusType missionStatusType;
 
+    @Column(name="progressPercentage")
+    private int progressPercentage;
+
     @Column(name="completed_at")
     private LocalDateTime completedAt;
 

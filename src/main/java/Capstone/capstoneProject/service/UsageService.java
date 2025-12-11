@@ -4,6 +4,8 @@ import Capstone.capstoneProject.dto.Usages.*;
 import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.enums.HistoryType;
+import Capstone.capstoneProject.enums.IncomeCategory;
+import Capstone.capstoneProject.enums.OutlayCategory;
 import Capstone.capstoneProject.enums.UsageSortType;
 import Capstone.capstoneProject.exceptions.ConflictingSearchCriteriaException;
 import Capstone.capstoneProject.exceptions.InvalidDateRangeException;
@@ -11,7 +13,10 @@ import Capstone.capstoneProject.exceptions.ReceiptAiServerException;
 import Capstone.capstoneProject.exceptions.WeekNotInMonthException;
 import Capstone.capstoneProject.repository.UsageHistoryRepository;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -20,11 +25,13 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UsageService {
     private final AuthenticatedUserUtils authenticatedUserUtils;
     private final UsageHistoryRepository usageHistoryRepository;
@@ -36,7 +43,7 @@ public class UsageService {
         Users user = authenticatedUserUtils.getCurrentUser();
 
         // 외부 AI 서버로 importer 전송
-        String url = "http://13.125.64.51:8080/income/income";
+        String url = "http://13.125.64.51:8080/income";
         Map<String, String> requestBody = Map.of("income_name", request.getImporter());
         ResponseEntity<Map> response = restTemplate.postForEntity(url, requestBody, Map.class);
         // 응답에서 category 추출
@@ -71,7 +78,7 @@ public class UsageService {
         Users user = authenticatedUserUtils.getCurrentUser();
 
         // 외부 AI 서버로 productName 전송
-        String url = "http://13.125.64.51:8080/category/category";
+        String url = "http://13.125.64.51:8080/category";
         Map<String, String> requestBody = Map.of("product_name", request.getProductName());
         ResponseEntity<Map> response = restTemplate.postForEntity(url, requestBody, Map.class);
         // 응답에서 category 추출
@@ -321,6 +328,101 @@ public class UsageService {
 
         return list.stream().map(UsageResponse::new).toList();
     }
+
+    public UsageSummaryResponse getUsageSummary() {
+        Users user = authenticatedUserUtils.getCurrentUser();
+        Pageable pageable = PageRequest.of(0, 1);
+        // 총지출, 총수입 가격
+        Integer totalOutlay = usageHistoryRepository.sumOutlayByUser(user.getId(), pageable).get(0);
+        Integer totalIncome = usageHistoryRepository.sumIncomeByUser(user.getId(), pageable).get(0);
+
+        // 가장 수량 많은 카테고리
+        String topOutlayCategory = usageHistoryRepository.findTopCategoryByOutlay(user.getId(), pageable).get(0);
+        String topIncomeCategory = usageHistoryRepository.findLeastCategoryByOutlay(user.getId(), pageable).get(0);
+
+        // 가장 수량 적은 카테고리
+        String leastOutlayCategory = findLeastOutlayCategory(user.getId());
+        String leastIncomeCategory = findLeastIncomeCategory(user.getId());
+//        String leastOutlayCategory = usageHistoryRepository.findTopCategoryByIncome(user.getId(), pageable).get(0);
+//        String leastIncomeCategory = usageHistoryRepository.findLeastCategoryByIncome(user.getId(), pageable).get(0);
+        
+        // 가장 많은 지출&수입 이름(수량기준)
+        String mostOutlayItemName = usageHistoryRepository.findMostOutlayItemName(user.getId(), pageable).get(0);
+        String topIncomeImporter = usageHistoryRepository.findtopIncomeImporter(user.getId(), pageable).get(0);
+        
+        // 가장 비싼 지출&수입 이름(가격기준)
+        String highestOutlayItemName = usageHistoryRepository.findHighestOutlayItemName(user.getId(), pageable).get(0);
+        String highestIncomeImporter = usageHistoryRepository.findhighestIncomeImporter(user.getId(), pageable).get(0);
+        
+        return UsageSummaryResponse.builder()
+                .totalOutlay(totalOutlay)
+                .totalIncome(totalIncome)
+                .topOutlayCategory(topOutlayCategory)
+                .topIncomeCategory(topIncomeCategory)
+                .leastOutlayCategory(leastOutlayCategory)
+                .leastIncomeCategory(leastIncomeCategory)
+                .mostOutlayItemName(mostOutlayItemName)
+                .topIncomeImporter(topIncomeImporter)
+                .highestOutlayItemName(highestOutlayItemName)
+                .highestIncomeImporter(highestIncomeImporter)
+                .build();
+    }
+
+    public String findLeastOutlayCategory(Long userId) {
+
+        // DB에서 실제 등장한 카테고리 count 가져오기
+        List<Object[]> results = usageHistoryRepository.countOutlayCategory(userId);
+
+        // Map<카테고리, 카운트>
+        Map<OutlayCategory, Long> countMap = new HashMap<>();
+
+        // DB 결과 넣기
+        for (Object[] row : results) {
+            OutlayCategory category = (OutlayCategory) row[0];
+            Long count = (Long) row[1];
+            countMap.put(category, count);
+        }
+
+        OutlayCategory leastCategory = null;
+        Long minCount = Long.MAX_VALUE;
+
+        for (OutlayCategory category : OutlayCategory.values()) {
+            Long count = countMap.getOrDefault(category, 0L);
+            if (count < minCount) {
+                minCount = count;
+                leastCategory = category;
+            }
+        }
+
+        return leastCategory.name();
+    }
+
+    public String findLeastIncomeCategory(Long userId) {
+
+        List<Object[]> results = usageHistoryRepository.countIncomeCategory(userId);
+
+        Map<IncomeCategory, Long> countMap = new HashMap<>();
+
+        for (Object[] row : results) {
+            IncomeCategory category = (IncomeCategory) row[0];
+            Long count = (Long) row[1];
+            countMap.put(category, count);
+        }
+
+        IncomeCategory leastCategory = null;
+        Long minCount = Long.MAX_VALUE;
+
+        for (IncomeCategory category : IncomeCategory.values()) {
+            Long count = countMap.getOrDefault(category, 0L);
+            if (count < minCount) {
+                minCount = count;
+                leastCategory = category;
+            }
+        }
+
+        return leastCategory.name();
+    }
+
 
 
 

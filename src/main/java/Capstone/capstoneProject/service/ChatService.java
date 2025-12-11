@@ -1,6 +1,7 @@
 package Capstone.capstoneProject.service;
 
 import Capstone.capstoneProject.dto.Chats.ChatMessageDTO;
+import Capstone.capstoneProject.dto.Chats.MessageSendRequest;
 import Capstone.capstoneProject.entity.Chats.ChatMessages;
 import Capstone.capstoneProject.entity.Chats.ChatRoomUsers;
 import Capstone.capstoneProject.entity.Chats.ChatRooms;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,6 +31,7 @@ public class ChatService {
     private final ChatRoomUsersRepository chatRoomUsersRepository;
     private final ChatMessagesRepository chatMessagesRepository;
     private final AuthenticatedUserUtils authenticatedUserUtils;
+    private final SimpMessagingTemplate messagingTemplate;
 
 
     public ChatRooms createRoom(Challenges challenges) {
@@ -69,7 +72,29 @@ public class ChatService {
                 .stream()
                 .map(ChatMessageDTO::from)
                 .collect(Collectors.toList());
+    }
 
+    public void sendMessage(MessageSendRequest request) {
+        Users user = authenticatedUserUtils.getCurrentUser();
+
+        ChatRooms chatRoom = chatRoomsRepository.findByRoomId(request.getRoomId())
+                .orElseThrow(() -> new ChatRoomNotFoundException("해당 채팅방이 없습니다."));
+
+        ChatMessages chatMessages = ChatMessages.builder()
+                .users(user)
+                .chatRooms(chatRoom)
+                .messageType(request.getMessageType())
+                .content(request.getContent())
+                .build();
+        chatMessagesRepository.save(chatMessages);
+
+        ChatMessageDTO dto = ChatMessageDTO.from(chatMessages);
+
+        // 메시지 전송
+        messagingTemplate.convertAndSend(
+                "/sub/chat/room/" + request.getRoomId(),
+                dto
+        );
     }
 
 

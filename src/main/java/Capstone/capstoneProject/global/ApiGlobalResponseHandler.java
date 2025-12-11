@@ -105,8 +105,8 @@ public class ApiGlobalResponseHandler {
 
 
 
-    @ExceptionHandler(AlreadyBoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleAlreadyBoundException(AlreadyBoundException e) {
+    @ExceptionHandler(AlreadyJoinedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAlreadyJoinedException(AlreadyJoinedException e) {
         return ResponseEntity.status(409)
                 .body(ApiResponse.error("이미 참여한 챌린지입니다."));
     }

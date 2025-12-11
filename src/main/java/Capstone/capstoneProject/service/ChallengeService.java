@@ -2,6 +2,7 @@ package Capstone.capstoneProject.service;
 
 import Capstone.capstoneProject.dto.Challenges.ChallengeCreate;
 import Capstone.capstoneProject.dto.Challenges.ChallengeDetailResponse;
+import Capstone.capstoneProject.dto.Challenges.ChallengeJoinResponse;
 import Capstone.capstoneProject.dto.Challenges.ChallengeListDTO;
 import Capstone.capstoneProject.dto.LikeResponseDTO;
 import Capstone.capstoneProject.entity.Chats.ChatRoomUsers;
@@ -10,10 +11,7 @@ import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.entity.challenges.*;
 import Capstone.capstoneProject.enums.SortType;
 import Capstone.capstoneProject.enums.UserJobs;
-import Capstone.capstoneProject.exceptions.AlreadyJoinedException;
-import Capstone.capstoneProject.exceptions.ChallengeFullException;
-import Capstone.capstoneProject.exceptions.ChallengeNotFoundException;
-import Capstone.capstoneProject.exceptions.NotChallengeOwnerException;
+import Capstone.capstoneProject.exceptions.*;
 import Capstone.capstoneProject.repository.*;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import jakarta.transaction.Transactional;
@@ -316,7 +314,7 @@ public class ChallengeService {
                 .collect(Collectors.toList());
     }
 
-    public void joinChallenge(Long id) {
+    public ChallengeJoinResponse joinChallenge(Long id) {
         Challenges challenge = challengeRepository.findById(id)
                 .orElseThrow(() -> new ChallengeNotFoundException("챌린지를 찾을 수 없습니다."));
 
@@ -343,6 +341,12 @@ public class ChallengeService {
         chatService.enterChatRoom(challenge, user);
 
         challengeUsersRepository.save(join);
+
+        ChatRooms chatRooms = chatRoomsRepository.findByChallenge(challenge)
+                .orElseThrow(() -> new ChatRoomNotFoundException("해당 채팅방을 찾을 수 없습니다."));
+        return ChallengeJoinResponse.builder()
+                .roomId(chatRooms.getRoomId())
+                .build();
     }
 
     public List<ChallengeListDTO> myChallengeList () {

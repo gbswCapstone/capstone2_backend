@@ -17,6 +17,7 @@ import Capstone.capstoneProject.enums.SortType;
 import Capstone.capstoneProject.enums.UserRole;
 import Capstone.capstoneProject.exceptions.PasswordMismatchException;
 import Capstone.capstoneProject.exceptions.UserAlreadyExistsException;
+import Capstone.capstoneProject.exceptions.UserNotFoundException;
 import Capstone.capstoneProject.repository.*;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import jakarta.transaction.Transactional;
@@ -200,6 +201,12 @@ public class UserService {
                     .image(BoardImageDTO.from(board))
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    public UserSummaryDTO getProfile(Long userId) {
+        Users user = userRepository.findByIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new UserNotFoundException("존재하지 않는 유저입니다."));
+        return UserSummaryDTO.from(user);
     }
 
     public List<CommentListDTO> getMyComments(SortType sortType) {
