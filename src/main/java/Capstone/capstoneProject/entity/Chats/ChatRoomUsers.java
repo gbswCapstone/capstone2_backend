@@ -1,6 +1,7 @@
 package Capstone.capstoneProject.entity.Chats;
 
 import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.enums.ChatRoomRole;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -36,4 +37,8 @@ public class ChatRoomUsers {
 
     @Column(name="deleted_at")
     private LocalDateTime deletedAt;
+
+    @Column(name="chat_room_role", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ChatRoomRole chatRoomRole;
 }

@@ -1,7 +1,8 @@
 package Capstone.capstoneProject.dto.Chats;
 
+import Capstone.capstoneProject.dto.Usages.UsageShareDTO;
 import Capstone.capstoneProject.entity.Chats.ChatMessages;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.enums.MessageType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,31 +10,118 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class ChatMessageDTO {
+
+
     private Long id; // 메시지 아이디
     private String roomId;        // 채팅방 ID
     private Long senderId;      // 메시지 보낸 사용자 ID
     private String senderName;  // 닉네임
     private MessageType messageType;
-    private String content;
+    private String content; // 사용내역 공유시 사용안함
+    private UsageShareDTO usageShareDTO; // 사용내역 공유 시 사용함
+    private List<String> imageUrls; // 이미지 전용
     private LocalDateTime createdAt;
     private String profileImg;
+    private boolean isDeleted; // 삭제여부
 
-    public static ChatMessageDTO from(ChatMessages chatMessages) {
+    private static ChatMessageDTOBuilder base(ChatMessages message) {
         return ChatMessageDTO.builder()
-                .id(chatMessages.getId())
-                .roomId(chatMessages.getChatRooms().getRoomId())
-                .senderId(chatMessages.getUsers().getId())
-                .senderName(chatMessages.getUsers().getProfile().getNickname())
-                .messageType(chatMessages.getMessageType())
-                .content(chatMessages.getContent())
-                .createdAt(chatMessages.getCreatedAt())
-                .profileImg(chatMessages.getUsers().getProfile().getProfileImg())
+                .id(message.getId())
+                .roomId(message.getChatRooms().getRoomId())
+                .senderId(message.getUsers().getId())
+                .senderName(message.getUsers().getProfile().getNickname())
+                .messageType(message.getMessageType())
+                .createdAt(message.getCreatedAt())
+                .profileImg(message.getUsers().getProfile().getProfileImg())
+                .isDeleted(message.getIsDeleted());
+    }
+
+    // 모든 채팅 메시지 타입 조회
+    public static ChatMessageDTO from(
+            ChatMessages message,
+            UsageHistory usageHistory,
+            List<String> imageUrls
+    ) {
+        ChatMessageDTO dto = ChatMessageDTO.base(message).build();
+
+        if (message.getIsDeleted()) {
+            dto.setContent("삭제된 메시지입니다.");
+            return dto;
+        }
+
+        return switch (message.getMessageType()) {
+            case IMAGE -> dto.toBuilder()
+                    .imageUrls(imageUrls)
+                    .build();
+
+            case USAGE_SHARE -> dto.toBuilder()
+                    .usageShareDTO(UsageShareDTO.from(usageHistory))
+                    .build();
+
+            default -> dto.toBuilder()
+                    .content(message.getContent())
+                    .build();
+        };
+    }
+
+    public static ChatMessageDTO deleted(ChatMessages message) {
+        return base(message)
+                .content("삭제된 메시지입니다.")
                 .build();
     }
+
+    public static ChatMessageDTO baseFrom(ChatMessages message) {
+        return ChatMessageDTO.builder()
+                .id(message.getId())
+                .roomId(message.getChatRooms().getRoomId())
+                .senderId(message.getUsers().getId())
+                .senderName(message.getUsers().getProfile().getNickname())
+                .messageType(message.getMessageType())
+                .createdAt(message.getCreatedAt())
+                .profileImg(message.getUsers().getProfile().getProfileImg())
+                .isDeleted(message.getIsDeleted())
+                .build();
+    }
+
+
+
+    public static ChatMessageDTO text(ChatMessages message) {
+        if (message.getIsDeleted()) {
+            return base(message).build();
+        }
+
+        return base(message)
+                .content(message.getContent())
+                .build();
+    }
+
+    public static ChatMessageDTO image(ChatMessages message, List<String> imageUrls) {
+        if (message.getIsDeleted()) {
+            return base(message).build();
+        }
+
+        return base(message)
+                .imageUrls(imageUrls)
+                .build();
+    }
+
+
+    public static ChatMessageDTO usageShare(ChatMessages message, UsageHistory usageHistory) {
+        if (message.getIsDeleted()) {
+            return base(message).build();
+        }
+
+        return base(message)
+                .usageShareDTO(UsageShareDTO.from(usageHistory))
+                .build();
+    }
+
+
 }

@@ -44,6 +44,9 @@ public class ChatRooms {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
+    @Column(name="deleted_at")
+    private LocalDateTime deletedAt;
+
     // 관계
     @OneToMany(mappedBy = "chatRooms")
     private List<ChatMessages> messages = new ArrayList<>();

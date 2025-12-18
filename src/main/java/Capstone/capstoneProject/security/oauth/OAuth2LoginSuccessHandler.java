@@ -4,7 +4,7 @@ import Capstone.capstoneProject.global.ApiResponse;
 import Capstone.capstoneProject.dto.TokenResponse;
 import Capstone.capstoneProject.entity.AuthToken;
 import Capstone.capstoneProject.entity.Users;
-import Capstone.capstoneProject.exceptions.UserNotFoundException;
+import Capstone.capstoneProject.exceptions.notfound.UserNotFoundException;
 import Capstone.capstoneProject.repository.AuthTokenRepository;
 import Capstone.capstoneProject.repository.UserRepository;
 import Capstone.capstoneProject.security.JwtTokenProvider;

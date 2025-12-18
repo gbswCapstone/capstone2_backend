@@ -1,10 +1,8 @@
 package Capstone.capstoneProject.security;
 
 import Capstone.capstoneProject.entity.Users;
-import Capstone.capstoneProject.exceptions.UserNotFoundException;
 import Capstone.capstoneProject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 @Component

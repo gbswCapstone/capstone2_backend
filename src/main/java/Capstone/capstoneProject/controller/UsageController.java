@@ -63,10 +63,28 @@ public class UsageController {
             responseCode = "401", description = "로그인이 필요합니다.",
             content = @Content)
     })
-    public ResponseEntity<ApiResponse<List<UsageResponse>>> plusReceiptOutlay
+    public ResponseEntity<ApiResponse<ReceiptResponse>> plusReceiptOutlay
             (@RequestBody ReceiptRequest request) {
-        List<UsageResponse> result = usageService.plusReceiptOutlay(request);
+        ReceiptResponse result = usageService.plusReceiptOutlay(request);
         return ResponseEntity.ok(ApiResponse.ok(result, "추가되었습니다."));
+    }
+
+    @PutMapping("/receipt")
+    @Operation(summary = "영수증 수정", description = "영수증 수정 시 사용하는 API 입니다.")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200", description = "요청 성공"
+            ), @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404", description = "해당 지출내역이 존재하지 않습니다.",
+            content = @Content
+    ),  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401", description = "로그인이 필요합니다.",
+            content = @Content)
+    })
+    public ResponseEntity<ApiResponse<ReceiptResponse>> patchReceiptOutlay
+            (@RequestBody ReceiptPatchRequest request) {
+        ReceiptResponse result = usageService.patchReceiptOutlay(request);
+        return ResponseEntity.ok(ApiResponse.ok(result, "수정되었습니다."));
     }
 
 

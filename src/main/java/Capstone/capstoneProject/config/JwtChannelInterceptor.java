@@ -1,10 +1,9 @@
 package Capstone.capstoneProject.config;
 
 import Capstone.capstoneProject.entity.Users;
-import Capstone.capstoneProject.exceptions.InvalidJwtAuthenticationException;
-import Capstone.capstoneProject.exceptions.UserNotFoundException;
+import Capstone.capstoneProject.exceptions.forbidden.InvalidJwtAuthenticationException;
+import Capstone.capstoneProject.exceptions.notfound.UserNotFoundException;
 import Capstone.capstoneProject.repository.UserRepository;
-import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import Capstone.capstoneProject.security.CustomSecurityUserDetails;
 import Capstone.capstoneProject.security.JwtTokenProvider;
 import Capstone.capstoneProject.security.oauth.CustomOauth2UserDetails;
@@ -18,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.security.Principal;
 import java.util.Map;
 
 @Component
@@ -27,7 +27,6 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
     private final CustomSecurityUserDetails customSecurityUserDetails;
-    private final AuthenticatedUserUtils authenticatedUserUtils;
 
     private static final String AUTH_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
@@ -39,6 +38,9 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
         // CONNECT 요청 처리
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             String token = extractToken(accessor);
+            if (token == null) {
+                token = (String) accessor.getSessionAttributes().get("token");
+            }
 
             if (token == null || !jwtTokenProvider.validateToken(token)) {
                 throw new InvalidJwtAuthenticationException("JWT 토큰이 없거나 유효하지 않습니다.");
@@ -55,15 +57,39 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                 userDetails = customSecurityUserDetails.loadUserByUsername(username);
             }
 
-            Users user = authenticatedUserUtils.getCurrentUser();
+            Users user = userRepository.findByEmailAndDeletedAtIsNull(username)
+                    .orElseThrow(() -> new UserNotFoundException("유저를 찾을 수 없습니다."));
+
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
             accessor.setUser(authenticationToken);
+
+            // send에서 인증될 수 있도록 세션에 저장
+            accessor.getSessionAttributes().put("userPrincipal", authenticationToken);
 
             // 세션에 사용자 정보 저장
             accessor.getSessionAttributes().put("user", user);
-            accessor.getSessionAttributes().put("nickname", user.getProfile().getNickname());
-            accessor.getSessionAttributes().put("roomId", accessor.getFirstNativeHeader("roomId"));
+            String nickname = user.getProfile() != null
+                    ? user.getProfile().getNickname()
+                    : null;
+            accessor.getSessionAttributes().put("nickname", nickname);
+            String roomId = accessor.getFirstNativeHeader("roomId");
+            if (roomId != null) {
+                accessor.getSessionAttributes().put("roomId", roomId);
+            }
+        }
+
+        if (StompCommand.SEND.equals(accessor.getCommand())) {
+
+            // principal 이 null 이면 세션에서 복구
+            if (accessor.getUser() == null) {
+                Object saved = accessor.getSessionAttributes().get("userPrincipal");
+
+                if (saved instanceof Principal savedUser) {
+                    accessor.setUser(savedUser);
+                }
+            }
         }
 
         return message;

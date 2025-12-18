@@ -65,6 +65,7 @@ public class UserController {
     }
 
     @GetMapping("/profile/{userId}")
+    @Operation(summary = "프로필 조회", description = "프로필 조회 시 사용하는 API 입니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200", description = "요청 성공"
