@@ -31,9 +31,6 @@ public class ChatNotices {
     @JoinColumn(name="chat_room_id", nullable = false)
     private ChatRooms chatRooms;
 
-    @Column(name="title", nullable = false)
-    private String title;
-
     @Column(name="content", columnDefinition = "TEXT")
     private String content;
 

@@ -2,6 +2,7 @@ package Capstone.capstoneProject.entity;
 
 
 import Capstone.capstoneProject.enums.HistoryType;
+import Capstone.capstoneProject.enums.UsageCategory;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -34,7 +35,8 @@ public class UsageHistory {
     private BigDecimal price;
 
     @Column(nullable = false)
-    private String category;
+    @Enumerated(EnumType.STRING)
+    private UsageCategory category;
 
     @Column(name="pro_date")
     private LocalDate proDate;
@@ -50,4 +52,10 @@ public class UsageHistory {
     @Enumerated(EnumType.STRING)
     private HistoryType historyType;
 
+    public void update(String name, BigDecimal price, UsageCategory category, int amount) {
+        this.name = name;
+        this.price = price;
+        this.category = category;
+        this.amount = amount;
+    }
 }

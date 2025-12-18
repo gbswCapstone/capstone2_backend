@@ -9,9 +9,16 @@ import Capstone.capstoneProject.entity.Chats.ChatRoomUsers;
 import Capstone.capstoneProject.entity.Chats.ChatRooms;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.entity.challenges.*;
+import Capstone.capstoneProject.enums.ChatRoomRole;
 import Capstone.capstoneProject.enums.SortType;
 import Capstone.capstoneProject.enums.UserJobs;
-import Capstone.capstoneProject.exceptions.*;
+import Capstone.capstoneProject.exceptions.conflict.AlreadyJoinedException;
+import Capstone.capstoneProject.exceptions.conflict.ChallengeFullException;
+import Capstone.capstoneProject.exceptions.forbidden.ChallengeAccessDeniedException;
+import Capstone.capstoneProject.exceptions.forbidden.ChatRoomAccessDeniedException;
+import Capstone.capstoneProject.exceptions.forbidden.NotChallengeOwnerException;
+import Capstone.capstoneProject.exceptions.notfound.ChallengeNotFoundException;
+import Capstone.capstoneProject.exceptions.notfound.ChatRoomNotFoundException;
 import Capstone.capstoneProject.repository.*;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import jakarta.transaction.Transactional;
@@ -33,9 +40,10 @@ public class ChallengeService {
     private final ChallengeUsersRepository challengeUsersRepository;
     private final LikeRepository likeRepository;
     private final UserRepository userRepository;
-    private final ChatService chatService;
+    private final ChallengeChatRoomService challengeChatRoomService;
     private final ChatRoomUsersRepository chatRoomUsersRepository;
     private final ChatRoomsRepository chatRoomsRepository;
+    private final ChallengeMessageService challengeMessageService;
 
 
     public ChallengeDetailResponse create(ChallengeCreate dto) {
@@ -53,7 +61,7 @@ public class ChallengeService {
         challengeRepository.save(challenge);
 
         // 챗방생성
-        ChatRooms chatRooms = chatService.createRoom(challenge);
+        ChatRooms chatRooms = challengeChatRoomService.createRoom(challenge);
 
         // 작성자를 자동 참여자로 추가
         ChallengeUsers challengeUser = ChallengeUsers.builder()
@@ -68,6 +76,7 @@ public class ChallengeService {
                 .chatRooms(chatRooms)
                 .users(user)
                 .createdAt(LocalDateTime.now())
+                .chatRoomRole(ChatRoomRole.HOST) // 작성자를 방장으로 추가
                 .build();
         chatRoomUsersRepository.save(chatRoomUser);
 
@@ -338,12 +347,16 @@ public class ChallengeService {
                 .joinedAt(LocalDateTime.now())
                 .build();
 
-        chatService.enterChatRoom(challenge, user);
+        challengeChatRoomService.enterChatRoom(challenge, user);
 
         challengeUsersRepository.save(join);
 
         ChatRooms chatRooms = chatRoomsRepository.findByChallenge(challenge)
                 .orElseThrow(() -> new ChatRoomNotFoundException("해당 채팅방을 찾을 수 없습니다."));
+
+        // 최초 입장 메시지 자동 전송
+        challengeMessageService.entreeSendMessage(chatRooms.getRoomId(), user);
+
         return ChallengeJoinResponse.builder()
                 .roomId(chatRooms.getRoomId())
                 .build();
@@ -368,6 +381,51 @@ public class ChallengeService {
                     return dto;
                 })
                 .collect(Collectors.toList());
+    }
+
+    public void exitChallenge(Long challengeId) {
+        Users user = authenticatedUserUtils.getCurrentUser();
+
+        Challenges challenges = challengeRepository.findByIdAndDeletedAtIsNull(challengeId)
+                .orElseThrow(() -> new ChallengeNotFoundException("해당 챌린지방을 찾을 수 없습니다."));
+
+        ChallengeUsers challengeUser = challengeUsersRepository
+                .findByChallengeIdAndUserId(challengeId, user.getId())
+                .orElseThrow(() -> new ChallengeAccessDeniedException("챌린지방 참가자가 아닙니다."));
+
+        challengeUsersRepository.delete(challengeUser);
+
+        ChatRooms chatRooms = chatRoomsRepository.findByChallenge(challenges)
+                .orElseThrow(() -> new ChatRoomNotFoundException("해당 채팅방을 찾을 수 없습니다."));
+
+        ChatRoomUsers chatRoomUsers = chatRoomUsersRepository.findByChatRooms_RoomIdAndUsers(chatRooms.getRoomId(), user)
+                        .orElseThrow(() -> new ChatRoomAccessDeniedException("해당 채팅방 유저가 아닙니다."));
+
+        // 남은 멤버 조회
+        List<ChatRoomUsers> remainUsers =
+                chatRoomUsersRepository
+                        .findByChatRooms_RoomIdAndUsersNotOrderByCreatedAtAsc(
+                                chatRooms.getRoomId(), user);
+
+        if (chatRoomUsers.getChatRoomRole() == ChatRoomRole.HOST) {
+
+            if (!remainUsers.isEmpty()) {
+                ChatRoomUsers newHost = remainUsers.get(0);
+                newHost.setChatRoomRole(ChatRoomRole.HOST);
+                chatRoomUsersRepository.save(newHost);
+            } else {
+                // 마지막 멤버 → 챌린지방 삭제
+                challenges.setDeletedAt(LocalDateTime.now());
+                chatRooms.setDeletedAt(LocalDateTime.now());
+                challengeRepository.save(challenges);
+                chatRoomsRepository.save(chatRooms);
+            }
+        }
+
+        chatRoomUsersRepository.delete(chatRoomUsers);
+
+        // 채팅방 나가는 메시지 전송
+        challengeMessageService.exitSendMessage(chatRooms.getRoomId(), user);
     }
 
 

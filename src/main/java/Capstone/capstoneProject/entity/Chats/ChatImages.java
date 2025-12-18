@@ -25,6 +25,9 @@ public class ChatImages {
     @JoinColumn(name="message_id", nullable = false)
     private ChatMessages chatMessages;
 
+    @Column(name="order_index", nullable = false)
+    private Integer orderIndex;
+
     @Column(name="image_url", nullable = false)
     private String imageUrl;
 

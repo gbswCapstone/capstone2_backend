@@ -3,14 +3,13 @@ package Capstone.capstoneProject.service;
 import Capstone.capstoneProject.dto.Usages.*;
 import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.entity.Users;
-import Capstone.capstoneProject.enums.HistoryType;
-import Capstone.capstoneProject.enums.IncomeCategory;
-import Capstone.capstoneProject.enums.OutlayCategory;
-import Capstone.capstoneProject.enums.UsageSortType;
-import Capstone.capstoneProject.exceptions.ConflictingSearchCriteriaException;
-import Capstone.capstoneProject.exceptions.InvalidDateRangeException;
-import Capstone.capstoneProject.exceptions.ReceiptAiServerException;
-import Capstone.capstoneProject.exceptions.WeekNotInMonthException;
+import Capstone.capstoneProject.enums.*;
+import Capstone.capstoneProject.exceptions.badRequest.ConflictingSearchCriteriaException;
+import Capstone.capstoneProject.exceptions.badRequest.InvalidDateRangeException;
+import Capstone.capstoneProject.exceptions.badRequest.InvalidQuantityException;
+import Capstone.capstoneProject.exceptions.badRequest.WeekNotInMonthException;
+import Capstone.capstoneProject.exceptions.notfound.UsageHistoryNotFoundException;
+import Capstone.capstoneProject.exceptions.serverError.ReceiptAiServerException;
 import Capstone.capstoneProject.repository.UsageHistoryRepository;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import jakarta.transaction.Transactional;
@@ -24,10 +23,9 @@ import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -41,16 +39,20 @@ public class UsageService {
     public UsageResponse plusIncomeHistory(IncomeRequest request) {
         // user 정보 가져오기 (baarer token에서 추출)
         Users user = authenticatedUserUtils.getCurrentUser();
+        if (request.getAmount()<=0) {
+            throw new InvalidQuantityException("수량은 최소 1개 이상이어야 합니다.");
+        }
 
         // 외부 AI 서버로 importer 전송
         String url = "http://13.125.64.51:8080/income";
         Map<String, String> requestBody = Map.of("income_name", request.getImporter());
         ResponseEntity<Map> response = restTemplate.postForEntity(url, requestBody, Map.class);
         // 응답에서 category 추출
-        String category = null;
+        String categoryStr = "";
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            category = (String) response.getBody().get("category");
+            categoryStr = (String) response.getBody().get("category");
         }
+        UsageCategory category = UsageCategory.valueOf(categoryStr);
         // 값이 안 오면 null
         LocalDate proDate = (request.getProDate() != null)
                 ? request.getProDate()
@@ -76,16 +78,20 @@ public class UsageService {
     public UsageResponse plusOutlayHistory(OutlayRequest request) {
         // user 정보 가져오기 (baarer token에서 추출)
         Users user = authenticatedUserUtils.getCurrentUser();
+        if (request.getAmount()<=0) {
+            throw new InvalidQuantityException("수량은 최소 1개 이상이어야 합니다.");
+        }
 
         // 외부 AI 서버로 productName 전송
         String url = "http://13.125.64.51:8080/category";
         Map<String, String> requestBody = Map.of("product_name", request.getProductName());
         ResponseEntity<Map> response = restTemplate.postForEntity(url, requestBody, Map.class);
         // 응답에서 category 추출
-        String category = null;
+        String categoryStr = "";
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-            category = (String) response.getBody().get("category");
+            categoryStr = (String) response.getBody().get("category");
         }
+        UsageCategory category = UsageCategory.valueOf(categoryStr);
         // 값이 안 오면 null
         LocalDate proDate = (request.getProDate() != null)
                 ? request.getProDate()
@@ -108,7 +114,7 @@ public class UsageService {
         return new UsageResponse(usageHistory);
     }
 
-    public List<UsageResponse> plusReceiptOutlay(ReceiptRequest request) {
+    public ReceiptResponse plusReceiptOutlay(ReceiptRequest request) {
         Users user = authenticatedUserUtils.getCurrentUser();
 
         String url = "http://13.125.64.51:8080/ocr/receipt";
@@ -123,19 +129,24 @@ public class UsageService {
             throw new ReceiptAiServerException("영수증 AI 서버 호출 실패");
         }
 
-        Map<String, Object> message = (Map<String, Object>) response.getBody().get("message");
-        List<Map<String, Object>> dataList = (List<Map<String, Object>>) message.get("data");
+        Map<String, Object> message =
+                (Map<String, Object>) response.getBody().get("message");
+        List<Map<String, Object>> dataList =
+                (List<Map<String, Object>>) message.get("data");
 
-        List<UsageResponse> usageList = new ArrayList<>();
+        List<ReceiptListDTO> usageList = new ArrayList<>();
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        LocalDate receiptDate = null;
 
         for (Map<String, Object> item : dataList) {
+
             BigDecimal price = new BigDecimal((String) item.get("price"));
             int amount = Integer.parseInt((String) item.get("quantity"));
             LocalDate proDate = LocalDate.parse((String) item.get("date"));
             String name = (String) item.get("productName");
-            String category = (String) item.get("category");
+            String categoryStr = (String) item.get("category");
+            UsageCategory category = UsageCategory.valueOf(categoryStr);
 
-            // 엔티티 저장
             UsageHistory usageHistory = UsageHistory.builder()
                     .users(user)
                     .name(name)
@@ -149,13 +160,62 @@ public class UsageService {
 
             UsageHistory savedHistory = usageHistoryRepository.save(usageHistory);
 
-            // 저장된 엔티티 기반 DTO 변환
-            UsageResponse usageResponse = new UsageResponse(savedHistory);
+            usageList.add(ReceiptListDTO.from(savedHistory));
 
-            usageList.add(usageResponse);
+            totalPrice = totalPrice.add(price);
+            receiptDate = proDate;
         }
-        return usageList;
+
+        return ReceiptResponse.builder()
+                .usageResponseList(usageList)
+                .totalPrice(totalPrice)
+                .proDate(receiptDate)
+                .build();
     }
+
+
+    public ReceiptResponse patchReceiptOutlay(ReceiptPatchRequest request) {
+        Users user = authenticatedUserUtils.getCurrentUser();
+
+        List<ReceiptListDTO> resultList = new ArrayList<>();
+        BigDecimal totalPrice = BigDecimal.ZERO;
+        LocalDate proDate = null;
+
+        for (ReceiptItemPatchDTO item : request.getItems()) {
+
+            UsageHistory usageHistory = usageHistoryRepository
+                    .findByIdAndUsers(item.getUsageHistoryId(), user)
+                    .orElseThrow(() -> new UsageHistoryNotFoundException("해당 지출 내역이 존재하지 않습니다."));
+
+            // id빼고 null처리 id는 필수 입력
+            String name = (item.getName() != null) ? item.getName() : usageHistory.getName();
+            BigDecimal price = (item.getPrice() != null) ? item.getPrice() : usageHistory.getPrice();
+            UsageCategory category = (item.getCategory() != null) ? item.getCategory() : usageHistory.getCategory();
+            Integer amount = (item.getAmount() != null) ? item.getAmount() : usageHistory.getAmount();
+
+            usageHistory.update(
+                    name,
+                    price,
+                    category,
+                    amount
+            );
+
+            UsageHistory saved = usageHistoryRepository.save(usageHistory);
+
+            resultList.add(ReceiptListDTO.from(saved));
+            totalPrice = totalPrice.add(saved.getPrice());
+            proDate = saved.getProDate();
+        }
+
+        return ReceiptResponse.builder()
+                .usageResponseList(resultList)
+                .totalPrice(totalPrice)
+                .proDate(proDate)
+                .build();
+    }
+
+
+
 
 
     public List<UsageResponse> getUsageList(UsageSearchTypeDTO dto, UsageSortType usageSortType) {
@@ -336,16 +396,14 @@ public class UsageService {
         Integer totalOutlay = usageHistoryRepository.sumOutlayByUser(user.getId(), pageable).get(0);
         Integer totalIncome = usageHistoryRepository.sumIncomeByUser(user.getId(), pageable).get(0);
 
-        // 가장 수량 많은 카테고리
-        String topOutlayCategory = usageHistoryRepository.findTopCategoryByOutlay(user.getId(), pageable).get(0);
-        String topIncomeCategory = usageHistoryRepository.findLeastCategoryByOutlay(user.getId(), pageable).get(0);
+        OutlayCategory topOutlayCategory = usageHistoryRepository.findTopCategoryByOutlay(user.getId(), pageable).get(0);
+        IncomeCategory topIncomeCategory = usageHistoryRepository.findTopCategoryByIncome(user.getId(), pageable).get(0);
 
-        // 가장 수량 적은 카테고리
-        String leastOutlayCategory = findLeastOutlayCategory(user.getId());
-        String leastIncomeCategory = findLeastIncomeCategory(user.getId());
-//        String leastOutlayCategory = usageHistoryRepository.findTopCategoryByIncome(user.getId(), pageable).get(0);
-//        String leastIncomeCategory = usageHistoryRepository.findLeastCategoryByIncome(user.getId(), pageable).get(0);
-        
+        // 가장 적은 지출 카테고리
+        OutlayCategory leastOutlayCategory = findLeastOutlayCategory(user.getId());
+        // 가장 적은 수입 카테고리
+        IncomeCategory leastIncomeCategory = findLeastIncomeCategory(user.getId());
+
         // 가장 많은 지출&수입 이름(수량기준)
         String mostOutlayItemName = usageHistoryRepository.findMostOutlayItemName(user.getId(), pageable).get(0);
         String topIncomeImporter = usageHistoryRepository.findtopIncomeImporter(user.getId(), pageable).get(0);
@@ -368,7 +426,7 @@ public class UsageService {
                 .build();
     }
 
-    public String findLeastOutlayCategory(Long userId) {
+    public OutlayCategory findLeastOutlayCategory(Long userId) {
 
         // DB에서 실제 등장한 카테고리 count 가져오기
         List<Object[]> results = usageHistoryRepository.countOutlayCategory(userId);
@@ -394,10 +452,10 @@ public class UsageService {
             }
         }
 
-        return leastCategory.name();
+        return leastCategory;
     }
 
-    public String findLeastIncomeCategory(Long userId) {
+    public IncomeCategory findLeastIncomeCategory(Long userId) {
 
         List<Object[]> results = usageHistoryRepository.countIncomeCategory(userId);
 
@@ -420,14 +478,58 @@ public class UsageService {
             }
         }
 
-        return leastCategory.name();
+        return leastCategory;
     }
 
+    public UsageSummaryDTO createUsageSummary(List<UsageHistory> currentMonthHistories) {
 
+        if (currentMonthHistories == null || currentMonthHistories.isEmpty()) {
+            return UsageSummaryDTO.builder()
+                    .month(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM")))
+                    .totalOutlay(BigDecimal.ZERO)
+                    .totalIncome(BigDecimal.ZERO)
+                    .categorySummaries(Collections.emptyList())
+                    .build();
+        }
 
+        BigDecimal totalOutlay = BigDecimal.ZERO;
+        BigDecimal totalIncome = BigDecimal.ZERO;
 
+        Map<UsageCategory, CategorySummariesDTO> categoryMap = new HashMap<>();
 
+        for (UsageHistory history : currentMonthHistories) {
 
+            BigDecimal price = history.getPrice(); // 사용 금액
+            UsageCategory category = history.getCategory();
+
+            // 전체 합계
+            if ("OUTLAY".equals(history.getHistoryType())) {
+                totalOutlay = totalOutlay.add(price);
+            } else if ("INCOME".equals(history.getHistoryType())) {
+                totalIncome = totalIncome.add(price);
+            }
+
+            // 카테고리별 요약
+            CategorySummariesDTO summary = categoryMap.computeIfAbsent(
+                    category,
+                    k -> {
+                        CategorySummariesDTO dto = new CategorySummariesDTO(category, price, history.getAmount());
+                        return dto;
+                    }
+            );
+
+            summary.setPrice(summary.getPrice().add(price));
+            summary.setAmount(summary.getAmount() + 1);
+        }
+
+        return UsageSummaryDTO.builder()
+                .month(YearMonth.now()
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM")))
+                .totalOutlay(totalOutlay)
+                .totalIncome(totalIncome)
+                .categorySummaries(new ArrayList<>(categoryMap.values()))
+                .build();
+    }
 
 
 }

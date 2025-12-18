@@ -2,6 +2,7 @@ package Capstone.capstoneProject.dto.Usages;
 
 import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.enums.HistoryType;
+import Capstone.capstoneProject.enums.UsageCategory;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -19,7 +20,7 @@ public class UsageResponse {
     private BigDecimal price;
     private LocalDate proDate;
     private LocalDateTime createdAt;
-    private String category;
+    private UsageCategory category;
     private HistoryType historyType;
     private int amount;
 

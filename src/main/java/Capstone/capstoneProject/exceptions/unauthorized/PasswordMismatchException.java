@@ -1,0 +1,12 @@
+package Capstone.capstoneProject.exceptions.unauthorized;
+
+import Capstone.capstoneProject.exceptions.common.DomainException;
+import org.springframework.http.HttpStatus;
+
+public class PasswordMismatchException extends DomainException {
+    public PasswordMismatchException() { super(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."); }
+
+    public PasswordMismatchException(String message) {
+        super(HttpStatus.UNAUTHORIZED, message);
+    }
+}

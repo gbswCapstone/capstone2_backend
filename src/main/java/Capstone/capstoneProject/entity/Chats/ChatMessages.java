@@ -44,6 +44,9 @@ public class ChatMessages {
     @Column(name="content", columnDefinition = "TEXT")
     private String content;
 
+    @Column(name="is_deleted", nullable = false)
+    private Boolean isDeleted;
+
     @Column(name="created_at", nullable = false)
     @CreatedDate
     private LocalDateTime createdAt;
@@ -51,4 +54,7 @@ public class ChatMessages {
     @Column(name="updated_at", nullable = false)
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @Column(name="usage_id")
+    private Long usageId;
 }

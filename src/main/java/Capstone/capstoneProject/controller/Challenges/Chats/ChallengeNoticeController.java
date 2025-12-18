@@ -1,0 +1,48 @@
+package Capstone.capstoneProject.controller.Challenges.Chats;
+
+import Capstone.capstoneProject.dto.Chats.NoticeDetailResponse;
+import Capstone.capstoneProject.dto.Chats.NoticeResponse;
+import Capstone.capstoneProject.dto.Chats.NoticeSummaryResponse;
+import Capstone.capstoneProject.enums.DateSortType;
+import Capstone.capstoneProject.global.ApiResponse;
+import Capstone.capstoneProject.service.ChallengeNoticeService;
+import io.swagger.v3.oas.annotations.Operation;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
+
+@Controller
+@RequestMapping("api/chat/rooms/{roomId}/notices")
+@RequiredArgsConstructor
+public class ChallengeNoticeController {
+    private final ChallengeNoticeService challengeNoticeService;
+
+    @GetMapping("/recent")
+    @Operation(summary = "챌린지 채팅방 최신 공지 1개 조회", description = "챌린지 채팅방에 항상 떠 있는 공지입니다.")
+    public ResponseEntity<ApiResponse<NoticeSummaryResponse>> getRecentNotice(@PathVariable String roomId) {
+        NoticeSummaryResponse result = challengeNoticeService.getRecentNotice(roomId);
+        return ResponseEntity.ok(ApiResponse.ok(result, "조회되었습니다."));
+    }
+
+    @GetMapping
+    @Operation(summary = "챌린지 채팅방 공지 전체조회", description = "챌린지 채팅방 공지 전체 조회 시 사용하는 API 입니다.")
+    public ResponseEntity<ApiResponse<List<NoticeResponse>>> getNotices
+            (@PathVariable String roomId, @RequestParam(required = false) DateSortType dateSortType) {
+        List<NoticeResponse> result = challengeNoticeService.getNotices(roomId, dateSortType);
+        return ResponseEntity.ok(ApiResponse.ok(result, "조회되었습니다."));
+    }
+
+    @GetMapping("/{noticeId}")
+    @Operation(summary = "챌린지 채팅방 공지 상세조회", description = "챌린지 채팅방에서 공지 꺽새 내릴 때 사용하는 API 입니다.")
+    public ResponseEntity<ApiResponse<NoticeDetailResponse>> getNotice
+            (@PathVariable String roomId, @PathVariable Long noticeId) {
+        NoticeDetailResponse result = challengeNoticeService.getNotice(roomId, noticeId);
+        return ResponseEntity.ok(ApiResponse.ok(result, "조회되었습니다."));
+    }
+}

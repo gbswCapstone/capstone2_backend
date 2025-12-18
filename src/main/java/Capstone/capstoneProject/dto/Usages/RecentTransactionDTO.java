@@ -1,0 +1,34 @@
+package Capstone.capstoneProject.dto.Usages;
+
+import Capstone.capstoneProject.entity.UsageHistory;
+import Capstone.capstoneProject.enums.HistoryType;
+import Capstone.capstoneProject.enums.UsageCategory;
+import lombok.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class RecentTransactionDTO {
+    private String name;
+    private HistoryType historyType;
+    private BigDecimal price;
+    private UsageCategory category;
+    private Integer amount;
+    private LocalDate proDate;
+
+    public static RecentTransactionDTO from(UsageHistory history) {
+        return RecentTransactionDTO.builder()
+                .name(history.getName())
+                .historyType(history.getHistoryType())
+                .price(history.getPrice())
+                .category(history.getCategory())
+                .amount(history.getAmount())
+                .proDate(history.getProDate())
+                .build();
+    }
+}
