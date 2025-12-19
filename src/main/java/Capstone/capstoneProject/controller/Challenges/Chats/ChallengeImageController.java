@@ -34,7 +34,7 @@ public class ChallengeImageController {
         return "Swagger 표시용 엔드포인트입니다.";
     }
 
-    @MessageMapping
+    @MessageMapping("/api/challenges/chat/images")
     @Operation(summary = "챌린지 채팅 이미지 전송")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(

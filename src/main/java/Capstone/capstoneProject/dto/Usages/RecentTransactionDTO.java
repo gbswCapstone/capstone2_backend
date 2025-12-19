@@ -6,7 +6,7 @@ import Capstone.capstoneProject.enums.UsageCategory;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+
 
 @Getter
 @Setter
@@ -19,7 +19,7 @@ public class RecentTransactionDTO {
     private BigDecimal price;
     private UsageCategory category;
     private Integer amount;
-    private LocalDate proDate;
+    private String proDate;
 
     public static RecentTransactionDTO from(UsageHistory history) {
         return RecentTransactionDTO.builder()
@@ -28,7 +28,7 @@ public class RecentTransactionDTO {
                 .price(history.getPrice())
                 .category(history.getCategory())
                 .amount(history.getAmount())
-                .proDate(history.getProDate())
+                .proDate(history.getProDate().toString())
                 .build();
     }
 }
