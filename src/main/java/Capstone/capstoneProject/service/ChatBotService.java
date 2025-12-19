@@ -7,12 +7,14 @@ import Capstone.capstoneProject.dto.ChatBot.ChatRoomAnalysisResponse;
 import Capstone.capstoneProject.dto.Usages.UsageSummaryDTO;
 import Capstone.capstoneProject.entity.ChatBot.ChatBotMessages;
 import Capstone.capstoneProject.entity.ChatBot.ChatBotRooms;
+import Capstone.capstoneProject.entity.ChatBot.HomeChatBotMessages;
 import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.exceptions.badGeteway.ChatBotHomeMessageFailedException;
 import Capstone.capstoneProject.exceptions.notfound.ChatBotRoomNotFoundException;
 import Capstone.capstoneProject.repository.ChatBotMessageRepository;
 import Capstone.capstoneProject.repository.ChatBotRoomRepository;
+import Capstone.capstoneProject.repository.HomeChatBotMessageRepository;
 import Capstone.capstoneProject.repository.UsageHistoryRepository;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import jakarta.transaction.Transactional;
@@ -35,12 +37,17 @@ public class ChatBotService {
     private final UsageHistoryRepository usageHistoryRepository;
     private final ChatBotMessageRepository chatBotMessageRepository;
     private final ChatBotRoomRepository chatBotRoomRepository;
+    private final HomeChatBotMessageRepository homeChatBotMessageRepository;
     private final UsageService usageService;
 
     public ChatBotMessageResponse createChatSummary() {
         Users user = authenticatedUserUtils.getCurrentUser();
         List<UsageHistory> usageHistory = usageHistoryRepository.findTop2ByUsersOrderByProDateDesc(user);
-        ChatBotSummaryRequest request = ChatBotSummaryRequest.from(usageHistory);
+
+        // 최근 챗봇 대화 기록
+        List<HomeChatBotMessages> recentMessages = homeChatBotMessageRepository.findTop2ByUserOrderByCreatedAtDesc(user);
+        
+        ChatBotSummaryRequest request = ChatBotSummaryRequest.from(recentMessages, usageHistory);
 
         String url = "http://13.125.64.51:8080/summary";
         // 요청 그대로 전달

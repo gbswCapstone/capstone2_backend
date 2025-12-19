@@ -60,7 +60,7 @@ public class ChallengeMessageController {
         return ResponseEntity.ok(ApiResponse.ok("전송되었습니다."));
     }
 
-    @GetMapping("api/chat/rooms/{roomId}/messages")
+    @GetMapping("/rooms/{roomId}/messages")
     @Operation(summary = "챌린지 채팅방 메시지 히스토리 조회", description = "챌린지 채팅방 메시지 히스토리 조회 시 사용하는 API 입니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -133,7 +133,7 @@ public class ChallengeMessageController {
         return ResponseEntity.ok(ApiResponse.ok("삭제되었습니다."));
     }
 
-    @GetMapping("api/chat/rooms/{roomId}/search/message")
+    @GetMapping("/rooms/{roomId}/search")
     @Operation(summary = "챌린지 채팅방 메시지 검색", description = "챌린지 채팅방 메시지 검색 시 사용하는 API 입니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(

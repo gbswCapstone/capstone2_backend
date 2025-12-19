@@ -1,12 +1,12 @@
 package Capstone.capstoneProject.dto.ChatBot;
 
 import Capstone.capstoneProject.dto.Usages.RecentTransactionDTO;
+import Capstone.capstoneProject.entity.ChatBot.HomeChatBotMessages;
 import Capstone.capstoneProject.entity.UsageHistory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.util.List;
 
 @Getter
@@ -14,11 +14,17 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class ChatBotSummaryRequest {
+    private List<ChatBotMessageResponse> recentChats;
     private List<RecentTransactionDTO> recentTransactions;
 
 
-    public static ChatBotSummaryRequest from(List<UsageHistory> histories) {
+    public static ChatBotSummaryRequest from(List<HomeChatBotMessages> homeChatBotMessages, List<UsageHistory> histories) {
         return ChatBotSummaryRequest.builder()
+                .recentChats(
+                        homeChatBotMessages.stream()
+                                .map(ChatBotMessageResponse::homeChatBot)
+                                .toList()
+                )
                 .recentTransactions(
                         histories.stream()
                                 .map(RecentTransactionDTO::from)

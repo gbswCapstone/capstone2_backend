@@ -392,13 +392,8 @@ public class UsageService {
     public UsageSummaryResponse getUsageSummary() {
         Users user = authenticatedUserUtils.getCurrentUser();
         Pageable pageable = PageRequest.of(0, 1);
-        // 총지출, 총수입 가격
-//        Integer totalOutlay = usageHistoryRepository.sumOutlayByUser(user.getId(), pageable).get(0);
-//        Integer totalIncome = usageHistoryRepository.sumIncomeByUser(user.getId(), pageable).get(0);
-//
-//        UsageCategory topOutlayCategory = usageHistoryRepository.findTopCategoryByOutlay(user.getId(), pageable).get(0);
-//        UsageCategory topIncomeCategory = usageHistoryRepository.findTopCategoryByIncome(user.getId(), pageable).get(0);
 
+        // 총 지출, 총수입 가격
         Integer totalOutlay = usageHistoryRepository.sumOutlayByUser(user.getId(), pageable)
                 .stream()
                 .filter(Objects::nonNull)
@@ -411,6 +406,7 @@ public class UsageService {
                 .findFirst()
                 .orElse(0);
 
+        // 가장 많은 지출, 수입 카테고리
         UsageCategory topOutlayCategory = usageHistoryRepository.findTopCategoryByOutlay(user.getId(), pageable)
                 .stream()
                 .findFirst()
@@ -420,12 +416,6 @@ public class UsageService {
                 .stream()
                 .findFirst()
                 .orElse(null);
-//
-//        List<UsageCategory> topOutlayList = usageHistoryRepository.findTopCategoryByOutlay(user.getId(), pageable);
-//        UsageCategory topOutlayCategory = topOutlayList.isEmpty() ? null : topOutlayList.get(0);
-//
-//        List<UsageCategory> topIncomeList = usageHistoryRepository.findTopCategoryByIncome(user.getId(), pageable);
-//        UsageCategory topIncomeCategory = topIncomeList.isEmpty() ? null : topIncomeList.get(0);
 
 
         // 가장 적은 지출 카테고리
@@ -433,6 +423,7 @@ public class UsageService {
         // 가장 적은 수입 카테고리
         UsageCategory leastIncomeCategory = findLeastIncomeCategory(user.getId());
 
+        // 가장 많은 지출&수입 이름(수량기준)
         String mostOutlayItemName = usageHistoryRepository.findMostOutlayItemName(user.getId(), pageable)
                 .stream()
                 .findFirst()
@@ -443,6 +434,7 @@ public class UsageService {
                 .findFirst()
                 .orElse(null);
 
+        // 가장 비싼 지출&수입 이름(가격기준)
         String highestOutlayItemName = usageHistoryRepository.findHighestOutlayItemName(user.getId(), pageable)
                 .stream()
                 .findFirst()
@@ -453,14 +445,6 @@ public class UsageService {
                 .findFirst()
                 .orElse(null);
 
-//        // 가장 많은 지출&수입 이름(수량기준)
-//        String mostOutlayItemName = usageHistoryRepository.findMostOutlayItemName(user.getId(), pageable).get(0);
-//        String topIncomeImporter = usageHistoryRepository.findtopIncomeImporter(user.getId(), pageable).get(0);
-//
-//        // 가장 비싼 지출&수입 이름(가격기준)
-//        String highestOutlayItemName = usageHistoryRepository.findHighestOutlayItemName(user.getId(), pageable).get(0);
-//        String highestIncomeImporter = usageHistoryRepository.findhighestIncomeImporter(user.getId(), pageable).get(0);
-//
         return UsageSummaryResponse.builder()
                 .totalOutlay(totalOutlay)
                 .totalIncome(totalIncome)
