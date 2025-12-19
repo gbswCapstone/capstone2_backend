@@ -393,25 +393,74 @@ public class UsageService {
         Users user = authenticatedUserUtils.getCurrentUser();
         Pageable pageable = PageRequest.of(0, 1);
         // 총지출, 총수입 가격
-        Integer totalOutlay = usageHistoryRepository.sumOutlayByUser(user.getId(), pageable).get(0);
-        Integer totalIncome = usageHistoryRepository.sumIncomeByUser(user.getId(), pageable).get(0);
+//        Integer totalOutlay = usageHistoryRepository.sumOutlayByUser(user.getId(), pageable).get(0);
+//        Integer totalIncome = usageHistoryRepository.sumIncomeByUser(user.getId(), pageable).get(0);
+//
+//        UsageCategory topOutlayCategory = usageHistoryRepository.findTopCategoryByOutlay(user.getId(), pageable).get(0);
+//        UsageCategory topIncomeCategory = usageHistoryRepository.findTopCategoryByIncome(user.getId(), pageable).get(0);
 
-        OutlayCategory topOutlayCategory = usageHistoryRepository.findTopCategoryByOutlay(user.getId(), pageable).get(0);
-        IncomeCategory topIncomeCategory = usageHistoryRepository.findTopCategoryByIncome(user.getId(), pageable).get(0);
+        Integer totalOutlay = usageHistoryRepository.sumOutlayByUser(user.getId(), pageable)
+                .stream()
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(0);
+
+        Integer totalIncome = usageHistoryRepository.sumIncomeByUser(user.getId(), pageable)
+                .stream()
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(0);
+
+        UsageCategory topOutlayCategory = usageHistoryRepository.findTopCategoryByOutlay(user.getId(), pageable)
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        UsageCategory topIncomeCategory = usageHistoryRepository.findTopCategoryByIncome(user.getId(), pageable)
+                .stream()
+                .findFirst()
+                .orElse(null);
+//
+//        List<UsageCategory> topOutlayList = usageHistoryRepository.findTopCategoryByOutlay(user.getId(), pageable);
+//        UsageCategory topOutlayCategory = topOutlayList.isEmpty() ? null : topOutlayList.get(0);
+//
+//        List<UsageCategory> topIncomeList = usageHistoryRepository.findTopCategoryByIncome(user.getId(), pageable);
+//        UsageCategory topIncomeCategory = topIncomeList.isEmpty() ? null : topIncomeList.get(0);
+
 
         // 가장 적은 지출 카테고리
-        OutlayCategory leastOutlayCategory = findLeastOutlayCategory(user.getId());
+        UsageCategory leastOutlayCategory = findLeastOutlayCategory(user.getId());
         // 가장 적은 수입 카테고리
-        IncomeCategory leastIncomeCategory = findLeastIncomeCategory(user.getId());
+        UsageCategory leastIncomeCategory = findLeastIncomeCategory(user.getId());
 
-        // 가장 많은 지출&수입 이름(수량기준)
-        String mostOutlayItemName = usageHistoryRepository.findMostOutlayItemName(user.getId(), pageable).get(0);
-        String topIncomeImporter = usageHistoryRepository.findtopIncomeImporter(user.getId(), pageable).get(0);
-        
-        // 가장 비싼 지출&수입 이름(가격기준)
-        String highestOutlayItemName = usageHistoryRepository.findHighestOutlayItemName(user.getId(), pageable).get(0);
-        String highestIncomeImporter = usageHistoryRepository.findhighestIncomeImporter(user.getId(), pageable).get(0);
-        
+        String mostOutlayItemName = usageHistoryRepository.findMostOutlayItemName(user.getId(), pageable)
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        String topIncomeImporter = usageHistoryRepository.findtopIncomeImporter(user.getId(), pageable)
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        String highestOutlayItemName = usageHistoryRepository.findHighestOutlayItemName(user.getId(), pageable)
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        String highestIncomeImporter = usageHistoryRepository.findhighestIncomeImporter(user.getId(), pageable)
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+//        // 가장 많은 지출&수입 이름(수량기준)
+//        String mostOutlayItemName = usageHistoryRepository.findMostOutlayItemName(user.getId(), pageable).get(0);
+//        String topIncomeImporter = usageHistoryRepository.findtopIncomeImporter(user.getId(), pageable).get(0);
+//
+//        // 가장 비싼 지출&수입 이름(가격기준)
+//        String highestOutlayItemName = usageHistoryRepository.findHighestOutlayItemName(user.getId(), pageable).get(0);
+//        String highestIncomeImporter = usageHistoryRepository.findhighestIncomeImporter(user.getId(), pageable).get(0);
+//
         return UsageSummaryResponse.builder()
                 .totalOutlay(totalOutlay)
                 .totalIncome(totalIncome)
@@ -426,25 +475,25 @@ public class UsageService {
                 .build();
     }
 
-    public OutlayCategory findLeastOutlayCategory(Long userId) {
+    public UsageCategory findLeastOutlayCategory(Long userId) {
 
         // DB에서 실제 등장한 카테고리 count 가져오기
         List<Object[]> results = usageHistoryRepository.countOutlayCategory(userId);
 
         // Map<카테고리, 카운트>
-        Map<OutlayCategory, Long> countMap = new HashMap<>();
+        Map<UsageCategory, Long> countMap = new HashMap<>();
 
         // DB 결과 넣기
         for (Object[] row : results) {
-            OutlayCategory category = (OutlayCategory) row[0];
+            UsageCategory category = (UsageCategory) row[0];
             Long count = (Long) row[1];
             countMap.put(category, count);
         }
 
-        OutlayCategory leastCategory = null;
+        UsageCategory leastCategory = null;
         Long minCount = Long.MAX_VALUE;
 
-        for (OutlayCategory category : OutlayCategory.values()) {
+        for (UsageCategory category : UsageCategory.values()) {
             Long count = countMap.getOrDefault(category, 0L);
             if (count < minCount) {
                 minCount = count;
@@ -455,22 +504,22 @@ public class UsageService {
         return leastCategory;
     }
 
-    public IncomeCategory findLeastIncomeCategory(Long userId) {
+    public UsageCategory findLeastIncomeCategory(Long userId) {
 
         List<Object[]> results = usageHistoryRepository.countIncomeCategory(userId);
 
-        Map<IncomeCategory, Long> countMap = new HashMap<>();
+        Map<UsageCategory, Long> countMap = new HashMap<>();
 
         for (Object[] row : results) {
-            IncomeCategory category = (IncomeCategory) row[0];
+            UsageCategory category = (UsageCategory) row[0];
             Long count = (Long) row[1];
             countMap.put(category, count);
         }
 
-        IncomeCategory leastCategory = null;
+        UsageCategory leastCategory = null;
         Long minCount = Long.MAX_VALUE;
 
-        for (IncomeCategory category : IncomeCategory.values()) {
+        for (UsageCategory category : UsageCategory.values()) {
             Long count = countMap.getOrDefault(category, 0L);
             if (count < minCount) {
                 minCount = count;

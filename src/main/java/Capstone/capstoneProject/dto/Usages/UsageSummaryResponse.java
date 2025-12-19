@@ -2,6 +2,7 @@ package Capstone.capstoneProject.dto.Usages;
 
 import Capstone.capstoneProject.enums.IncomeCategory;
 import Capstone.capstoneProject.enums.OutlayCategory;
+import Capstone.capstoneProject.enums.UsageCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,16 +23,16 @@ public class UsageSummaryResponse {
     private int totalIncome;
 
     @Schema(description = "가장 많은 지출 카테고리", example = "FOOD")
-    private OutlayCategory topOutlayCategory;
+    private UsageCategory topOutlayCategory;
 
     @Schema(description = "가장 많은 수입 카테고리", example = "WAGE")
-    private IncomeCategory topIncomeCategory;
+    private UsageCategory topIncomeCategory;
 
     @Schema(description = "가장 적은 지출 카테고리")
-    private OutlayCategory leastOutlayCategory;
+    private UsageCategory leastOutlayCategory;
 
     @Schema(description = "가장 적은 수입 카테고리")
-    private IncomeCategory leastIncomeCategory;
+    private UsageCategory leastIncomeCategory;
 
     @Schema(description = "가장 많은 지출 상품명")
     private String mostOutlayItemName;

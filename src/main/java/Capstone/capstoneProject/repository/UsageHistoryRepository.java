@@ -4,6 +4,7 @@ import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.enums.IncomeCategory;
 import Capstone.capstoneProject.enums.OutlayCategory;
+import Capstone.capstoneProject.enums.UsageCategory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,10 +25,6 @@ public interface UsageHistoryRepository extends JpaRepository<UsageHistory, Long
                                                      @Param("start") LocalDate start,
                                                      @Param("end") LocalDate end);
 
-
-
-
-
     // 사용자의 총 지출 가격
     @Query("SELECT SUM(u.price) FROM UsageHistory u WHERE u.users.id = :userId AND u.historyType = 'OUTLAY'")
     List<Integer> sumOutlayByUser(@Param("userId") Long userId, Pageable pageable);
@@ -38,11 +35,11 @@ public interface UsageHistoryRepository extends JpaRepository<UsageHistory, Long
 
     // 지출내역에서 가장 많은 카테고리(수량기준)
     @Query("SELECT u.category FROM UsageHistory u WHERE u.users.id = :userId AND u.historyType = 'OUTLAY' GROUP BY u.category ORDER BY SUM(u.amount) DESC")
-    List<OutlayCategory> findTopCategoryByOutlay(@Param("userId") Long userId, Pageable pageable);
+    List<UsageCategory> findTopCategoryByOutlay(@Param("userId") Long userId, Pageable pageable);
 
     // 수입내역에서 가장 많은 카테고리(수량기준)
     @Query("SELECT u.category FROM UsageHistory u WHERE u.users.id = :userId AND u.historyType = 'INCOME' GROUP BY u.category ORDER BY SUM(u.amount) ASC")
-    List<IncomeCategory> findTopCategoryByIncome(@Param("userId") Long userId, Pageable pageable);
+    List<UsageCategory> findTopCategoryByIncome(@Param("userId") Long userId, Pageable pageable);
 
     // 가장 많은 지출 상품명(수량기준)
     @Query("SELECT u.name FROM UsageHistory u WHERE u.users.id = :userId AND u.historyType = 'OUTLAY' GROUP BY u.name ORDER BY SUM(u.amount) DESC")
