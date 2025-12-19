@@ -37,7 +37,7 @@ public class ChallengeMessageController {
         return "Swagger 표시용 엔드포인트입니다.";
     }
 
-    @MessageMapping
+    @MessageMapping("/api/challenges/chat/messages")
     @Operation(summary = "챌린지 채팅 메시지 전송", description = "챌린지 채팅 메시지 전송 시 사용하는 API 입니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
