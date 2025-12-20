@@ -57,4 +57,11 @@ public class ChatMessages {
 
     @Column(name="usage_id")
     private Long usageId;
+
+    @PrePersist
+    public void prePersist() {
+        if (isDeleted == null) {
+            isDeleted = false;
+        }
+    }
 }
