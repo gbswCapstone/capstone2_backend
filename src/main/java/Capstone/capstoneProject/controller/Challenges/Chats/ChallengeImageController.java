@@ -30,12 +30,6 @@ public class ChallengeImageController {
         SEND: /pub/api/challenges/chat/images
         SUBSCRIBE: /sub/challenges/chat/room/{roomId}
         """)
-    public String chatSendImage() {
-        return "Swagger 표시용 엔드포인트입니다.";
-    }
-
-    @MessageMapping("/api/challenges/chat/images")
-    @Operation(summary = "챌린지 채팅 이미지 전송")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200", description = "요청 성공"
@@ -56,9 +50,14 @@ public class ChallengeImageController {
                     content = @Content
             )
     })
-    public ResponseEntity<ApiResponse<Void>> sendImages(@Payload ImageUploadRequest request, SimpMessageHeaderAccessor accessor) {
+    public String chatSendImage() {
+        return "Swagger 표시용 엔드포인트입니다.";
+    }
+
+    @MessageMapping("/api/challenges/chat/images")
+    @Operation(summary = "챌린지 채팅 이미지 전송")
+    public void sendImages(@Payload ImageUploadRequest request, SimpMessageHeaderAccessor accessor) {
         challengeImageService.sendImage(request, accessor);
-        return ResponseEntity.ok(ApiResponse.ok("전송되었습니다."));
     }
 
     @DeleteMapping("/{messageId}")

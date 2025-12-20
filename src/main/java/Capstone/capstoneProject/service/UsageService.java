@@ -14,11 +14,17 @@ import Capstone.capstoneProject.repository.UsageHistoryRepository;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -114,64 +120,100 @@ public class UsageService {
         return new UsageResponse(usageHistory);
     }
 
-    public ReceiptResponse plusReceiptOutlay(ReceiptRequest request) {
-        Users user = authenticatedUserUtils.getCurrentUser();
-
-        String url = "http://13.125.64.51:8080/ocr/receipt";
-        Map<String, String> requestBody = Map.of(
-                "image_url", request.getImageUrl(),
-                "filename", "receipt"
-        );
-
-        ResponseEntity<Map> response = restTemplate.postForEntity(url, requestBody, Map.class);
-
-        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-            throw new ReceiptAiServerException("영수증 AI 서버 호출 실패");
-        }
-
-        Map<String, Object> message =
-                (Map<String, Object>) response.getBody().get("message");
-        List<Map<String, Object>> dataList =
-                (List<Map<String, Object>>) message.get("data");
-
-        List<ReceiptListDTO> usageList = new ArrayList<>();
-        BigDecimal totalPrice = BigDecimal.ZERO;
-        LocalDate receiptDate = null;
-
-        for (Map<String, Object> item : dataList) {
-
-            BigDecimal price = new BigDecimal((String) item.get("price"));
-            int amount = Integer.parseInt((String) item.get("quantity"));
-            LocalDate proDate = LocalDate.parse((String) item.get("date"));
-            String name = (String) item.get("productName");
-            String categoryStr = (String) item.get("category");
-            UsageCategory category = UsageCategory.valueOf(categoryStr);
-
-            UsageHistory usageHistory = UsageHistory.builder()
-                    .users(user)
-                    .name(name)
-                    .price(price)
-                    .proDate(proDate)
-                    .category(category)
-                    .amount(amount)
-                    .historyType(HistoryType.OUTLAY)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-
-            UsageHistory savedHistory = usageHistoryRepository.save(usageHistory);
-
-            usageList.add(ReceiptListDTO.from(savedHistory));
-
-            totalPrice = totalPrice.add(price);
-            receiptDate = proDate;
-        }
-
-        return ReceiptResponse.builder()
-                .usageResponseList(usageList)
-                .totalPrice(totalPrice)
-                .proDate(receiptDate)
-                .build();
-    }
+//    public ReceiptResponse plusReceiptOutlay(ReceiptRequest request) {
+//        Users user = authenticatedUserUtils.getCurrentUser();
+//
+//        String url = "http://13.125.64.51:8080/ocr/receipt";
+//        byte[] imageBytes = image.getBytes();
+//
+//        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+//        body.add("image", new ByteArrayResource(imageBytes) {
+//            @Override
+//            public String getFilename() {
+//                return image.getOriginalFilename();
+//            }
+//        });
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+//
+//        HttpEntity<?> request = new HttpEntity<>(body, headers);
+//
+//        restTemplate.postForObject(aiUrl, request, Response.class);
+//
+//        try {
+//            body.add(
+//                    "image",
+//                    new ByteArrayResource(image.getBytes()) {
+//                        @Override
+//                        public String getFilename() {
+//                            return image.getOriginalFilename();
+//                        }
+//                    }
+//            );
+//        } catch (IOException e) {
+//            throw new ReceiptAiServerException("이미지 변환 중 오류가 발생했습니다.");
+//        }
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+//
+//        HttpEntity<MultiValueMap<String, Object>> requestEntity =
+//                new HttpEntity<>(body, headers);
+//
+//        // =========================
+//        // 3️⃣ AI 서버 호출
+//        // =========================
+//        ResponseEntity<Map> response =
+//                restTemplate.postForEntity(url, requestEntity, Map.class);
+//
+//        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+//            throw new ReceiptAiServerException("영수증 AI 서버 호출 실패");
+//        }
+//
+//        Map<String, Object> message =
+//                (Map<String, Object>) response.getBody().get("message");
+//        List<Map<String, Object>> dataList =
+//                (List<Map<String, Object>>) message.get("data");
+//
+//        List<ReceiptListDTO> usageList = new ArrayList<>();
+//        BigDecimal totalPrice = BigDecimal.ZERO;
+//        LocalDate receiptDate = null;
+//
+//        for (Map<String, Object> item : dataList) {
+//
+//            BigDecimal price = new BigDecimal((String) item.get("price"));
+//            int amount = Integer.parseInt((String) item.get("quantity"));
+//            LocalDate proDate = LocalDate.parse((String) item.get("date"));
+//            String name = (String) item.get("productName");
+//            String categoryStr = (String) item.get("category");
+//            UsageCategory category = UsageCategory.valueOf(categoryStr);
+//
+//            UsageHistory usageHistory = UsageHistory.builder()
+//                    .users(user)
+//                    .name(name)
+//                    .price(price)
+//                    .proDate(proDate)
+//                    .category(category)
+//                    .amount(amount)
+//                    .historyType(HistoryType.OUTLAY)
+//                    .createdAt(LocalDateTime.now())
+//                    .build();
+//
+//            UsageHistory savedHistory = usageHistoryRepository.save(usageHistory);
+//
+//            usageList.add(ReceiptListDTO.from(savedHistory));
+//
+//            totalPrice = totalPrice.add(price);
+//            receiptDate = proDate;
+//        }
+//
+//        return ReceiptResponse.builder()
+//                .usageResponseList(usageList)
+//                .totalPrice(totalPrice)
+//                .proDate(receiptDate)
+//                .build();
+//    }
 
 
     public ReceiptResponse patchReceiptOutlay(ReceiptPatchRequest request) {

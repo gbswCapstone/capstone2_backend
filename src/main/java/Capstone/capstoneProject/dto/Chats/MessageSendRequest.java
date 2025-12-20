@@ -13,5 +13,4 @@ import lombok.Setter;
 public class MessageSendRequest {
     private String content;
     private String roomId;
-    private MessageType messageType;
 }

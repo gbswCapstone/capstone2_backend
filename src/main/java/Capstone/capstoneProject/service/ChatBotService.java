@@ -62,6 +62,15 @@ public class ChatBotService {
             throw new ChatBotHomeMessageFailedException("홈 챗봇 메시지 생성에 실패했습니다.");
         }
 
+        // ai가 생성한 메시지 저장
+        HomeChatBotMessages homeChatBotMessages =
+                HomeChatBotMessages.builder()
+                        .user(user)
+                        .message(response.getBody().getMessage())
+                        .build();
+
+        homeChatBotMessageRepository.save(homeChatBotMessages);
+
         return response.getBody();
     }
 
