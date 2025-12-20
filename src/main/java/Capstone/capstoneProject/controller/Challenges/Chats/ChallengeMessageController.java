@@ -95,7 +95,7 @@ public class ChallengeMessageController {
             )
     })
     public ResponseEntity<ApiResponse<Void>> patchMessage
-            (@Payload MessagePatchRequest request, @PathVariable Long messageId) {
+            (@RequestBody MessagePatchRequest request, @PathVariable Long messageId) {
         challengeMessageService.patchMessage(request, messageId);
         return ResponseEntity.ok(ApiResponse.ok("수정되었습니다."));
     }
