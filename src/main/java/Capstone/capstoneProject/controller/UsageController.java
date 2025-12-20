@@ -51,23 +51,23 @@ public class UsageController {
         return ResponseEntity.ok(ApiResponse.ok(result, "추가되었습니다."));
     }
 
-    @PostMapping("/receipt")
-    @Operation(summary = "영수증 지출 추가", description = "영수증 지출 추가 시 사용하는 API 입니다.")
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(
-                    responseCode = "200", description = "요청 성공"
-            ), @io.swagger.v3.oas.annotations.responses.ApiResponse(
-            responseCode = "500", description = "AI 서버 호출에 실패했습니다.",
-            content = @Content
-            ),  @io.swagger.v3.oas.annotations.responses.ApiResponse(
-            responseCode = "401", description = "로그인이 필요합니다.",
-            content = @Content)
-    })
-    public ResponseEntity<ApiResponse<ReceiptResponse>> plusReceiptOutlay
-            (@RequestBody ReceiptRequest request) {
-        ReceiptResponse result = usageService.plusReceiptOutlay(request);
-        return ResponseEntity.ok(ApiResponse.ok(result, "추가되었습니다."));
-    }
+//    @PostMapping("/receipt")
+//    @Operation(summary = "영수증 지출 추가", description = "영수증 지출 추가 시 사용하는 API 입니다.")
+//    @ApiResponses(value = {
+//            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+//                    responseCode = "200", description = "요청 성공"
+//            ), @io.swagger.v3.oas.annotations.responses.ApiResponse(
+//            responseCode = "500", description = "AI 서버 호출에 실패했습니다.",
+//            content = @Content
+//            ),  @io.swagger.v3.oas.annotations.responses.ApiResponse(
+//            responseCode = "401", description = "로그인이 필요합니다.",
+//            content = @Content)
+//    })
+//    public ResponseEntity<ApiResponse<ReceiptResponse>> plusReceiptOutlay
+//            (@RequestBody ReceiptRequest request) {
+//        ReceiptResponse result = usageService.plusReceiptOutlay(request);
+//        return ResponseEntity.ok(ApiResponse.ok(result, "추가되었습니다."));
+//    }
 
     @PutMapping("/receipt")
     @Operation(summary = "영수증 수정", description = "영수증 수정 시 사용하는 API 입니다.")

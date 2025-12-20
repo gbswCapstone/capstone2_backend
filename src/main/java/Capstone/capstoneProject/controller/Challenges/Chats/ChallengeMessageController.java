@@ -33,12 +33,6 @@ public class ChallengeMessageController {
         SEND: /pub/api/challenges/chat/message
         SUBSCRIBE: /sub/challenges/chat/room/{roomId}
         """)
-    public String chatSendMessage() {
-        return "Swagger 표시용 엔드포인트입니다.";
-    }
-
-    @MessageMapping("/api/challenges/chat/messages")
-    @Operation(summary = "챌린지 채팅 메시지 전송", description = "챌린지 채팅 메시지 전송 시 사용하는 API 입니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200", description = "요청 성공"
@@ -55,9 +49,14 @@ public class ChallengeMessageController {
                     content = @Content
             )
     })
-    public ResponseEntity<ApiResponse<Void>> message(@Payload MessageSendRequest request, SimpMessageHeaderAccessor accessor) {
+    public String chatSendMessage() {
+        return "Swagger 표시용 엔드포인트입니다.";
+    }
+
+    @MessageMapping("/api/challenges/chat/messages")
+    @Operation(summary = "챌린지 채팅 메시지 전송", description = "챌린지 채팅 메시지 전송 시 사용하는 API 입니다.")
+    public void message(@Payload MessageSendRequest request, SimpMessageHeaderAccessor accessor) {
         challengeMessageService.sendMessage(request, accessor);
-        return ResponseEntity.ok(ApiResponse.ok("전송되었습니다."));
     }
 
     @GetMapping("/rooms/{roomId}/messages")

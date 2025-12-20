@@ -61,7 +61,7 @@ public class ChallengeMessageService {
         ChatMessages chatMessages = ChatMessages.builder()
                 .users(user)
                 .chatRooms(chatRoom)
-                .messageType(request.getMessageType())
+                .messageType(MessageType.TEXT)
                 .content(request.getContent())
                 .build();
         chatMessagesRepository.save(chatMessages);
