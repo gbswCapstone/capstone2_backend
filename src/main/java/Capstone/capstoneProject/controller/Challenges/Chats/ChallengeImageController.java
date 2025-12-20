@@ -54,12 +54,6 @@ public class ChallengeImageController {
         return "Swagger 표시용 엔드포인트입니다.";
     }
 
-    @MessageMapping("/api/challenges/chat/images")
-    @Operation(summary = "챌린지 채팅 이미지 전송")
-    public void sendImages(@Payload ImageUploadRequest request, SimpMessageHeaderAccessor accessor) {
-        challengeImageService.sendImage(request, accessor);
-    }
-
     @DeleteMapping("/{messageId}")
     @Operation(summary = "챌린지 채팅 이미지 삭제", description = "작성자와 방장만 해당 이미지를 삭제할 수 있습니다.")
     public ResponseEntity<ApiResponse<Void>> deleteImages(@PathVariable Long messageId) {
