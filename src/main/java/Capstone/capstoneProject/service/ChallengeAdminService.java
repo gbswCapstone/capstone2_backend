@@ -52,21 +52,22 @@ public class ChallengeAdminService {
         return NoticeResponse.from(chatNotices, chatRoomUsers, user);
     }
 
-    public NoticeResponse patchNotice(String roomId, Long noticeId, NoticeRequest request) {
+    public NoticeResponse patchNotice(Long noticeId, NoticeRequest request) {
         Users user = authenticatedUserUtils.getCurrentUser();
 
-        ChatRooms chatRooms = chatRoomsRepository.findByRoomId(roomId)
+        ChatNotices chatNotices = chatNoticesRepository.findById(noticeId)
+                .orElseThrow(() -> new ChatRoomNoticeNotFoundException("채팅방 해당 공지를 찾을 수 없습니다."));
+
+        ChatRooms chatRooms = chatRoomsRepository.findByRoomId(chatNotices.getChatRooms().getRoomId())
                 .orElseThrow(() -> new ChatRoomNotFoundException("해당 채팅방을 찾을 수 없습니다."));
 
-        ChatRoomUsers chatRoomUsers = chatRoomUsersRepository.findByChatRooms_RoomIdAndUsers(roomId, user)
+        ChatRoomUsers chatRoomUsers = chatRoomUsersRepository.findByChatRooms_RoomIdAndUsers(chatRooms.getRoomId(), user)
                 .orElseThrow(() -> new ChatRoomAccessDeniedException("해당 채팅방 유저가 아닙니다."));
 
         if(chatRoomUsers.getChatRoomRole() != ChatRoomRole.HOST) {
             throw new ChatRoomHostRequiredException("채팅방 방장만 가능한 권한입니다.");
         }
 
-        ChatNotices chatNotices = chatNoticesRepository.findById(noticeId)
-                .orElseThrow(() -> new ChatRoomNoticeNotFoundException("채팅방 해당 공지를 찾을 수 없습니다."));
 
         // 나중에 시간나면 마지막 수정자도 확장해두기!
         chatNotices.setContent(request.getContent());
@@ -75,21 +76,23 @@ public class ChallengeAdminService {
         return NoticeResponse.from(chatNotices, chatRoomUsers, user);
     }
 
-    public void deleteNotice(String roomId, Long noticeId) {
+    public void deleteNotice(Long noticeId) {
         Users user = authenticatedUserUtils.getCurrentUser();
 
-        ChatRooms chatRooms = chatRoomsRepository.findByRoomId(roomId)
+        ChatNotices chatNotices = chatNoticesRepository.findById(noticeId)
+                .orElseThrow(() -> new ChatRoomNoticeNotFoundException("채팅방 해당 공지를 찾을 수 없습니다."));
+
+        ChatRooms chatRooms = chatRoomsRepository.findByRoomId(chatNotices.getChatRooms().getRoomId())
                 .orElseThrow(() -> new ChatRoomNotFoundException("해당 채팅방을 찾을 수 없습니다."));
 
-        ChatRoomUsers chatRoomUsers = chatRoomUsersRepository.findByChatRooms_RoomIdAndUsers(roomId, user)
+        ChatRoomUsers chatRoomUsers = chatRoomUsersRepository.findByChatRooms_RoomIdAndUsers(chatRooms.getRoomId(), user)
                 .orElseThrow(() -> new ChatRoomAccessDeniedException("해당 채팅방 유저가 아닙니다."));
 
         if(chatRoomUsers.getChatRoomRole() != ChatRoomRole.HOST) {
             throw new ChatRoomHostRequiredException("채팅방 방장만 가능한 권한입니다.");
         }
 
-        ChatNotices chatNotices = chatNoticesRepository.findById(noticeId)
-                .orElseThrow(() -> new ChatRoomNoticeNotFoundException("채팅방 해당 공지를 찾을 수 없습니다."));
+
 
         // 공지 삭제
         chatNoticesRepository.delete(chatNotices);

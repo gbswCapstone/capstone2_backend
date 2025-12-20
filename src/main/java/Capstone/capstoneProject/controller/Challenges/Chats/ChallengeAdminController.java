@@ -49,7 +49,7 @@ public class ChallengeAdminController {
     }
 
 
-    @PutMapping("/chat/rooms/{roomId}/notices/{noticeId}")
+    @PutMapping("/chat/notices/{noticeId}")
     @Operation(summary = "챌린지 채팅방 공지 수정", description = "공지 수정은 방장만 수정할 수 있습니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -77,12 +77,12 @@ public class ChallengeAdminController {
             )
     })
     public ResponseEntity<ApiResponse<NoticeResponse>> patchChallengeChatNotice
-            (@PathVariable String roomId, @PathVariable Long noticeId, @RequestBody NoticeRequest request) {
-        NoticeResponse result = challengeAdminService.patchNotice(roomId, noticeId, request);
+            (@PathVariable Long noticeId, @RequestBody NoticeRequest request) {
+        NoticeResponse result = challengeAdminService.patchNotice(noticeId, request);
         return ResponseEntity.ok(ApiResponse.ok(result, "수정되었습니다."));
     }
 
-    @DeleteMapping("/chat/rooms/{roomId}/notices/{noticeId}")
+    @DeleteMapping("/chat/notices/{noticeId}")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200", description = "요청 성공"
@@ -110,8 +110,8 @@ public class ChallengeAdminController {
     })
     @Operation(summary = "챌린지 채팅방 공지 삭제", description = "공지 삭제는 방장만 삭제할 수 있습니다.")
     public ResponseEntity<ApiResponse<Void>> deleteChallengeChatNotice
-            (@PathVariable String roomId, @PathVariable Long noticeId) {
-        challengeAdminService.deleteNotice(roomId, noticeId);
+            (@PathVariable Long noticeId) {
+        challengeAdminService.deleteNotice(noticeId);
         return ResponseEntity.ok(ApiResponse.ok("삭제되었습니다."));
     }
 }

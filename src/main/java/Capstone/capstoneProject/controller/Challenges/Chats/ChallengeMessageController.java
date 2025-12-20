@@ -30,6 +30,7 @@ public class ChallengeMessageController {
     @Operation(summary = "챌린지 채팅 메시지 전송 (WebSocket)",
             description = """
         실제 메시지 전송은 WebSocket(STOMP)을 사용합니다.
+        Headers에 roomId 넣어야합니다.
         SEND: /pub/api/challenges/chat/message
         SUBSCRIBE: /sub/challenges/chat/room/{roomId}
         """)
