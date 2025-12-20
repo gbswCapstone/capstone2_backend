@@ -29,6 +29,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -85,6 +86,10 @@ public class ChallengeMessageService {
         // 작성자만 수정 가능
         if (!chatMessages.getUsers().getId().equals(user.getId())) {
             throw new ChatMessageAccessDeniedException("채팅방의 해당 메시지에 관한 권한이 없습니다.");
+        }
+
+        if (!StringUtils.hasText(request.getContent())) {
+            throw new IllegalArgumentException("메시지 내용은 비어 있을 수 없습니다.");
         }
         chatMessages.setContent(request.getContent());
         chatMessagesRepository.save(chatMessages);
