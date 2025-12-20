@@ -53,11 +53,6 @@ public class ChallengeMessageController {
         return "Swagger 표시용 엔드포인트입니다.";
     }
 
-    @MessageMapping("/api/challenges/chat/messages")
-    @Operation(summary = "챌린지 채팅 메시지 전송", description = "챌린지 채팅 메시지 전송 시 사용하는 API 입니다.")
-    public void message(@Payload MessageSendRequest request, SimpMessageHeaderAccessor accessor) {
-        challengeMessageService.sendMessage(request, accessor);
-    }
 
     @GetMapping("/rooms/{roomId}/messages")
     @Operation(summary = "챌린지 채팅방 메시지 히스토리 조회", description = "챌린지 채팅방 메시지 히스토리 조회 시 사용하는 API 입니다.")
