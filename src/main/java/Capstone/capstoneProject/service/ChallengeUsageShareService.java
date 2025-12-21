@@ -7,6 +7,9 @@ import Capstone.capstoneProject.entity.Chats.ChatRoomUsers;
 import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.enums.ChatRoomRole;
+import Capstone.capstoneProject.enums.MessageType;
+import Capstone.capstoneProject.exceptions.badRequest.TextMessageRequiredException;
+import Capstone.capstoneProject.exceptions.badRequest.UsageShareMessageRequiredException;
 import Capstone.capstoneProject.exceptions.forbidden.ChatMessageAccessDeniedException;
 import Capstone.capstoneProject.exceptions.forbidden.ChatRoomAccessDeniedException;
 import Capstone.capstoneProject.exceptions.forbidden.UsageAccessDeniedException;
@@ -43,7 +46,7 @@ public class ChallengeUsageShareService {
         List<UsageHistory> usages = usageHistoryRepository.findAllByIdInAndUsers(request.getUsageIds(), user);
 
         if (usages.size() != request.getUsageIds().size()) {
-            throw new UsageAccessDeniedException("본인 사용내역만 공유 가능");
+            throw new UsageAccessDeniedException("본인 사용내역만 공유 가능합니다.");
         }
 
         for (UsageHistory usage : usages) {
@@ -54,8 +57,14 @@ public class ChallengeUsageShareService {
     public void deleteChallengeChatUsage(Long messageId) {
         Users user = authenticatedUserUtils.getCurrentUser();
 
+
         ChatMessages chatMessages = chatMessagesRepository.findById(messageId)
                 .orElseThrow(() -> new ChatRoomMessageNotFoundException("채팅방의 해당 메시지를 찾을 수 없습니다."));
+
+        if (chatMessages.getMessageType() != MessageType.USAGE_SHARE) {
+            throw new UsageShareMessageRequiredException("사용내역 메시지가 아닙니다.");
+        }
+
         ChatRoomUsers chatRoomUsers = chatRoomUsersRepository.findByChatRooms_RoomIdAndUsers(chatMessages.getChatRooms().getRoomId(), user)
                 .orElseThrow(() -> new ChatRoomAccessDeniedException("해당 채팅방의 유저가 아닙니다."));
 
