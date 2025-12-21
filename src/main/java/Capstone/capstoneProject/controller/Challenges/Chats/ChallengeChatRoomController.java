@@ -25,7 +25,7 @@ public class ChallengeChatRoomController {
     }
 
     @GetMapping("api/chat/rooms/{roomId}/users")
-    @Operation(summary = "챌린지 채팅방 유저 조회", description = "챌린지 채팅방 유저 조회 시 사용하는 API 입니다.")
+    @Operation(summary = "챌린지 채팅방 유저 조회", description = "맨 처음으로 방장이 먼저 조회되고 그 다음으로 본인이 조회됩니다.")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200", description = "요청 성공"

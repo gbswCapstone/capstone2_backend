@@ -1,6 +1,6 @@
 package Capstone.capstoneProject.controller;
 
-import Capstone.capstoneProject.dto.Chats.ImageUploadRequest;
+
 import Capstone.capstoneProject.dto.Chats.MessageSendRequest;
 import Capstone.capstoneProject.service.ChallengeImageService;
 import Capstone.capstoneProject.service.ChallengeMessageService;
@@ -23,9 +23,5 @@ public class WebSocketController {
         challengeMessageService.sendMessage(request, accessor);
     }
 
-    @MessageMapping("/api/challenges/chat/images")
-    @Operation(summary = "챌린지 채팅 이미지 전송")
-    public void sendImages(@Payload ImageUploadRequest request, SimpMessageHeaderAccessor accessor) {
-        challengeImageService.sendImage(request, accessor);
-    }
+
 }
