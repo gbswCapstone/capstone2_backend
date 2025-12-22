@@ -4,5 +4,5 @@ import lombok.Getter;
 
 @Getter
 public enum MissionStatusType {
-    PROGRESS, COMPLETED
+    PROGRESS, COMPLETED, FAILED
 }

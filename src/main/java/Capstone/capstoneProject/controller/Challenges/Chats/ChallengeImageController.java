@@ -45,8 +45,8 @@ public class ChallengeImageController {
             )
     })
     public ResponseEntity<ApiResponse<Void>> uploadChatImages
-            (@RequestParam("images") List<MultipartFile> images,
-             @RequestParam("roomId") String roomId) {
+            (@RequestPart("images") List<MultipartFile> images,
+             @RequestPart("roomId") String roomId) {
         challengeImageService.sendImage(images, roomId);
         return ResponseEntity.ok(ApiResponse.ok("전송되었습니다."));
     }

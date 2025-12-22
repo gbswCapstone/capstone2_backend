@@ -2,6 +2,7 @@ package Capstone.capstoneProject.dto.Chats;
 
 import Capstone.capstoneProject.dto.Usages.UsageShareDTO;
 import Capstone.capstoneProject.entity.Chats.ChatMessages;
+import Capstone.capstoneProject.entity.Missions.Missions;
 import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.enums.MessageType;
 import lombok.AllArgsConstructor;
@@ -27,6 +28,7 @@ public class ChatMessageDTO {
     private String content; // 사용내역 공유시 사용안함
     private UsageShareDTO usageShareDTO; // 사용내역 공유 시 사용함
     private List<String> imageUrls; // 이미지 전용
+    private MissionShareDTO missionShareDTO; // 미션 공유시 사용함
     private LocalDateTime createdAt;
     private String profileImg;
     private boolean isDeleted; // 삭제여부
@@ -120,6 +122,16 @@ public class ChatMessageDTO {
 
         return base(message)
                 .usageShareDTO(UsageShareDTO.from(usageHistory))
+                .build();
+    }
+
+    public static ChatMessageDTO missionShare(ChatMessages messages, Missions mission) {
+        if (messages.getIsDeleted()) {
+            return base(messages).build();
+        }
+
+        return base(messages)
+                .missionShareDTO(MissionShareDTO.from(mission))
                 .build();
     }
 

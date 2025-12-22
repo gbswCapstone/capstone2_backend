@@ -11,6 +11,5 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class MessageSendRequest {
-    private String content;
-    private String roomId;
+    private String message;
 }

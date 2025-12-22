@@ -4,6 +4,7 @@ package Capstone.capstoneProject.controller;
 import Capstone.capstoneProject.dto.Chats.MessageSendRequest;
 import Capstone.capstoneProject.service.ChallengeImageService;
 import Capstone.capstoneProject.service.ChallengeMessageService;
+import Capstone.capstoneProject.service.ChatBotService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -15,12 +16,19 @@ import org.springframework.stereotype.Controller;
 @RequiredArgsConstructor
 public class WebSocketController {
     private final ChallengeMessageService challengeMessageService;
-    private final ChallengeImageService challengeImageService;
+    private final ChatBotService chatBotService;
+
 
     @MessageMapping("/api/challenges/chat/messages")
     @Operation(summary = "챌린지 채팅 메시지 전송", description = "챌린지 채팅 메시지 전송 시 사용하는 API 입니다.")
-    public void message(@Payload MessageSendRequest request, SimpMessageHeaderAccessor accessor) {
+    public void ChallengeMessage(@Payload MessageSendRequest request, SimpMessageHeaderAccessor accessor) {
         challengeMessageService.sendMessage(request, accessor);
+    }
+
+    @MessageMapping("/api/chat/bot/messages")
+    @Operation(summary = "챗봇 채팅 메시지 전송", description = "챗봇 채팅 메시지 전송 시 사용하는 API 입니다.")
+    public void ChatBotMessage(@Payload MessageSendRequest request, SimpMessageHeaderAccessor accessor) {
+        chatBotService.sendMessage(request, accessor);
     }
 
 

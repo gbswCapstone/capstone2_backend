@@ -21,8 +21,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class
-Users {
+public class Users {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,7 +57,5 @@ Users {
 
     @Column(name="deleted_at")
     private LocalDateTime deletedAt;
-
-
 
 }

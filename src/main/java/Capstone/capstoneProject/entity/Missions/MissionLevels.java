@@ -34,9 +34,6 @@ public class MissionLevels {
     @Column(name="experience", nullable = false)
     private int experience;
 
-    @Column(name="rule", columnDefinition = "TEXT")
-    private String rule;
-
     @Column(name="created_at", nullable = false)
     @CreatedDate
     private LocalDateTime createdAt;

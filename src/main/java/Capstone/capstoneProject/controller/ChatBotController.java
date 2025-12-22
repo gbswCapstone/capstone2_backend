@@ -1,23 +1,71 @@
 package Capstone.capstoneProject.controller;
 
-
+import Capstone.capstoneProject.dto.ChatBot.ChatBotMessageDTO;
 import Capstone.capstoneProject.dto.ChatBot.ChatBotMessageResponse;
-import Capstone.capstoneProject.dto.ChatBot.ChatRoomAnalysisResponse;
-import Capstone.capstoneProject.dto.ChatBot.ChatRoomAnalysisSummary;
 import Capstone.capstoneProject.global.ApiResponse;
 import Capstone.capstoneProject.service.ChatBotService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
-@RequestMapping("api/chatbot")
+@RequestMapping("api/chat/bot")
 @RequiredArgsConstructor
 public class ChatBotController {
     private final ChatBotService chatBotService;
+
+    @PostMapping("/subscribe")
+    @Operation(
+            summary = "챗봇 채팅방 구독",
+            description = """
+    실제 구독은 STOMP(WebSocket)를 사용합니다.
+
+    SUBSCRIBE:
+    /sub/chat/bot/{userId}
+    """
+    )
+    public String chatBotSubscribe() {
+        return "Swagger 표시용 엔드포인트입니다.";
+    }
+
+    @PostMapping("/send")
+    @Operation(
+            summary = "챗봇 메시지 전송 (WebSocket)",
+            description = """
+    실제 메시지 전송은 STOMP(WebSocket)를 사용합니다.
+
+    SEND:
+    /pub/api/chat/bot/messages
+
+    Headers:
+    userId: 유저 ID
+
+    SUBSCRIBE:
+    /sub/chat/bot/{userId}
+    """
+    )
+    public String chatBotMessage() {
+        return "Swagger 표시용 엔드포인트입니다.";
+    }
+
+    @GetMapping("/chat/rooms/messages")
+    @Operation(summary = "챗봇 채팅방 메시지 히스토리 조회", description = "챗봇 채팅방 메시지 히스토리 조회 시 사용하는 API 입니다.")
+    public ResponseEntity<ApiResponse<List<ChatBotMessageDTO>>> getChatBotMessages
+            (@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "30") int size) {
+        List<ChatBotMessageDTO> result = chatBotService.getChatBotMessages(page, size);
+        return ResponseEntity.ok(ApiResponse.ok(result, "조회되었습니다."));
+    }
+
+    @PostMapping("/chat/rooms/analysis")
+    @Operation(summary = "채팅방 소비습관 분석 메시지 생성", description = "챗봇 채팅방에서의 소비습관 분석입니다.")
+    public ResponseEntity<ApiResponse<ChatBotMessageResponse>> chatRoomAnalysis() {
+        ChatBotMessageResponse result = chatBotService.createChatRoomAnalysis();
+        return ResponseEntity.ok(ApiResponse.ok(result, "생성되었습니다."));
+    }
 
     @PostMapping("/chat/summary")
     @Operation(summary = "홈 화면 챗봇 메시지 생성", description = "유저 사용내역 기반으로 챗봇이 답변을 내려줍니다.")
@@ -26,12 +74,8 @@ public class ChatBotController {
         return ResponseEntity.ok(ApiResponse.ok(result, "생성되었습니다."));
     }
 
-    @PostMapping("/chat/rooms/analysis")
-    @Operation(summary = "채팅방 소비습관 분석 메시지 생성", description = "챗봇 채팅방에서의 소비습관 분석입니다.")
-    public ResponseEntity<ApiResponse<ChatRoomAnalysisResponse>> chatRoomAnalysis() {
-        ChatRoomAnalysisResponse result = chatBotService.createChatRoomAnalysis();
-        return ResponseEntity.ok(ApiResponse.ok(result, "생성되었습니다."));
-    }
+
+
 
 
 

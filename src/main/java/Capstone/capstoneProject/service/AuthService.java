@@ -10,6 +10,7 @@ import Capstone.capstoneProject.exceptions.unauthorized.PasswordMismatchExceptio
 import Capstone.capstoneProject.exceptions.notfound.RefreshTokenNotFoundException;
 import Capstone.capstoneProject.exceptions.notfound.UserNotFoundException;
 import Capstone.capstoneProject.repository.AuthTokenRepository;
+import Capstone.capstoneProject.repository.ChatBotMessageRepository;
 import Capstone.capstoneProject.repository.UserProfileRepository;
 import Capstone.capstoneProject.repository.UserRepository;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
@@ -34,6 +35,7 @@ public class AuthService {
     private final AuthTokenRepository authTokenRepository;
     private final UserProfileRepository userProfileRepository;
     private final AuthenticatedUserUtils authenticatedUserUtils;
+    private final ChatBotService chatBotService;
 
 
     public TokenResponse login(LoginRequest request) {
@@ -61,6 +63,9 @@ public class AuthService {
                 .createdAt(LocalDateTime.now())
                 .build();
         authTokenRepository.save(tokenEntity);
+
+        // 챗봇방 생성 or 넘어가기
+        chatBotService.createRoom(user);
 
         return new TokenResponse(accessToken, refreshToken);
     }
