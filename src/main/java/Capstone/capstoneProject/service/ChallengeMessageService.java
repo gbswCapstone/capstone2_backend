@@ -7,6 +7,7 @@ import Capstone.capstoneProject.dto.Chats.MessageSendRequest;
 import Capstone.capstoneProject.entity.Chats.ChatMessages;
 import Capstone.capstoneProject.entity.Chats.ChatRoomUsers;
 import Capstone.capstoneProject.entity.Chats.ChatRooms;
+import Capstone.capstoneProject.entity.Missions.Missions;
 import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.enums.ChatRoomRole;
@@ -48,22 +49,29 @@ public class ChallengeMessageService {
     private final UsageHistoryRepository usageHistoryRepository;
     private final ChatImagesRepository chatImagesRepository;
 
+    private String extractRoomId(String destination) {
+        return destination.split("/room/")[1];
+    }
+
     public void sendMessage(MessageSendRequest request, SimpMessageHeaderAccessor accessor) {
         Principal principal = resolvePrincipal(accessor);
-
         String username = principal.getName();
-
         Users user = userRepository.findByEmailAndDeletedAtIsNull(username)
                 .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
-        ChatRooms chatRoom = chatRoomsRepository.findByRoomId(request.getRoomId())
+        // STOMP destination에서 roomId 추출
+        String destination = accessor.getDestination();
+        String roomId = extractRoomId(destination);
+
+        // 채팅방 조회
+        ChatRooms chatRoom = chatRoomsRepository.findByRoomId(roomId)
                 .orElseThrow(() -> new ChatRoomNotFoundException("해당 채팅방을 찾을 수 없습니다."));
 
         ChatMessages chatMessages = ChatMessages.builder()
                 .users(user)
                 .chatRooms(chatRoom)
                 .messageType(MessageType.TEXT)
-                .content(request.getContent())
+                .content(request.getMessage())
                 .build();
         chatMessagesRepository.save(chatMessages);
 
@@ -71,7 +79,7 @@ public class ChallengeMessageService {
 
         // 메시지 전송
         messagingTemplate.convertAndSend(
-                "/sub/challenges/chat/room/" + request.getRoomId(),
+                "/sub/challenges/chat/room/" + roomId,
                 dto
         );
     }
@@ -261,6 +269,28 @@ public class ChallengeMessageService {
         chatMessagesRepository.save(chatMessages);
 
         ChatMessageDTO dto = ChatMessageDTO.usageShare(chatMessages, usageHistory);
+
+        // 메시지 전송
+        messagingTemplate.convertAndSend(
+                "/sub/challenges/chat/room/" + roomId,
+                dto
+        );
+    }
+
+    public void saveAndSendMissionMessage(String roomId, Missions missions, Users user) {
+
+        ChatRooms chatRoom = chatRoomsRepository.findByRoomId(roomId)
+                .orElseThrow(() -> new ChatRoomNotFoundException("해당 채팅방이 없습니다."));
+
+        ChatMessages chatMessages = ChatMessages.builder()
+                .users(user)
+                .chatRooms(chatRoom)
+                .messageType(MessageType.MISSION)
+                .missions(missions)
+                .build();
+        chatMessagesRepository.save(chatMessages);
+
+        ChatMessageDTO dto = ChatMessageDTO.missionShare(chatMessages, missions);
 
         // 메시지 전송
         messagingTemplate.convertAndSend(

@@ -1,8 +1,6 @@
 package Capstone.capstoneProject.dto.ChatBot;
 
 import Capstone.capstoneProject.dto.Usages.SpendingItem;
-import Capstone.capstoneProject.enums.IncomeCategory;
-import Capstone.capstoneProject.enums.OutlayCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,7 +15,7 @@ import java.math.BigDecimal;
 public class ChatRoomAnalysisSummary {
     private String biggestCategory;
     private SpendingItem mostAmountItemName;
-    private SpendingItem highestPriceItemName;
+    private String highestPriceItemName;
     private BigDecimal totalOutlay;
 
 

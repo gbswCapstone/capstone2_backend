@@ -36,8 +36,8 @@ public class Missions {
     @Column(name="title", nullable = false)
     private String title;
 
-    @Column(name="description", columnDefinition = "TEXT")
-    private String description;
+    @Column(name="rule", columnDefinition = "TEXT", nullable = false)
+    private String rule;
 
     @Column(name="goal_amount")
     private BigDecimal goalAmount;

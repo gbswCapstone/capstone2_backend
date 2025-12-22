@@ -5,10 +5,9 @@ import Capstone.capstoneProject.entity.Chats.ChatRooms;
 import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.exceptions.forbidden.ChatRoomAccessDeniedException;
 import Capstone.capstoneProject.exceptions.notfound.ChatRoomNotFoundException;
-import Capstone.capstoneProject.repository.ChatMessagesRepository;
 import Capstone.capstoneProject.repository.ChatRoomUsersRepository;
 import Capstone.capstoneProject.repository.ChatRoomsRepository;
-import Capstone.capstoneProject.repository.UserRepository;
+import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -19,17 +18,27 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class StompHandler implements ChannelInterceptor {
+public class ChallengeRoomStompHandler implements ChannelInterceptor {
 
     private final ChatRoomUsersRepository chatRoomUsersRepository;
-    private final ChatMessagesRepository chatMessagesRepository;
     private final ChatRoomsRepository chatRoomsRepository;
-    private final UserRepository userRepository;
+    private final AuthenticatedUserUtils authenticatedUserUtils;
 
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+
+        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+            String authHeader = accessor.getFirstNativeHeader("Authorization");
+            if (authHeader == null) {
+                return null;
+            }
+
+            Users user = authenticatedUserUtils.getCurrentUser();
+            accessor.getSessionAttributes().put("user", user);
+        }
+
 
         // 채팅방 구독 시 검증
         if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {

@@ -74,14 +74,18 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                     ? user.getProfile().getNickname()
                     : null;
             accessor.getSessionAttributes().put("nickname", nickname);
-            String roomId = accessor.getFirstNativeHeader("roomId");
-            if (roomId != null) {
-                accessor.getSessionAttributes().put("roomId", roomId);
-            }
+
+            // 챌린지 채팅방 roomId 처리
+//            String roomId = accessor.getFirstNativeHeader("roomId");
+//            if (roomId != null) {
+//                accessor.getSessionAttributes().put("roomId", roomId);
+//            }
         }
 
         if (StompCommand.SEND.equals(accessor.getCommand())) {
-
+            System.out.println("=== SEND 수신 ===");
+            System.out.println("Destination: " + accessor.getDestination());
+            System.out.println("Headers: " + accessor.toNativeHeaderMap());
             // principal 이 null 이면 세션에서 복구
             if (accessor.getUser() == null) {
                 Object saved = accessor.getSessionAttributes().get("userPrincipal");

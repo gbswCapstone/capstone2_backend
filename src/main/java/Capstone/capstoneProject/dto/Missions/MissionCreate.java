@@ -1,6 +1,5 @@
 package Capstone.capstoneProject.dto.Missions;
 
-import Capstone.capstoneProject.enums.PeriodType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,11 +12,10 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @Builder
-public class PersonalMissionCreate {
+public class MissionCreate {
     private String title;
     private String rule;
-    private String description; // null허용
-    private BigDecimal targetAmount;
+    private BigDecimal goalAmount;
     private LocalDate startDate;
     private LocalDate endDate;
 

@@ -35,8 +35,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        StompHandler stompHandler = applicationContext.getBean(StompHandler.class);
-        registration.interceptors(jwtChannelInterceptor, stompHandler);
+        // 챌린지 채팅방
+        ChallengeRoomStompHandler challengeRoomStompHandler =
+                applicationContext.getBean(ChallengeRoomStompHandler.class);
+
+        // 챗봇 채팅방
+        ChatBotRoomStompHandler chatBotRoomStompHandler =
+                applicationContext.getBean(ChatBotRoomStompHandler.class);
+
+        registration.interceptors(jwtChannelInterceptor, challengeRoomStompHandler, chatBotRoomStompHandler);
     }
 
 }

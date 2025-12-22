@@ -4,5 +4,5 @@ import lombok.Getter;
 
 @Getter
 public enum ChatBotSenderType {
-    USER, AI
+    USER, AI, ANALYSIS
 }
