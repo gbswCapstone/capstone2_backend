@@ -140,8 +140,8 @@ public class UsageController {
                     responseCode = "401", description = "로그인이 필요합니다.",
                     content = @Content(schema = @Schema(implementation = UsageSummaryResponse.class)))
     })
-    public ResponseEntity<ApiResponse<UsageSummaryResponse>> getUsageSummary() {
-        UsageSummaryResponse result = usageService.getUsageSummary();
+    public ResponseEntity<ApiResponse<AnalysisResponseDTO>> getUsageSummary() {
+        AnalysisResponseDTO result = usageService.getAiUsageAnalysis();
         return ResponseEntity.ok(ApiResponse.ok(result, "조회되었습니다."));
     }
 

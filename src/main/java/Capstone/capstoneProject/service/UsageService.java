@@ -4,6 +4,7 @@ import Capstone.capstoneProject.dto.Usages.*;
 import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.*;
+import Capstone.capstoneProject.exceptions.badGeteway.ChatBotMessageFailedException;
 import Capstone.capstoneProject.exceptions.badRequest.ConflictingSearchCriteriaException;
 import Capstone.capstoneProject.exceptions.badRequest.InvalidDateRangeException;
 import Capstone.capstoneProject.exceptions.badRequest.InvalidQuantityException;
@@ -479,6 +480,20 @@ public class UsageService {
                 .highestOutlayItemName(highestOutlayItemName)
                 .highestIncomeImporter(highestIncomeImporter)
                 .build();
+    }
+
+    public AnalysisResponseDTO getAiUsageAnalysis() {
+        UsageSummaryResponse request = getUsageSummary();
+        String url = "http://13.125.64.51:8080/analysis";
+        // 요청 그대로 전달
+        ResponseEntity<AnalysisResponseDTO> response =
+                restTemplate.postForEntity(
+                        url, request, AnalysisResponseDTO.class
+                );
+        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+            throw new ChatBotMessageFailedException("챗봇 메시지 생성에 실패했습니다.");
+        }
+        return response.getBody();
     }
 
     public UsageCategory findLeastOutlayCategory(Long userId) {
