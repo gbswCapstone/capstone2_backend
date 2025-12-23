@@ -1,6 +1,5 @@
 package Capstone.capstoneProject.dto.Chats;
 
-import Capstone.capstoneProject.enums.MessageType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -23,7 +23,7 @@ public class ChatMessageDTO {
     private Long senderId;      // 메시지 보낸 사용자 ID
     private String senderName;  // 닉네임
     private MessageType messageType;
-    private String content; // 사용내역 공유시 사용안함
+    private String message; // 사용내역 공유시 사용안함
     private UsageShareDTO usageShareDTO; // 사용내역 공유 시 사용함
     private List<String> imageUrls; // 이미지 전용
     private MissionShareDTO missionShareDTO; // 미션 공유시 사용함
@@ -54,7 +54,7 @@ public class ChatMessageDTO {
         ChatMessageDTO dto = ChatMessageDTO.base(message).build();
 
         if (message.getIsDeleted()) {
-            dto.setContent("삭제된 메시지입니다.");
+            dto.setMessage("삭제된 메시지입니다.");
             return dto;
         }
 
@@ -72,14 +72,14 @@ public class ChatMessageDTO {
                     .build();
 
             default -> dto.toBuilder()
-                    .content(message.getContent())
+                    .message(message.getMessage())
                     .build();
         };
     }
 
     public static ChatMessageDTO deleted(ChatMessages message) {
         return base(message)
-                .content("삭제된 메시지입니다.")
+                .message("삭제된 메시지입니다.")
                 .build();
     }
 
@@ -104,7 +104,7 @@ public class ChatMessageDTO {
         }
 
         return base(message)
-                .content(message.getContent())
+                .message(message.getMessage())
                 .build();
     }
 

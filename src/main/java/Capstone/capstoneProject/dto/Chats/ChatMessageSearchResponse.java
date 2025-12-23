@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ChatMessageSearchResponse {
     private Long messageId;
-    private String content;
+    private String message;
     private MessageType messageType;
     private Long senderId;
     private String senderName;
@@ -23,7 +23,7 @@ public class ChatMessageSearchResponse {
     public static ChatMessageSearchResponse from(ChatMessages chatMessages) {
         return ChatMessageSearchResponse.builder()
                 .messageId(chatMessages.getId())
-                .content(chatMessages.getContent())
+                .message(chatMessages.getMessage())
                 .messageType(chatMessages.getMessageType())
                 .senderId(chatMessages.getUsers().getId())
                 .senderName(chatMessages.getUsers().getProfile().getNickname())
