@@ -17,6 +17,8 @@ public interface UsageHistoryRepository extends JpaRepository<UsageHistory, Long
     Optional<UsageHistory> findByIdAndUsers(Long id, Users user);
     List<UsageHistory> findAllByIdInAndUsers(List<Long> ids, Users user);
     List<UsageHistory> findTop2ByUsersOrderByProDateDesc(Users user);
+    List<UsageHistory> findAllByUsers(Users users);
+
     // 이번달 사용내역 전체 조회
     @Query("SELECT u FROM UsageHistory u WHERE u.users = :user AND u.proDate BETWEEN :start AND :end ORDER BY u.proDate DESC")
     List<UsageHistory> findAllByUsersForCurrentMonth(@Param("user") Users user,

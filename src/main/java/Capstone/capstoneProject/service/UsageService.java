@@ -238,9 +238,6 @@ public class UsageService {
     }
 
 
-
-
-
     public List<UsageResponse> getUsageList(UsageSearchTypeDTO dto, UsageSortType usageSortType) {
         Users user = authenticatedUserUtils.getCurrentUser();
 
@@ -388,10 +385,10 @@ public class UsageService {
             }
         }
 
-        // 아무 값도 없으면 최근 1개월 조회
+        // 아무 값도 없으면 전체 조회
         if (start == null && end == null) {
-            end = LocalDate.now();
-            start = end.minusMonths(1);
+            List<UsageHistory> usages = usageHistoryRepository.findAllByUsers(user);
+            return usages.stream().map(UsageResponse::new).toList();
         }
 
         else {
