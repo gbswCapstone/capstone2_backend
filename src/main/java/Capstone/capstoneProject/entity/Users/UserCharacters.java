@@ -1,7 +1,7 @@
-package Capstone.capstoneProject.entity.Missions;
+package Capstone.capstoneProject.entity.Users;
 
-import Capstone.capstoneProject.entity.Users.Users;
-import Capstone.capstoneProject.enums.MissionStatusType;
+
+import Capstone.capstoneProject.enums.CharacterType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -11,14 +11,14 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name="user_characters")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "user_missions")
 @EntityListeners(AuditingEntityListener.class)
-public class UserMissions {
+public class UserCharacters {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,27 +26,26 @@ public class UserMissions {
 
     @ManyToOne
     @JoinColumn(name="user_id", nullable = false)
-    private Users users;
+    private Users user;
 
-    @ManyToOne
-    @JoinColumn(name="mission_id", nullable = false)
-    private Missions missions;
+    @Column(name="level", nullable = false)
+    private int level;
 
-    @Column(name="status", nullable = false)
+    @Column(name="type", nullable = false)
     @Enumerated(EnumType.STRING)
-    private MissionStatusType missionStatusType;
+    private CharacterType type;
 
-    @Column(name="completed_at")
-    private LocalDateTime completedAt;
+    @Column(name="rating", nullable = false)
+    private String rating;
 
-    @Column(name="experience")
+    @Column(name="experience", nullable = false)
     private int experience;
 
-    @Column(name="created_at", nullable = false)
     @CreatedDate
+    @Column(name="created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name="updated_at", nullable = false)
     @LastModifiedDate
+    @Column(name="updated_at", nullable = false)
     private LocalDateTime updatedAt;
 }

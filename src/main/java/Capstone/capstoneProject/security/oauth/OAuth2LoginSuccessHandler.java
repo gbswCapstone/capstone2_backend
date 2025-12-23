@@ -3,7 +3,7 @@ package Capstone.capstoneProject.security.oauth;
 import Capstone.capstoneProject.global.ApiResponse;
 import Capstone.capstoneProject.dto.TokenResponse;
 import Capstone.capstoneProject.entity.AuthToken;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.exceptions.notfound.UserNotFoundException;
 import Capstone.capstoneProject.repository.AuthTokenRepository;
 import Capstone.capstoneProject.repository.UserRepository;

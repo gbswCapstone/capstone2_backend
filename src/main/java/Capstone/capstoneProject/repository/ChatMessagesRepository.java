@@ -2,6 +2,7 @@ package Capstone.capstoneProject.repository;
 
 import Capstone.capstoneProject.entity.Chats.ChatMessages;
 import Capstone.capstoneProject.entity.Chats.ChatRooms;
+import Capstone.capstoneProject.entity.Missions.Missions;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,6 +16,7 @@ import java.util.Optional;
 public interface ChatMessagesRepository extends JpaRepository<ChatMessages, Long> {
     Page<ChatMessages> findByChatRooms(ChatRooms chatRooms, Pageable pageable);
 
+    Optional<ChatMessages> findByMissionsAndIsDeletedFalse(Missions missions);
 
     Optional<ChatMessages> findByIdAndIsDeletedFalse(Long id);
     Page<ChatMessages> findByChatRoomsAndCreatedAtGreaterThanEqual(

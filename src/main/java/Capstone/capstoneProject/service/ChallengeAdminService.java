@@ -6,7 +6,7 @@ import Capstone.capstoneProject.dto.Chats.NoticeResponse;
 import Capstone.capstoneProject.entity.Chats.ChatNotices;
 import Capstone.capstoneProject.entity.Chats.ChatRoomUsers;
 import Capstone.capstoneProject.entity.Chats.ChatRooms;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.ChatRoomRole;
 import Capstone.capstoneProject.exceptions.forbidden.ChatRoomAccessDeniedException;
 import Capstone.capstoneProject.exceptions.forbidden.ChatRoomHostRequiredException;

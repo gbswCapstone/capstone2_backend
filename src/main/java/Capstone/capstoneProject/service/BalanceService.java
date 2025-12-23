@@ -1,14 +1,13 @@
 package Capstone.capstoneProject.service;
 
 import Capstone.capstoneProject.dto.BalanceDTO;
-import Capstone.capstoneProject.entity.UserAccounts;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.UserAccounts;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.exceptions.notfound.BalanceNotFoundException;
 import Capstone.capstoneProject.repository.UserAccountRepository;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.YearMonth;
 
@@ -21,7 +20,7 @@ public class BalanceService {
     public BalanceDTO createBalance(BalanceDTO request) {
         Users user = authenticatedUserUtils.getCurrentUser();
 
-        UserAccounts userAccounts =UserAccounts.builder()
+        UserAccounts userAccounts = UserAccounts.builder()
                 .user(user)
                 .balance(request.getBalance())
                 .thisIncome(BigDecimal.valueOf(0))

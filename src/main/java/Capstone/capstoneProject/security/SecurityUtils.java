@@ -1,6 +1,6 @@
 package Capstone.capstoneProject.security;
 
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.exceptions.unauthorized.NotAuthenticatedException;
 import Capstone.capstoneProject.repository.UserRepository;
 import Capstone.capstoneProject.security.oauth.CustomOauth2UserDetails;

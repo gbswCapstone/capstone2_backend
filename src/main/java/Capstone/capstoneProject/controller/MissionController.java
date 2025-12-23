@@ -21,29 +21,14 @@ public class MissionController {
 
     private final MissionService missionService;
 
-    @PostMapping("/personal")
-    @Operation(summary = "개인 미션 생성", description = "미션 생성 시 사용하는 API 입니다.")
-    public ResponseEntity<ApiResponse<MissionResponse>> createMission
-            (@RequestBody MissionCreate request) {
-        MissionResponse result = missionService.createPersonalMission(request);
-        return ResponseEntity.ok(ApiResponse.ok(result, "생성되었습니다."));
-    }
+//    @PostMapping("/personal")
+//    @Operation(summary = "개인 미션 생성", description = "미션 생성 시 사용하는 API 입니다.")
+//    public ResponseEntity<ApiResponse<MissionResponse>> createMission
+//            (@RequestBody MissionCreate request) {
+//        MissionResponse result = missionService.createPersonalMission(request);
+//        return ResponseEntity.ok(ApiResponse.ok(result, "생성되었습니다."));
+//    }
 
-    @PostMapping("/challenges/rooms/{roomId}")
-    @Operation(summary = "챌린지 미션 생성 및 전송", description =
-            "챌린지 미션 생성 및 전송 시 사용하는 API 입니다." + "미션 생성자는 자동으로 미션에 참가됩니다.")
-    public ResponseEntity<ApiResponse<MissionResponse>> createChallengeMission
-            (@PathVariable String roomId, @RequestBody MissionCreate request) {
-        MissionResponse result = missionService.createChallengeMission(roomId, request);
-        return ResponseEntity.ok(ApiResponse.ok(result, "생성 및 전송되었습니다."));
-    }
-
-    @PostMapping("/challenges/join/{missionId}")
-    @Operation(summary = "챌린지 미션 참가하기", description = "챌린지 미션 참가 시 사용하는 API 입니다.")
-    public ResponseEntity<ApiResponse<Void>> challengeMissionJoin(@PathVariable Long missionId) {
-        missionService.joinChallengeMission(missionId);
-        return ResponseEntity.ok(ApiResponse.ok("참가되었습니다."));
-    }
 
 //    @PostMapping("/complete/{missionId}")
 //    @Operation(summary = "미션 완료하기", description = "미션 완료 시 사용하는 API 입니다.")

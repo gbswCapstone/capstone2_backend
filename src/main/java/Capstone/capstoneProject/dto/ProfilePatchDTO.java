@@ -1,7 +1,8 @@
 package Capstone.capstoneProject.dto;
 
-import Capstone.capstoneProject.entity.UserProfile;
-import Capstone.capstoneProject.entity.Users;
+
+import Capstone.capstoneProject.entity.Users.UserProfile;
+import Capstone.capstoneProject.entity.Users.Users;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

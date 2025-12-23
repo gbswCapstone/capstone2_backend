@@ -2,7 +2,7 @@ package Capstone.capstoneProject.config;
 
 
 import Capstone.capstoneProject.entity.Chats.ChatRooms;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.exceptions.forbidden.ChatRoomAccessDeniedException;
 import Capstone.capstoneProject.exceptions.notfound.ChatRoomNotFoundException;
 import Capstone.capstoneProject.repository.ChatRoomUsersRepository;
@@ -30,13 +30,14 @@ public class ChallengeRoomStompHandler implements ChannelInterceptor {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-            String authHeader = accessor.getFirstNativeHeader("Authorization");
-            if (authHeader == null) {
-                return null;
-            }
-
-            Users user = authenticatedUserUtils.getCurrentUser();
-            accessor.getSessionAttributes().put("user", user);
+//            String authHeader = accessor.getFirstNativeHeader("Authorization");
+//            if (authHeader == null) {
+//                return null;
+//            }
+//
+//            Users user = authenticatedUserUtils.getCurrentUser();
+//            accessor.getSessionAttributes().put("user", user);
+            return message;
         }
 
 

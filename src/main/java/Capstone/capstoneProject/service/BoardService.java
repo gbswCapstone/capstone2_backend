@@ -6,7 +6,7 @@ import Capstone.capstoneProject.entity.Boards.BoardImages;
 import Capstone.capstoneProject.entity.Boards.BoardLikes;
 import Capstone.capstoneProject.entity.Boards.BoardVideos;
 import Capstone.capstoneProject.entity.Boards.Boards;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.BoardCategory;
 import Capstone.capstoneProject.enums.SortType;
 import Capstone.capstoneProject.exceptions.forbidden.NotBoardOwnerException;

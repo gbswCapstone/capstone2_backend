@@ -1,4 +1,4 @@
-package Capstone.capstoneProject.entity;
+package Capstone.capstoneProject.entity.Users;
 
 import jakarta.persistence.*;
 import lombok.*;

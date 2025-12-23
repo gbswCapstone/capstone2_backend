@@ -9,7 +9,7 @@ import Capstone.capstoneProject.entity.Chats.ChatRoomUsers;
 import Capstone.capstoneProject.entity.Chats.ChatRooms;
 import Capstone.capstoneProject.entity.Missions.Missions;
 import Capstone.capstoneProject.entity.UsageHistory;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.ChatRoomRole;
 import Capstone.capstoneProject.enums.MessageType;
 import Capstone.capstoneProject.exceptions.badRequest.TextMessageRequiredException;
@@ -48,6 +48,8 @@ public class ChallengeMessageService {
     private final SimpMessagingTemplate messagingTemplate;
     private final UsageHistoryRepository usageHistoryRepository;
     private final ChatImagesRepository chatImagesRepository;
+    private final MissionRepository missionRepository;
+    private final UserMissionRepository userMissionRepository;
 
     private String extractRoomId(String destination) {
         return destination.split("/room/")[1];
@@ -137,19 +139,26 @@ public class ChallengeMessageService {
                 .map(message -> {
                     UsageHistory usage = null;
                     List<String> imageUrls = null;
-
+                    Missions missions = null;
+                    int currentParticipants = 0;
                     if (message.getMessageType() == MessageType.USAGE_SHARE) {
                         usage = usageHistoryRepository
                                 .findById(message.getUsageId())
                                 .orElse(null);
                     }
-
                     if (message.getMessageType() == MessageType.IMAGE) {
                         imageUrls =
                                 chatImagesRepository.findImageUrlByChatMessages(message);
                     }
-
-                    return ChatMessageDTO.from(message, usage, imageUrls);
+                    if (message.getMessageType() == MessageType.MISSION) {
+                        missions = message.getMissions();
+                        if (missions != null) {
+                            currentParticipants = userMissionRepository.countByMissionsId(missions.getId());
+                        }
+                        missions = missionRepository.findByChallenges(chatRooms.getChallenge())
+                                .orElse(null);
+                    }
+                    return ChatMessageDTO.from(message, usage, imageUrls, missions, currentParticipants);
                 })
                 .toList();
     }
@@ -160,9 +169,6 @@ public class ChallengeMessageService {
         ChatMessages chatMessages = chatMessagesRepository.findById(messageId)
                 .orElseThrow(() -> new ChatRoomMessageNotFoundException("채팅방의 해당 메시지를 찾을 수 없습니다."));
 
-        if (chatMessages.getMessageType() != MessageType.TEXT) {
-            throw new TextMessageRequiredException("이미지 메시지가 아닙니다.");
-        }
         ChatRoomUsers chatRoomUsers = chatRoomUsersRepository.findByChatRooms_RoomIdAndUsers(chatMessages.getChatRooms().getRoomId(), user)
                 .orElseThrow(() -> new ChatRoomAccessDeniedException("해당 채팅방의 유저가 아닙니다."));
 
@@ -290,9 +296,18 @@ public class ChallengeMessageService {
                 .build();
         chatMessagesRepository.save(chatMessages);
 
-        ChatMessageDTO dto = ChatMessageDTO.missionShare(chatMessages, missions);
+        int currentParticipants = userMissionRepository.countByMissionsId(missions.getId());
+        ChatMessageDTO dto = ChatMessageDTO.missionShare(chatMessages, missions, currentParticipants);
 
         // 메시지 전송
+        messagingTemplate.convertAndSend(
+                "/sub/challenges/chat/room/" + roomId,
+                dto
+        );
+    }
+
+    public void updateMissionMessage(String roomId, ChatMessageDTO dto) {
+        // 수정한거 채팅방에 바로 반영
         messagingTemplate.convertAndSend(
                 "/sub/challenges/chat/room/" + roomId,
                 dto

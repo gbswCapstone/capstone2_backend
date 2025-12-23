@@ -1,6 +1,5 @@
 package Capstone.capstoneProject.config;
 
-import Capstone.capstoneProject.entity.Users;
 import Capstone.capstoneProject.repository.ChatBotRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
@@ -21,70 +20,53 @@ public class ChatBotRoomStompHandler implements ChannelInterceptor {
 
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
         StompCommand command = accessor.getCommand();
-        String destination = accessor.getDestination();
 
-        // 세션으로 유저 확인
-        if (StompCommand.CONNECT.equals(command)) {
-            return message;
-        }
-
-        Users sessionUser = (Users) accessor.getSessionAttributes().get("user");
-        if (sessionUser == null) {
-            return null;
-        }
-
-        // 챗봇 방 구독 검증
-        if (StompCommand.SUBSCRIBE.equals(command)) {
-
-            if (destination == null || !destination.contains("/chat/bot/")) {
-                return null;
-            }
-
-            Long targetUserId;
-            try {
-                targetUserId = Long.parseLong(destination.split("/bot/")[1]);
-            } catch (Exception e) {
-                return null;
-            }
-
-            // 본인 챗봇 채팅방만 구독 가능
-            if (!sessionUser.getId().equals(targetUserId)) {
-                return null;
-            }
-
-            // 챗봇 채팅방 존재 여부 확인
-            chatBotRoomRepository.findByUser(sessionUser)
-                    .orElse(null);
-        }
-
-        // 메시지 전송
-        if (StompCommand.SEND.equals(command)) {
-
-            if (destination == null || !destination.contains("/chat/bot/messages")) {
-                return null;
-            }
-
-            String userIdHeader = accessor.getFirstNativeHeader("userId");
-            if (userIdHeader == null) {
-                return null;
-            }
-
-            Long targetUserId;
-            try {
-                targetUserId = Long.parseLong(userIdHeader);
-            } catch (Exception e) {
-                return null;
-            }
-
-            // 본인 챗봇 채팅방에만 메시지 전송 가능
-            if (!sessionUser.getId().equals(targetUserId)) {
-                return null;
-            }
-
-            chatBotRoomRepository.findByUser(sessionUser)
-                    .orElse(null);
-        }
-
+//        // CONNECT 절대 건드리지 않음
+//        if (command == StompCommand.CONNECT) {
+//            return message;
+//        }
+//
+//        String destination = accessor.getDestination();
+//
+//        // 챗봇 경로가 아니면 그냥 통과
+//        if (destination == null || !destination.contains("/chat/bot")) {
+//            return message;
+//        }
+//
+//        Users sessionUser = (Users) accessor.getSessionAttributes().get("user");
+//        if (sessionUser == null) {
+//            throw new ChatBotRoomAccessDeniedException("인증되지 않은 사용자");
+//        }
+//
+//        // 구독 검증
+//        if (command == StompCommand.SUBSCRIBE) {
+//
+//            Long targetUserId;
+//            try {
+//                targetUserId = Long.parseLong(destination.split("/bot/")[1]);
+//            } catch (Exception e) {
+//                throw new IllegalArgumentException("잘못된 구독 경로");
+//            }
+//
+//            if (!sessionUser.getId().equals(targetUserId)) {
+//                throw new IllegalStateException("본인 챗봇 방만 구독 가능");
+//            }
+//
+//            chatBotRoomRepository.findByUser(sessionUser)
+//                    .orElseThrow(() -> new IllegalStateException("챗봇 채팅방 없음"));
+//        }
+//
+//        // 메시지 전송 검증
+//        if (command == StompCommand.SEND) {
+//            // 경로 검증
+//            if (!destination.contains("/chat/bot/messages")) {
+//                return message;
+//            }
+//
+//            chatBotRoomRepository.findByUser(sessionUser)
+//                    .orElseThrow(() -> new ChatBotRoomNotFoundException("해당 챗봇 채팅방을 찾을 수 없습니다."));
+//        }
         return message;
     }
 }
+

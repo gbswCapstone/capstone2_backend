@@ -7,7 +7,7 @@ import Capstone.capstoneProject.dto.Challenges.ChallengeListDTO;
 import Capstone.capstoneProject.dto.LikeResponseDTO;
 import Capstone.capstoneProject.entity.Chats.ChatRoomUsers;
 import Capstone.capstoneProject.entity.Chats.ChatRooms;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.entity.challenges.*;
 import Capstone.capstoneProject.enums.ChatRoomRole;
 import Capstone.capstoneProject.enums.SortType;

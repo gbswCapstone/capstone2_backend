@@ -3,14 +3,13 @@ package Capstone.capstoneProject.service;
 import Capstone.capstoneProject.dto.*;
 import Capstone.capstoneProject.entity.AuthToken;
 
-import Capstone.capstoneProject.entity.Users;
-import Capstone.capstoneProject.entity.UserProfile;
+import Capstone.capstoneProject.entity.Users.UserProfile;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.UserRole;
 import Capstone.capstoneProject.exceptions.unauthorized.PasswordMismatchException;
 import Capstone.capstoneProject.exceptions.notfound.RefreshTokenNotFoundException;
 import Capstone.capstoneProject.exceptions.notfound.UserNotFoundException;
 import Capstone.capstoneProject.repository.AuthTokenRepository;
-import Capstone.capstoneProject.repository.ChatBotMessageRepository;
 import Capstone.capstoneProject.repository.UserProfileRepository;
 import Capstone.capstoneProject.repository.UserRepository;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;

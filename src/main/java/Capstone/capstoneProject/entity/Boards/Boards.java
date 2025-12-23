@@ -1,7 +1,7 @@
 package Capstone.capstoneProject.entity.Boards;
 
 import Capstone.capstoneProject.entity.Comments;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.BoardCategory;
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,6 +1,6 @@
 package Capstone.capstoneProject.repository;
 
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.entity.challenges.Challenges;
 import Capstone.capstoneProject.entity.challenges.ChallengeLikes;
 import org.springframework.data.jpa.repository.JpaRepository;

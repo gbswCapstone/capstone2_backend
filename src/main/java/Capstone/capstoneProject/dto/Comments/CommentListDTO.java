@@ -3,7 +3,7 @@ package Capstone.capstoneProject.dto.Comments;
 import Capstone.capstoneProject.dto.UserSummaryDTO;
 import Capstone.capstoneProject.entity.Boards.Boards;
 import Capstone.capstoneProject.entity.Comments;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

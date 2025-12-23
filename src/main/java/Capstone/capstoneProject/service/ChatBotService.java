@@ -7,7 +7,7 @@ import Capstone.capstoneProject.entity.ChatBot.ChatBotMessages;
 import Capstone.capstoneProject.entity.ChatBot.ChatBotRooms;
 import Capstone.capstoneProject.entity.ChatBot.HomeChatBotMessages;
 import Capstone.capstoneProject.entity.UsageHistory;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.ChatBotSenderType;
 import Capstone.capstoneProject.exceptions.badGeteway.ChatBotMessageFailedException;
 import Capstone.capstoneProject.exceptions.notfound.ChatBotRoomNotFoundException;
@@ -26,7 +26,6 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;

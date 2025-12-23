@@ -1,9 +1,8 @@
 package Capstone.capstoneProject.dto.Chats;
 
-import Capstone.capstoneProject.dto.UserSummaryDTO;
 import Capstone.capstoneProject.entity.Chats.ChatNotices;
 import Capstone.capstoneProject.entity.Chats.ChatRoomUsers;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

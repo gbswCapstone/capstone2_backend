@@ -1,7 +1,7 @@
 package Capstone.capstoneProject.repository;
 
 import Capstone.capstoneProject.entity.ChatBot.HomeChatBotMessages;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -20,7 +20,7 @@ public class ChatBotController {
 
     @PostMapping("/subscribe")
     @Operation(
-            summary = "챗봇 채팅방 구독",
+            summary = "챗봇 채팅방 구독(WebSocket)",
             description = """
     실제 구독은 STOMP(WebSocket)를 사용합니다.
 
