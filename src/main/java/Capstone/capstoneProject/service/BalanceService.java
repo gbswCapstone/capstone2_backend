@@ -3,6 +3,8 @@ package Capstone.capstoneProject.service;
 import Capstone.capstoneProject.dto.BalanceDTO;
 import Capstone.capstoneProject.entity.Users.UserAccounts;
 import Capstone.capstoneProject.entity.Users.Users;
+import Capstone.capstoneProject.exceptions.conflict.AlreadyJoinedException;
+import Capstone.capstoneProject.exceptions.conflict.BalanceAlreadyExistsException;
 import Capstone.capstoneProject.exceptions.notfound.BalanceNotFoundException;
 import Capstone.capstoneProject.repository.UserAccountRepository;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
@@ -19,6 +21,12 @@ public class BalanceService {
 
     public BalanceDTO createBalance(BalanceDTO request) {
         Users user = authenticatedUserUtils.getCurrentUser();
+
+        boolean isBalanced = userAccountRepository.existsByUser(user);
+
+        if (isBalanced) {
+            throw new BalanceAlreadyExistsException("잔액 정보가 이미 존재합니다.");
+        }
 
         UserAccounts userAccounts = UserAccounts.builder()
                 .user(user)
