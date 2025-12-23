@@ -1,8 +1,8 @@
 package Capstone.capstoneProject.service;
 
 import Capstone.capstoneProject.dto.Characters.CharacterResponse;
-import Capstone.capstoneProject.entity.UserCharacters;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.UserCharacters;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.exceptions.notfound.UserCharacterNotFoundException;
 import Capstone.capstoneProject.repository.UserCharacterRepository;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;

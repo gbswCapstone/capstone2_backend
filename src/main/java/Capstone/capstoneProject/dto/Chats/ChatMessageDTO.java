@@ -18,8 +18,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class ChatMessageDTO {
-
-
     private Long id; // 메시지 아이디
     private String roomId;        // 채팅방 ID
     private Long senderId;      // 메시지 보낸 사용자 ID
@@ -49,7 +47,9 @@ public class ChatMessageDTO {
     public static ChatMessageDTO from(
             ChatMessages message,
             UsageHistory usageHistory,
-            List<String> imageUrls
+            List<String> imageUrls,
+            Missions missions,
+            int currentParticipants
     ) {
         ChatMessageDTO dto = ChatMessageDTO.base(message).build();
 
@@ -65,6 +65,10 @@ public class ChatMessageDTO {
 
             case USAGE_SHARE -> dto.toBuilder()
                     .usageShareDTO(UsageShareDTO.from(usageHistory))
+                    .build();
+
+            case MISSION -> dto.toBuilder()
+                    .missionShareDTO(MissionShareDTO.from(missions, currentParticipants))
                     .build();
 
             default -> dto.toBuilder()
@@ -125,13 +129,13 @@ public class ChatMessageDTO {
                 .build();
     }
 
-    public static ChatMessageDTO missionShare(ChatMessages messages, Missions mission) {
+    public static ChatMessageDTO missionShare(ChatMessages messages, Missions mission, int currentParticipants) {
         if (messages.getIsDeleted()) {
             return base(messages).build();
         }
 
         return base(messages)
-                .missionShareDTO(MissionShareDTO.from(mission))
+                .missionShareDTO(MissionShareDTO.from(mission, currentParticipants))
                 .build();
     }
 

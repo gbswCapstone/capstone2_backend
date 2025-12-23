@@ -1,11 +1,13 @@
 package Capstone.capstoneProject.entity;
 
 
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.HistoryType;
 import Capstone.capstoneProject.enums.UsageCategory;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -18,6 +20,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 public class UsageHistory {
 
     @Id

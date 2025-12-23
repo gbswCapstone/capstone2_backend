@@ -34,7 +34,7 @@ public class BalanceController {
     @PutMapping
     @Operation(summary = "유저 잔액 수정", description = "유저 잔액 수정 시 사용하는 API 입니다.")
     public ResponseEntity<ApiResponse<BalanceDTO>> patchBalance
-            (@PathVariable Long id, @RequestBody BalanceDTO request) {
+            (@RequestBody BalanceDTO request) {
         BalanceDTO result = balanceService.patchBalance(request);
         return ResponseEntity.ok(ApiResponse.ok(result, "수정되었습니다."));
     }

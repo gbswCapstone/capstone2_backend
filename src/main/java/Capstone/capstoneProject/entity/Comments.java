@@ -1,6 +1,7 @@
 package Capstone.capstoneProject.entity;
 
 import Capstone.capstoneProject.entity.Boards.Boards;
+import Capstone.capstoneProject.entity.Users.Users;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;

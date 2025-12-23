@@ -1,6 +1,6 @@
 package Capstone.capstoneProject.config;
 
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.exceptions.forbidden.InvalidJwtAuthenticationException;
 import Capstone.capstoneProject.exceptions.notfound.UserNotFoundException;
 import Capstone.capstoneProject.repository.UserRepository;
@@ -13,6 +13,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -74,8 +75,6 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                     ? user.getProfile().getNickname()
                     : null;
             accessor.getSessionAttributes().put("nickname", nickname);
-
-            // 챌린지 채팅방 roomId 처리
 //            String roomId = accessor.getFirstNativeHeader("roomId");
 //            if (roomId != null) {
 //                accessor.getSessionAttributes().put("roomId", roomId);
@@ -83,9 +82,7 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
         }
 
         if (StompCommand.SEND.equals(accessor.getCommand())) {
-            System.out.println("=== SEND 수신 ===");
-            System.out.println("Destination: " + accessor.getDestination());
-            System.out.println("Headers: " + accessor.toNativeHeaderMap());
+
             // principal 이 null 이면 세션에서 복구
             if (accessor.getUser() == null) {
                 Object saved = accessor.getSessionAttributes().get("userPrincipal");
@@ -93,6 +90,9 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                 if (saved instanceof Principal savedUser) {
                     accessor.setUser(savedUser);
                 }
+            }
+            if (accessor.getUser() == null) {
+                throw new AccessDeniedException("STOMP SEND 인증 실패");
             }
         }
 
@@ -107,4 +107,5 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
         return null;
     }
 }
+
 

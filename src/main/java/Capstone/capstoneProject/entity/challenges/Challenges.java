@@ -1,6 +1,6 @@
 package Capstone.capstoneProject.entity.challenges;
 
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.UserJobs;
 import jakarta.persistence.*;
 import lombok.*;

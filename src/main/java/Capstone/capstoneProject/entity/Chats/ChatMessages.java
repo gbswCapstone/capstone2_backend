@@ -1,7 +1,7 @@
 package Capstone.capstoneProject.entity.Chats;
 
 import Capstone.capstoneProject.entity.Missions.Missions;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.MessageType;
 import jakarta.persistence.*;
 import lombok.*;

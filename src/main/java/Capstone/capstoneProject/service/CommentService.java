@@ -9,7 +9,7 @@ import Capstone.capstoneProject.dto.UserSummaryDTO;
 import Capstone.capstoneProject.entity.Boards.Boards;
 import Capstone.capstoneProject.entity.CommentLikes;
 import Capstone.capstoneProject.entity.Comments;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.SortType;
 import Capstone.capstoneProject.exceptions.notfound.BoardNotFoundException;
 import Capstone.capstoneProject.exceptions.notfound.CommentNotFoundException;

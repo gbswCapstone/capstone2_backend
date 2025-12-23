@@ -1,9 +1,7 @@
 package Capstone.capstoneProject.repository;
 
 import Capstone.capstoneProject.entity.UsageHistory;
-import Capstone.capstoneProject.entity.Users;
-import Capstone.capstoneProject.enums.IncomeCategory;
-import Capstone.capstoneProject.enums.OutlayCategory;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.UsageCategory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

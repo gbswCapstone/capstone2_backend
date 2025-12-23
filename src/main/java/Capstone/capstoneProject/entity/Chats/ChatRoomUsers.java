@@ -1,6 +1,6 @@
 package Capstone.capstoneProject.entity.Chats;
 
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.ChatRoomRole;
 import jakarta.persistence.*;
 import lombok.*;

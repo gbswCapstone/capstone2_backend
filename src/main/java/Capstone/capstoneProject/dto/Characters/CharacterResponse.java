@@ -1,6 +1,7 @@
 package Capstone.capstoneProject.dto.Characters;
 
-import Capstone.capstoneProject.entity.UserCharacters;
+
+import Capstone.capstoneProject.entity.Users.UserCharacters;
 import Capstone.capstoneProject.enums.CharacterType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,11 +1,9 @@
 package Capstone.capstoneProject.dto.Boards;
 
-import Capstone.capstoneProject.dto.Comments.CommentListDTO;
 import Capstone.capstoneProject.dto.UserSummaryDTO;
 import Capstone.capstoneProject.entity.Boards.Boards;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.BoardCategory;
-import Capstone.capstoneProject.repository.CommentRepository;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

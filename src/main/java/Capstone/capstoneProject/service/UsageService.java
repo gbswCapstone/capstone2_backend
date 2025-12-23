@@ -2,7 +2,7 @@ package Capstone.capstoneProject.service;
 
 import Capstone.capstoneProject.dto.Usages.*;
 import Capstone.capstoneProject.entity.UsageHistory;
-import Capstone.capstoneProject.entity.Users;
+import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.*;
 import Capstone.capstoneProject.exceptions.badRequest.ConflictingSearchCriteriaException;
 import Capstone.capstoneProject.exceptions.badRequest.InvalidDateRangeException;
