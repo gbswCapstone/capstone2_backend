@@ -10,5 +10,5 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class MessagePatchRequest {
-    private String content;
+    private String message;
 }

@@ -121,16 +121,16 @@ public class ChallengeService {
 
         if (finalSort == SortType.POPULAR) {
             challenges = (finalJob == UserJobs.NONE)
-                    ? challengeRepository.findAllByOrderByLikeCountDescCreatedAtDesc()
-                    : challengeRepository.findAllByJobOrderByLikeCountDescCreatedAtDesc(finalJob);
+                    ? challengeRepository.findAllByDeletedAtIsNullOrderByLikeCountDescCreatedAtDesc()
+                    : challengeRepository.findAllByJobAndDeletedAtIsNullOrderByLikeCountDescCreatedAtDesc(finalJob);
         } else if (finalSort == SortType.OLDEST) {
             challenges = (finalJob == UserJobs.NONE)
-                    ? challengeRepository.findAllByOrderByCreatedAtAsc()
-                    : challengeRepository.findAllByJobOrderByCreatedAtAsc(finalJob);
+                    ? challengeRepository.findAllByDeletedAtIsNullOrderByCreatedAtAsc()
+                    : challengeRepository.findAllByJobAndDeletedAtIsNullOrderByCreatedAtAsc(finalJob);
         } else { // RECENT
             challenges = (finalJob == UserJobs.NONE)
-                    ? challengeRepository.findAllByOrderByCreatedAtDesc()
-                    : challengeRepository.findAllByJobOrderByCreatedAtDesc(finalJob);
+                    ? challengeRepository.findAllByDeletedAtIsNullOrderByCreatedAtDesc()
+                    : challengeRepository.findAllByJobAndDeletedAtIsNullOrderByCreatedAtDesc(finalJob);
         }
 
         return challenges.stream()

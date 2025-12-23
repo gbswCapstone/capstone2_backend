@@ -1,6 +1,7 @@
 package Capstone.capstoneProject.controller;
 
 
+import Capstone.capstoneProject.dto.Chats.ChallengeMessageRequest;
 import Capstone.capstoneProject.dto.Chats.MessageSendRequest;
 import Capstone.capstoneProject.service.ChallengeImageService;
 import Capstone.capstoneProject.service.ChallengeMessageService;
@@ -21,7 +22,7 @@ public class WebSocketController {
 
     @MessageMapping("/api/challenges/chat/messages")
     @Operation(summary = "챌린지 채팅 메시지 전송", description = "챌린지 채팅 메시지 전송 시 사용하는 API 입니다.")
-    public void ChallengeMessage(@Payload MessageSendRequest request, SimpMessageHeaderAccessor accessor) {
+    public void ChallengeMessage(@Payload ChallengeMessageRequest request, SimpMessageHeaderAccessor accessor) {
         challengeMessageService.sendMessage(request, accessor);
     }
 

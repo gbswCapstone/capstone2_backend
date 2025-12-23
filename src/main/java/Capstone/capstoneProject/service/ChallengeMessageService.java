@@ -1,9 +1,6 @@
 package Capstone.capstoneProject.service;
 
-import Capstone.capstoneProject.dto.Chats.ChatMessageDTO;
-import Capstone.capstoneProject.dto.Chats.ChatMessageSearchResponse;
-import Capstone.capstoneProject.dto.Chats.MessagePatchRequest;
-import Capstone.capstoneProject.dto.Chats.MessageSendRequest;
+import Capstone.capstoneProject.dto.Chats.*;
 import Capstone.capstoneProject.entity.Chats.ChatMessages;
 import Capstone.capstoneProject.entity.Chats.ChatRoomUsers;
 import Capstone.capstoneProject.entity.Chats.ChatRooms;
@@ -12,7 +9,6 @@ import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.ChatRoomRole;
 import Capstone.capstoneProject.enums.MessageType;
-import Capstone.capstoneProject.exceptions.badRequest.TextMessageRequiredException;
 import Capstone.capstoneProject.exceptions.forbidden.ChatMessageAccessDeniedException;
 import Capstone.capstoneProject.exceptions.forbidden.ChatRoomAccessDeniedException;
 import Capstone.capstoneProject.exceptions.notfound.ChatRoomMessageNotFoundException;
@@ -31,7 +27,6 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -55,15 +50,13 @@ public class ChallengeMessageService {
         return destination.split("/room/")[1];
     }
 
-    public void sendMessage(MessageSendRequest request, SimpMessageHeaderAccessor accessor) {
+    public void sendMessage(ChallengeMessageRequest request, SimpMessageHeaderAccessor accessor) {
         Principal principal = resolvePrincipal(accessor);
         String username = principal.getName();
         Users user = userRepository.findByEmailAndDeletedAtIsNull(username)
                 .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
-        // STOMP destination에서 roomId 추출
-        String destination = accessor.getDestination();
-        String roomId = extractRoomId(destination);
+        String roomId = request.getRoomId();
 
         // 채팅방 조회
         ChatRooms chatRoom = chatRoomsRepository.findByRoomId(roomId)
@@ -73,7 +66,7 @@ public class ChallengeMessageService {
                 .users(user)
                 .chatRooms(chatRoom)
                 .messageType(MessageType.TEXT)
-                .content(request.getMessage())
+                .message(request.getMessage())
                 .build();
         chatMessagesRepository.save(chatMessages);
 
@@ -98,10 +91,10 @@ public class ChallengeMessageService {
             throw new ChatMessageAccessDeniedException("채팅방의 해당 메시지에 관한 권한이 없습니다.");
         }
 
-        if (!StringUtils.hasText(request.getContent())) {
+        if (!StringUtils.hasText(request.getMessage())) {
             throw new IllegalArgumentException("메시지 내용은 비어 있을 수 없습니다.");
         }
-        chatMessages.setContent(request.getContent());
+        chatMessages.setMessage(request.getMessage());
         chatMessagesRepository.save(chatMessages);
 
         // 수정한거 채팅방에 바로 반영
@@ -231,7 +224,7 @@ public class ChallengeMessageService {
                 .chatRooms(chatRoom)
                 .users(user)
                 .messageType(MessageType.ENTER)
-                .content(user.getProfile().getNickname() + "님이 입장했습니다.")
+                .message(user.getProfile().getNickname() + "님이 입장했습니다.")
                 .build();
 
         enterEntity = chatMessagesRepository.save(enterEntity);
@@ -251,7 +244,7 @@ public class ChallengeMessageService {
                 .chatRooms(chatRoom)
                 .users(user)
                 .messageType(MessageType.LEAVE)
-                .content(user.getProfile().getNickname() + "님이 퇴장했습니다.")
+                .message(user.getProfile().getNickname() + "님이 퇴장했습니다.")
                 .build();
 
         leaveEntity = chatMessagesRepository.save(leaveEntity);

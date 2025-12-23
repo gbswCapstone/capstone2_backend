@@ -41,8 +41,8 @@ public class ChatMessages {
     @Enumerated(EnumType.STRING)
     private MessageType messageType;
 
-    @Column(name="content", columnDefinition = "TEXT")
-    private String content;
+    @Column(name="message", columnDefinition = "TEXT")
+    private String message;
 
     @Column(name="is_deleted", nullable = false)
     private Boolean isDeleted;

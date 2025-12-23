@@ -12,23 +12,23 @@ import java.util.Optional;
 public interface ChallengeRepository extends JpaRepository<Challenges, Long>, ChallengeRepositoryCustom {
 
     // job 없이 조회 최신순
-    List<Challenges> findAllByOrderByCreatedAtDesc();
+    List<Challenges> findAllByDeletedAtIsNullOrderByCreatedAtDesc();
 
     // job 없이 조회 오래된순
-    List<Challenges> findAllByOrderByCreatedAtAsc();
+    List<Challenges> findAllByDeletedAtIsNullOrderByCreatedAtAsc();
 
     // job 없이 인기순(좋아요순) + 최신순-
-    List<Challenges> findAllByOrderByLikeCountDescCreatedAtDesc();
+    List<Challenges> findAllByDeletedAtIsNullOrderByLikeCountDescCreatedAtDesc();
 
     // job 조회 인기순(좋아요순) + 최신순
-    List<Challenges> findAllByJobOrderByLikeCountDescCreatedAtDesc(UserJobs job);
+    List<Challenges> findAllByJobAndDeletedAtIsNullOrderByLikeCountDescCreatedAtDesc(UserJobs job);
 
     // job 조회 최신순
 
-    List<Challenges> findAllByJobOrderByCreatedAtDesc(UserJobs job);
+    List<Challenges> findAllByJobAndDeletedAtIsNullOrderByCreatedAtDesc(UserJobs job);
 
     // job 조회 오래된순
-    List<Challenges> findAllByJobOrderByCreatedAtAsc(UserJobs job);
+    List<Challenges> findAllByJobAndDeletedAtIsNullOrderByCreatedAtAsc(UserJobs job);
 
 
     Optional<Challenges> findByIdAndDeletedAtIsNull(Long challengeId);

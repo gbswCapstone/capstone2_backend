@@ -30,7 +30,7 @@ public interface ChatMessagesRepository extends JpaRepository<ChatMessages, Long
     SELECT m FROM ChatMessages m
     WHERE m.chatRooms.roomId = :roomId
       AND m.messageType = 'TEXT'
-      AND m.content LIKE %:keyword%
+      AND m.message LIKE %:keyword%
     ORDER BY m.createdAt DESC
 """)
     List<ChatMessages> searchByRoomIdAndKeyword(
