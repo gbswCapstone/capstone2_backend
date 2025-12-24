@@ -4,8 +4,10 @@ import lombok.Getter;
 
 @Getter
 public enum MissionType {
-    AMOUNT,       // 금액 기준
-    COUNT,        // 횟수 기준
-    NO_EXPENSE,   // 무지출
-    ATTENDANCE    // 출석
+    SPENDING_COUNT, // 지출 횟수 제한
+    INCOME_GOAL, // 수입 목표 금액
+    OUTLAY_GOAL, // 지출 목표 금액
+    MONTHLY_OUTLAY_GOAL, // 이번달 목표 지출
+    ATTENDANCE_CHECK, // 출석 체크 미션
+    NO_OUTLAY // 무지출
 }

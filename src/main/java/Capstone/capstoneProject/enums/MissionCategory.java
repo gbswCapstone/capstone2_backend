@@ -3,6 +3,6 @@ package Capstone.capstoneProject.enums;
 import lombok.Getter;
 
 @Getter
-public enum MissionDifficultyType {
-    EASY, NOMAL, HARD
+public enum MissionCategory {
+    TOTAL, BASIC, PERSONAL, CHALLENGE,
 }

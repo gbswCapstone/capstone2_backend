@@ -2,17 +2,75 @@ package Capstone.capstoneProject.repository;
 
 import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.entity.Users.Users;
+import Capstone.capstoneProject.enums.HistoryType;
 import Capstone.capstoneProject.enums.UsageCategory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 public interface UsageHistoryRepository extends JpaRepository<UsageHistory, Long>, UsageHistoryCustom {
+
+    @Query("""
+    SELECT COALESCE(SUM(uh.price * uh.amount), 0)
+    FROM UsageHistory uh
+    WHERE uh.users.id = :userId
+      AND uh.category = :category
+      AND uh.historyType = :historyType
+      AND uh.proDate BETWEEN :startDate AND :endDate
+""")
+    BigDecimal sumAmount(
+            @Param("userId") Long userId,
+            @Param("category") UsageCategory category,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("historyType") HistoryType historyType
+    );
+
+
+
+
+    // 지출 횟수 계산 SPENDING_COUNT
+    @Query("SELECT COUNT(uh) FROM UsageHistory uh " +
+            "WHERE uh.users = :user " +
+            "AND uh.historyType = 'OUTLAY' " + // 지출 내역만
+            "AND uh.proDate BETWEEN :startDate AND :endDate")
+    Long countUsageHistory(
+            @Param("user") Users user,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+    // 무지출
+    @Query("""
+    SELECT COALESCE(SUM(uh.price * uh.amount), 0)
+    FROM UsageHistory uh
+    WHERE uh.users = :user
+      AND (:category IS NULL OR uh.category = :category)
+      AND uh.historyType = 'OUTLAY'
+      AND uh.proDate BETWEEN :startDate AND :endDate
+""")
+    BigDecimal calculateTotalSpending(
+            @Param("user") Users user,
+            @Param("category") UsageCategory category,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+
+
+    // 무지출 일수 계산 (해당 기간 중 지출 내역이 없는 날의 수)
+    @Query("SELECT COUNT(DISTINCT uh.proDate) FROM UsageHistory uh " +
+            "WHERE uh.users = :user " +
+            "AND uh.historyType = 'OUTLAY' " +
+            "AND uh.proDate BETWEEN :startDate AND :endDate")
+    Long countSpendingDays(Users user, LocalDate startDate, LocalDate endDate);
+
 
     Optional<UsageHistory> findByIdAndUsers(Long id, Users user);
     List<UsageHistory> findAllByIdInAndUsers(List<Long> ids, Users user);
