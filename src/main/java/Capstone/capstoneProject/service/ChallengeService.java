@@ -138,8 +138,7 @@ public class ChallengeService {
                     ChallengeListDTO dto = new ChallengeListDTO(ch);
 
                     // 참여여부 체크
-                    boolean isJoined = ch.getChallengeUsers().stream()
-                            .anyMatch(cu -> cu.getUser().getId().equals(user.getId()));
+                    boolean isJoined = challengeUsersRepository.existsByChallengeIdAndUserId(ch.getId(), user.getId());
                     dto.setJoined(isJoined);
 
                     // 참여한 경우에만 roomId 세팅

@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,6 +32,41 @@ public class MissionService {
     private final UserMissionRepository userMissionRepository;
     private final UserMissionRepositoryCustom userMissionRepositoryCustom;
     private final UsageHistoryRepository usageHistoryRepository;
+
+    public MissionResponse createMonthGoalMission(BigDecimal price) {
+        Users user = authenticatedUserUtils.getCurrentUser();
+
+        // 기간 계산
+        LocalDate now = LocalDate.now();// 현재 날짜 기준 계산
+        LocalDate firstDay = now.withDayOfMonth(1); // 이번 달 1일
+        LocalDate lastDay = now.with(TemporalAdjusters.lastDayOfMonth()); // 이번 달 마지막 날
+
+        Missions missions = Missions.builder()
+                .missionType(MissionType.MONTHLY_OUTLAY_GOAL)
+                .title("이번 달 목표 지출")
+                .category(null)
+                .maxInt(0)
+                .goalAmount(price)
+                .experience(80)
+                .startDate(firstDay)
+                .endDate(lastDay)
+                .build();
+        missionRepository.save(missions);
+
+
+        UserMissions userMissions = UserMissions.builder()
+                .users(user)
+                .missions(missions)
+                .missionStatusType(MissionStatusType.PROGRESS)
+                .completedAt(null)
+                .currentStreak(0)
+                .experience(missions.getExperience())
+                .build();
+        userMissionRepository.save(userMissions);
+
+        return MissionResponse.from(missions, userMissions);
+
+    }
 
     public MissionResponse createPersonalMission(MissionCreate request) {
         Users user = authenticatedUserUtils.getCurrentUser();
