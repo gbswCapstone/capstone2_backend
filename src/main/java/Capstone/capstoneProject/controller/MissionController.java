@@ -3,6 +3,8 @@ package Capstone.capstoneProject.controller;
 import Capstone.capstoneProject.dto.Missions.MissionListDTO;
 import Capstone.capstoneProject.dto.Missions.MissionResponse;
 import Capstone.capstoneProject.dto.Missions.MissionCreate;
+import Capstone.capstoneProject.enums.DateSortType;
+import Capstone.capstoneProject.enums.MissionCategory;
 import Capstone.capstoneProject.enums.SortType;
 import Capstone.capstoneProject.global.ApiResponse;
 import Capstone.capstoneProject.service.MissionService;
@@ -21,13 +23,23 @@ public class MissionController {
 
     private final MissionService missionService;
 
-//    @PostMapping("/personal")
-//    @Operation(summary = "개인 미션 생성", description = "미션 생성 시 사용하는 API 입니다.")
-//    public ResponseEntity<ApiResponse<MissionResponse>> createMission
-//            (@RequestBody MissionCreate request) {
-//        MissionResponse result = missionService.createPersonalMission(request);
-//        return ResponseEntity.ok(ApiResponse.ok(result, "생성되었습니다."));
-//    }
+    @PostMapping("/personal")
+    @Operation(summary = "개인 미션 생성", description = "미션 생성 시 사용하는 API 입니다.")
+    public ResponseEntity<ApiResponse<MissionResponse>> createMission
+            (@RequestBody MissionCreate request) {
+        MissionResponse result = missionService.createPersonalMission(request);
+        return ResponseEntity.ok(ApiResponse.ok(result, "생성되었습니다."));
+    }
+
+    @GetMapping
+    @Operation(summary = "유저 전체미션 조회", description = "유저 전체미션 조회 시 사용하는 API 입니다.")
+    public ResponseEntity<ApiResponse<List<MissionListDTO>>> getMissions
+            (@RequestParam(required = false) DateSortType sortType,
+             @RequestParam(required = false) MissionCategory category
+             ) {
+        List<MissionListDTO> result = missionService.getMissions(sortType, category);
+        return ResponseEntity.ok(ApiResponse.ok(result, "조회되었습니다."));
+    }
 
 
 //    @PostMapping("/complete/{missionId}")
@@ -39,12 +51,7 @@ public class MissionController {
 
 
 
-//    @GetMapping
-//    @Operation(summary = "유저 전체미션 조회", description = "유저 전체미션 조회 시 사용하는 API 입니다.")
-//    public ResponseEntity<ApiResponse<List<MissionListDTO>>> getMissions(@RequestParam SortType sortType) {
-//        List<MissionListDTO> result = missionService.getMissions(sortType);
-//        return ResponseEntity.ok(ApiResponse.ok(result, "조회되었습니다."));
-//    }
+
 //
 //    @GetMapping("/{missionId}")
 //    @Operation(summary = "유저 미션 상세 조회", description = "유저 미션 상세 조회 시 사용하는 API 입니다.")

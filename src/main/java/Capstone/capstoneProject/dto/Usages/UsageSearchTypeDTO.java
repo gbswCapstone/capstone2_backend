@@ -38,9 +38,6 @@ public class UsageSearchTypeDTO {
     @Schema(description = "간편조회 타입(TODAY: 오늘, LAST_WEEK: 이번주, LAST_MONTH: 이번달)", example = "LAST_MONTH")
     private PresetType presetType;
 
-    public UsageSearchTypeDTO() {
-        this.type = HistoryType.ALL;
-    }
 }
 
 

@@ -20,19 +20,22 @@ import java.time.LocalDateTime;
 @Builder
 public class MissionResponse {
     private Long id;
-    private MissionType missionType;
+    private MissionType missionType; // ZERO_SPENDING 등
     private String title;
-    private UsageCategory category;
+    private UsageCategory category; // 식비, 교통비 등
     private MissionStatusType status;
-    private int experience; // 미션성공하면 받게 되는 경험치
-    private LocalDate startDate; // 시작날짜
-    private LocalDate endDate; // 끝날짜
+    private int experience;
+
+    // 성공 횟수 관련 추가
+    private int currentStreak;      // 현재 0~4번 성공 상태
+    private int successThreshold;   // 5번 성공 시 보너스 (기존 maxInt)
+
+    private LocalDate startDate;
+    private LocalDate endDate;
     private LocalDateTime createdAt;
 
-    // 있을 수도 있고 없을 수도 있음
-    private Long challengeId; // 챌린지 미션일 경우
-    private BigDecimal targetAmount; // 목표금액 미션일 경우
-
+    private Long challengeId;
+    private BigDecimal goalAmount;
 
     public static MissionResponse from(Missions missions, UserMissions userMissions) {
         return MissionResponse.builder()
@@ -42,11 +45,15 @@ public class MissionResponse {
                 .category(missions.getCategory())
                 .status(userMissions.getMissionStatusType())
                 .experience(missions.getExperience())
+                // UserMissions에 저장된 현재 연속 성공 횟수
+                .currentStreak(userMissions.getCurrentStreak())
+                // Missions에 설정된 목표 횟수 (예: 5)
+                .successThreshold(missions.getMaxInt())
                 .startDate(missions.getStartDate())
                 .endDate(missions.getEndDate())
                 .createdAt(missions.getCreatedAt())
                 .challengeId(missions.getChallenges() != null ? missions.getChallenges().getId() : null)
-                .targetAmount(missions.getGoalAmount())
+                .goalAmount(missions.getGoalAmount())
                 .build();
     }
 }

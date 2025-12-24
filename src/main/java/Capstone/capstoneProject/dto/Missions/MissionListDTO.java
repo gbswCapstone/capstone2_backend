@@ -27,7 +27,7 @@ public class MissionListDTO {
     private int experience;
     private LocalDate startDate;
     private LocalDate endDate;
-    private BigDecimal goalAmount;
+    private BigDecimal goalAmount; // null일 수도 있음
     private BigDecimal currentAmount; // 지금 현재
 
     public static MissionListDTO from(Missions missions, UserMissions userMissions, BigDecimal currentAmount) {

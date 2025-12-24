@@ -8,5 +8,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MissionRepository extends JpaRepository<Missions, Long> {
-    Optional<Missions> findByChallenges(Challenges challenges);
+    List<Missions> findByChallenges(Challenges challenge);
 }

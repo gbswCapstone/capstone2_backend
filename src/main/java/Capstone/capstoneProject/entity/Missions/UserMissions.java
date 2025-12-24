@@ -39,6 +39,9 @@ public class UserMissions {
     @Column(name="completed_at")
     private LocalDateTime completedAt;
 
+    @Column(name="current_streak", nullable = false)
+    private int currentStreak;
+
     @Column(name="experience")
     private int experience;
 

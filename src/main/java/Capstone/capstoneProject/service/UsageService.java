@@ -256,7 +256,7 @@ public class UsageService {
             throw new ConflictingSearchCriteriaException("검색 조건(간편조회타입, (시작날짜, 끝날짜), 연/월/주)은 하나만 선택해야 합니다.");
         }
 
-        HistoryType type = (dto.getType() == HistoryType.ALL) ? null : dto.getType();
+        HistoryType type = dto.getType();
         LocalDate start = null;
         LocalDate end = null;
 

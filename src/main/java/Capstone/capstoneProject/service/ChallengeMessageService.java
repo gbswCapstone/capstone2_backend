@@ -29,7 +29,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -117,43 +119,46 @@ public class ChallengeMessageService {
 
         LocalDateTime joinedAt = chatRoomUser.getCreatedAt();
 
-        Pageable pageable =
-                PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
-        // 입장 시점 이후 메시지만 조회
-        Page<ChatMessages> messagePage =
-                chatMessagesRepository.findByChatRoomsAndCreatedAtGreaterThanEqual(
-                        chatRooms,
-                        joinedAt,
-                        pageable
-                );
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        Page<ChatMessages> messagePage = chatMessagesRepository.findByChatRoomsAndCreatedAtGreaterThanEqual(
+                chatRooms, joinedAt, pageable
+        );
 
-        return messagePage.getContent()
-                .stream()
+        Missions commonMission = missionRepository.findByChallenges(chatRooms.getChallenge())
+                .stream().findFirst().orElse(null);
+
+
+        List<ChatMessageDTO> messages = messagePage.getContent().stream()
                 .map(message -> {
                     UsageHistory usage = null;
                     List<String> imageUrls = null;
-                    Missions missions = null;
                     int currentParticipants = 0;
+
                     if (message.getMessageType() == MessageType.USAGE_SHARE) {
-                        usage = usageHistoryRepository
-                                .findById(message.getUsageId())
-                                .orElse(null);
+                        usage = usageHistoryRepository.findById(message.getUsageId()).orElse(null);
                     }
+
                     if (message.getMessageType() == MessageType.IMAGE) {
-                        imageUrls =
-                                chatImagesRepository.findImageUrlByChatMessages(message);
+                        imageUrls = chatImagesRepository.findImageUrlByChatMessages(message);
                     }
+
                     if (message.getMessageType() == MessageType.MISSION) {
-                        missions = message.getMissions();
-                        if (missions != null) {
-                            currentParticipants = userMissionRepository.countByMissionsId(missions.getId());
+                        // 메시지에 직접 연결된 미션이 있다면 사용, 없다면 위에서 조회한 commonMission 사용
+                        Missions m = (message.getMissions() != null) ? message.getMissions() : commonMission;
+                        if (m != null) {
+                            currentParticipants = userMissionRepository.countByMissionsId(m.getId());
                         }
-                        missions = missionRepository.findByChallenges(chatRooms.getChallenge())
-                                .orElse(null);
+                        return ChatMessageDTO.from(message, usage, imageUrls, m, currentParticipants);
                     }
-                    return ChatMessageDTO.from(message, usage, imageUrls, missions, currentParticipants);
+
+                    return ChatMessageDTO.from(message, usage, imageUrls, null, 0);
                 })
-                .toList();
+                .collect(Collectors.toList());
+
+        // 과거 -> 최신순
+        Collections.reverse(messages);
+
+        return messages;
     }
 
     public void deleteMessage(Long messageId) {

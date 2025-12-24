@@ -373,7 +373,6 @@ public class ChallengeService {
                     Challenges challenge = cu.getChallenge();
                     ChallengeListDTO dto = new ChallengeListDTO(challenge);
 
-
                     dto.setJoined(true);
                     // roomId 세팅
                     chatRoomsRepository.findByChallenge(challenge)
