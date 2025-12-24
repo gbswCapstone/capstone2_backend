@@ -26,6 +26,9 @@ public class ChatBotRooms {
     @JoinColumn(name="user_id", nullable = false)
     private Users user;
 
+    @Column(name="chat_bot_room_id", nullable = false)
+    private String chatBotRoomId;
+
     @Column(name="created_at", nullable = false)
     @CreatedDate
     private LocalDateTime createdAt;

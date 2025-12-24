@@ -4,6 +4,7 @@ import Capstone.capstoneProject.entity.Missions.Missions;
 import Capstone.capstoneProject.entity.Missions.UserMissions;
 import Capstone.capstoneProject.enums.MissionStatusType;
 import Capstone.capstoneProject.enums.MissionType;
+import Capstone.capstoneProject.enums.UsageCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,7 +22,7 @@ public class MissionListDTO {
     private Long id;
     private MissionType missionType;
     private String title;
-    private String rule;
+    private UsageCategory category;
     private MissionStatusType status;
     private int experience;
     private LocalDate startDate;
@@ -34,7 +35,7 @@ public class MissionListDTO {
                 .id(missions.getId())
                 .missionType(missions.getMissionType())
                 .title(missions.getTitle())
-                .rule(missions.getRule())
+                .category(missions.getCategory())
                 .status(userMissions.getMissionStatusType())
                 .experience(missions.getExperience())
                 .startDate(missions.getStartDate())

@@ -75,10 +75,6 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                     ? user.getProfile().getNickname()
                     : null;
             accessor.getSessionAttributes().put("nickname", nickname);
-//            String roomId = accessor.getFirstNativeHeader("roomId");
-//            if (roomId != null) {
-//                accessor.getSessionAttributes().put("roomId", roomId);
-//            }
         }
 
         if (StompCommand.SEND.equals(accessor.getCommand())) {
