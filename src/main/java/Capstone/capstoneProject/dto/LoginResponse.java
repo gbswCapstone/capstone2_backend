@@ -1,4 +1,4 @@
-package Capstone.capstoneProject.dto.Chats;
+package Capstone.capstoneProject.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @Builder
-public class MessageSendRequest {
+public class LoginResponse {
+    private String accessToken;
+    private String refreshToken;
     private String chatBotRoomId;
-    private String message;
 }

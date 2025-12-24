@@ -32,9 +32,9 @@ public class AuthController {
                     content = @Content
             )
     })
-    public ResponseEntity<ApiResponse<TokenResponse>> login(@RequestBody LoginRequest request) {
-        TokenResponse tokenResponse = authService.login(request);
-        return ResponseEntity.ok(ApiResponse.ok(tokenResponse));
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody LoginRequest request) {
+        LoginResponse result  = authService.login(request);
+        return ResponseEntity.ok(ApiResponse.ok(result, "로그인 되었습니다."));
     }
 
 
@@ -51,9 +51,9 @@ public class AuthController {
             )
     })
     @PostMapping("api/auth/auto-login")
-    public ResponseEntity<ApiResponse<TokenResponse>> autoLogin(@RequestBody AutoLoginRequest request) {
-        TokenResponse tokenResponse = authService.autoLogin(request);
-        return ResponseEntity.ok(ApiResponse.ok(tokenResponse));
+    public ResponseEntity<ApiResponse<LoginResponse>> autoLogin(@RequestBody AutoLoginRequest request) {
+        LoginResponse result  = authService.autoLogin(request);
+        return ResponseEntity.ok(ApiResponse.ok(result, "로그인 되었습니다."));
     }
 
     @PostMapping("api/auth/log-out")
@@ -72,15 +72,15 @@ public class AuthController {
 
     @Operation(summary = "구글 로그인", description = "구글 로그인 시 사용하는 API 입니다.")
     @PostMapping("api/auth/login/google")
-    public ResponseEntity<ApiResponse<TokenResponse>> googleLogin(@RequestBody OauthRequest request) {
-        TokenResponse tokenResponse = authService.googleLogin(request);
-        return ResponseEntity.ok(ApiResponse.ok(tokenResponse));
+    public ResponseEntity<ApiResponse<LoginResponse>> googleLogin(@RequestBody OauthRequest request) {
+        LoginResponse result  = authService.googleLogin(request);
+        return ResponseEntity.ok(ApiResponse.ok(result, "구글 로그인 되었습니다."));
     }
 
     @Operation(summary = "카카오 로그인", description = "카카오 로그인 시 사용하는 API 입니다.")
     @PostMapping("api/auth/login/kakao")
-    public ResponseEntity<ApiResponse<TokenResponse>> kakaoLogin(@RequestBody OauthRequest request) {
-        TokenResponse tokenResponse = authService.kakaoLogin(request);
-        return ResponseEntity.ok(ApiResponse.ok(tokenResponse));
+    public ResponseEntity<ApiResponse<LoginResponse>> kakaoLogin(@RequestBody OauthRequest request) {
+        LoginResponse result  = authService.kakaoLogin(request);
+        return ResponseEntity.ok(ApiResponse.ok(result, "카카오 로그인 되었습니다."));
     }
 }

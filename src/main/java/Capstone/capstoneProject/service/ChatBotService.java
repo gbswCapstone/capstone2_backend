@@ -29,7 +29,7 @@ import org.springframework.web.client.RestTemplate;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
-
+import java.util.UUID;
 
 
 @Service
@@ -55,6 +55,7 @@ public class ChatBotService {
                 .orElseGet(() ->
                         chatBotRoomRepository.save(
                                 ChatBotRooms.builder()
+                                        .chatBotRoomId(UUID.randomUUID().toString()) // 랜덤 UUID
                                         .user(user)
                                         .build()
                         )
@@ -62,7 +63,6 @@ public class ChatBotService {
     }
 
     private Principal resolvePrincipal(SimpMessageHeaderAccessor accessor) {
-
         Principal principal = accessor.getUser();
         if (principal != null) {
             return principal;
@@ -72,7 +72,6 @@ public class ChatBotService {
         if (saved instanceof Principal p) {
             return p;
         }
-
         throw new NotAuthenticatedException("WebSocket 인증 정보가 없습니다.");
     }
 
@@ -82,16 +81,7 @@ public class ChatBotService {
         Users user = userRepository.findByEmailAndDeletedAtIsNull(username)
                 .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
-//        Users sessionUser = (Users) accessor.getSessionAttributes().get("user");
-//        if (sessionUser == null) {
-//            throw new IllegalStateException("세션 유저 정보가 없습니다.");
-//        }
-        // header에서 userId 꺼내기
-        Long targetUserId = Long.parseLong(
-                accessor.getFirstNativeHeader("userId")
-        );
-
-        ChatBotRooms room = chatBotRoomRepository.findByUserId(targetUserId)
+        ChatBotRooms room = chatBotRoomRepository.findByChatBotRoomId(request.getChatBotRoomId())
                 .orElseThrow(() -> new ChatBotRoomNotFoundException("챗봇 채팅방이 없습니다."));
 
         ChatBotMessages chatBotMessages = ChatBotMessages.builder()
@@ -103,7 +93,7 @@ public class ChatBotService {
 
         // 유저 메시지 전송
         messagingTemplate.convertAndSend(
-                "/sub/chat/bot/" + targetUserId,
+                "/sub/chat/bot/" + request.getChatBotRoomId(),
                 ChatBotMessageDTO.from(chatBotMessages)
         );
 
@@ -140,7 +130,7 @@ public class ChatBotService {
         chatBotMessageRepository.save(saveChatBotMessages);
         // ai 메시지 전송
         messagingTemplate.convertAndSend(
-                "/sub/chat/bot/" + user.getId(),
+                "/sub/chat/bot/" + chatBotRooms.getChatBotRoomId(),
                 ChatBotMessageDTO.from(saveChatBotMessages));
     }
 

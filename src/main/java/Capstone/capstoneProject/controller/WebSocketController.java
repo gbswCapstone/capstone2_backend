@@ -3,7 +3,6 @@ package Capstone.capstoneProject.controller;
 
 import Capstone.capstoneProject.dto.Chats.ChallengeMessageRequest;
 import Capstone.capstoneProject.dto.Chats.MessageSendRequest;
-import Capstone.capstoneProject.service.ChallengeImageService;
 import Capstone.capstoneProject.service.ChallengeMessageService;
 import Capstone.capstoneProject.service.ChatBotService;
 import io.swagger.v3.oas.annotations.Operation;

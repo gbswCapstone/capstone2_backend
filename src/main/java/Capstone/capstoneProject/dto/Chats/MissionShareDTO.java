@@ -2,6 +2,7 @@ package Capstone.capstoneProject.dto.Chats;
 
 import Capstone.capstoneProject.entity.Missions.Missions;
 import Capstone.capstoneProject.enums.MissionType;
+import Capstone.capstoneProject.enums.UsageCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,7 +20,7 @@ import java.time.LocalDate;
 public class MissionShareDTO {
     private Long id; // 미션아이디
     private String title;
-    private String rule;
+    private UsageCategory category;
     private BigDecimal goalAmount; // null일 수도 있음
     private LocalDate startDate;
     private LocalDate endDate;
@@ -29,7 +30,7 @@ public class MissionShareDTO {
         return MissionShareDTO.builder()
                 .id(missions.getId())
                 .title(missions.getTitle())
-                .rule(missions.getRule())
+                .category(missions.getCategory())
                 .goalAmount(missions.getGoalAmount())
                 .startDate(missions.getStartDate())
                 .endDate(missions.getEndDate())

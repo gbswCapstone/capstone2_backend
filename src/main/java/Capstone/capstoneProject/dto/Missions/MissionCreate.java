@@ -1,5 +1,6 @@
 package Capstone.capstoneProject.dto.Missions;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class MissionCreate {
+    @NotBlank(message = "제목을 입력해주세요.")
     private String title;
     private String rule;
     private BigDecimal goalAmount;

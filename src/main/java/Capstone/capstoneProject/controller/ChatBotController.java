@@ -25,7 +25,7 @@ public class ChatBotController {
     실제 구독은 STOMP(WebSocket)를 사용합니다.
 
     SUBSCRIBE:
-    /sub/chat/bot/{userId}
+    /sub/chat/bot/{chatBotRoomId}
     """
     )
     public String chatBotSubscribe() {
@@ -42,10 +42,10 @@ public class ChatBotController {
     /pub/api/chat/bot/messages
 
     Headers:
-    userId: 유저 ID
+    chatBotRoomid
 
     SUBSCRIBE:
-    /sub/chat/bot/{userId}
+    /sub/chat/bot/{chatBotRoomId}
     """
     )
     public String chatBotMessage() {

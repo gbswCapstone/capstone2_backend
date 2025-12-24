@@ -1,9 +1,12 @@
 package Capstone.capstoneProject.entity.Missions;
 
 import Capstone.capstoneProject.entity.challenges.Challenges;
+import Capstone.capstoneProject.enums.MissionDifficultyType;
 import Capstone.capstoneProject.enums.MissionType;
+import Capstone.capstoneProject.enums.UsageCategory;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.context.annotation.EnableMBeanExport;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -36,8 +39,16 @@ public class Missions {
     @Column(name="title", nullable = false)
     private String title;
 
-    @Column(name="rule", columnDefinition = "TEXT", nullable = false)
-    private String rule;
+    @Column(name="category")
+    @Enumerated(EnumType.STRING)
+    private UsageCategory category;
+
+    @Column(name="max_int")
+    private int maxInt;
+
+    @Column(name="mission_difficulty", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private MissionDifficultyType missionDifficulty;
 
     @Column(name="goal_amount")
     private BigDecimal goalAmount;

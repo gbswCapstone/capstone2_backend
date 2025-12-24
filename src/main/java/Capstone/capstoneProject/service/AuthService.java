@@ -3,6 +3,7 @@ package Capstone.capstoneProject.service;
 import Capstone.capstoneProject.dto.*;
 import Capstone.capstoneProject.entity.AuthToken;
 
+import Capstone.capstoneProject.entity.ChatBot.ChatBotRooms;
 import Capstone.capstoneProject.entity.Users.UserProfile;
 import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.UserRole;
@@ -37,7 +38,7 @@ public class AuthService {
     private final ChatBotService chatBotService;
 
 
-    public TokenResponse login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
         Users user = userRepository.findByEmailAndDeletedAtIsNull(request.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("계정이 존재하지 않습니다."));
         Authentication authentication;
@@ -64,13 +65,13 @@ public class AuthService {
         authTokenRepository.save(tokenEntity);
 
         // 챗봇방 생성 or 넘어가기
-        chatBotService.createRoom(user);
+        ChatBotRooms chatBotRooms = chatBotService.createRoom(user);
 
-        return new TokenResponse(accessToken, refreshToken);
+        return new LoginResponse(accessToken, refreshToken, chatBotRooms.getChatBotRoomId());
     }
 
 
-    public TokenResponse autoLogin(AutoLoginRequest request) {
+    public LoginResponse autoLogin(AutoLoginRequest request) {
         String refreshToken = request.getRefreshToken();
         if (!jwtTokenProvider.validateToken(refreshToken)) {
             throw new RefreshTokenNotFoundException("유효하지 않은 리프레시 토큰입니다.");
@@ -97,12 +98,14 @@ public class AuthService {
                 .build();
         authTokenRepository.save(tokenEntity);
 
+        // 없으면 생성
+        ChatBotRooms chatBotRooms = chatBotService.createRoom(user);
 
-        return new TokenResponse(newAccessToken, newRefreshToken);
+        return new LoginResponse(newAccessToken, newRefreshToken, chatBotRooms.getChatBotRoomId());
     }
 
 
-    public TokenResponse googleLogin(OauthRequest request) {
+    public LoginResponse googleLogin(OauthRequest request) {
         String provider = "google";
         String email = request.getEmail();
         String nickname = request.getNickname();
@@ -148,11 +151,13 @@ public class AuthService {
                 .createdAt(LocalDateTime.now())
                 .build();
         authTokenRepository.save(tokenEntity);
-        return new TokenResponse(accessToken, refreshToken);
+        ChatBotRooms chatBotRooms = chatBotService.createRoom(user);
+
+        return new LoginResponse(accessToken, refreshToken, chatBotRooms.getChatBotRoomId());
         }
 
 
-    public TokenResponse kakaoLogin(OauthRequest request) {
+    public LoginResponse kakaoLogin(OauthRequest request) {
         String provider = "kakao";
         String email = request.getEmail();
         String nickname = request.getNickname();
@@ -198,7 +203,8 @@ public class AuthService {
                 .createdAt(LocalDateTime.now())
                 .build();
         authTokenRepository.save(tokenEntity);
-        return new TokenResponse(accessToken, refreshToken);
+        ChatBotRooms chatBotRooms = chatBotService.createRoom(user);
+        return new LoginResponse(accessToken, refreshToken, chatBotRooms.getChatBotRoomId());
     }
 
 

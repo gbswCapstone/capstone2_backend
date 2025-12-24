@@ -28,23 +28,21 @@ public class ChallengeRoomStompHandler implements ChannelInterceptor {
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        String destination = accessor.getDestination();
 
-        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-//            String authHeader = accessor.getFirstNativeHeader("Authorization");
-//            if (authHeader == null) {
-//                return null;
-//            }
-//
-//            Users user = authenticatedUserUtils.getCurrentUser();
-//            accessor.getSessionAttributes().put("user", user);
+        // 챌린지 주소(/room/)가 아니면 챗봇 메시지일 수 있으므로 바로 통과!
+        if (destination != null && !destination.contains("/room/")) {
             return message;
         }
 
 
+        if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+            return message;
+        }
+
         // 채팅방 구독 시 검증
         if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
 
-            String destination = accessor.getDestination();
             String roomId = extractRoomId(destination);
             Users user = (Users) accessor.getSessionAttributes().get("user");
 
