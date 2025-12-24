@@ -3,17 +3,21 @@ package Capstone.capstoneProject.repository;
 import Capstone.capstoneProject.entity.Missions.Missions;
 import Capstone.capstoneProject.entity.Missions.UserMissions;
 import Capstone.capstoneProject.entity.Users.Users;
+import Capstone.capstoneProject.enums.MissionType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface UserMissionRepository extends JpaRepository<UserMissions, Long> {
     boolean existsByUsersAndMissions(Users user, Missions missions);
     List<UserMissions> findAllByUsers(Users user);
 
+    // 이번달 목표금액 미션 해놓았는지 조회
+    Optional<UserMissions> findByUsersAndMissions_MissionType(Users user, MissionType missionType);
 
     // 출석
     @Query("""

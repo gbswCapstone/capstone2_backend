@@ -33,11 +33,11 @@ public class ChallengeMissionController {
         challengeMissionService.joinChallengeMission(missionId);
         return ResponseEntity.ok(ApiResponse.ok("참가되었습니다."));
     }
-//
-//    @DeleteMapping("/{messageId}")
-//    @Operation(summary = "챌린지 미션 메시지 삭제", description = "미션은 메시지 삭제와 상관업이 미션을 참가한 사람들은 계속 진행됩니다.")
-//    public ResponseEntity<ApiResponse<Void>> deleteChallengeMission(@PathVariable Long messageId) {
-//        challengeMessageService.deleteMessage(messageId);
-//        return ResponseEntity.ok(ApiResponse.ok("삭제되었습니다."));
-//    }
+
+    @DeleteMapping("/{messageId}")
+    @Operation(summary = "챌린지 미션 메시지 삭제", description = "미션은 메시지 삭제와 상관업이 미션을 참가한 사람들은 계속 진행됩니다.")
+    public ResponseEntity<ApiResponse<Void>> deleteChallengeMission(@PathVariable Long messageId) {
+        challengeMessageService.deleteMessage(messageId);
+        return ResponseEntity.ok(ApiResponse.ok("삭제되었습니다."));
+    }
 }

@@ -164,7 +164,7 @@ public class ChallengeMessageService {
     public void deleteMessage(Long messageId) {
         Users user = authenticatedUserUtils.getCurrentUser();
 
-        ChatMessages chatMessages = chatMessagesRepository.findById(messageId)
+        ChatMessages chatMessages = chatMessagesRepository.findByIdAndIsDeletedFalse(messageId)
                 .orElseThrow(() -> new ChatRoomMessageNotFoundException("채팅방의 해당 메시지를 찾을 수 없습니다."));
 
         ChatRoomUsers chatRoomUsers = chatRoomUsersRepository.findByChatRooms_RoomIdAndUsers(chatMessages.getChatRooms().getRoomId(), user)
