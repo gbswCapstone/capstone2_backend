@@ -3,6 +3,8 @@ package Capstone.capstoneProject.service;
 import Capstone.capstoneProject.dto.Missions.MissionListDTO;
 import Capstone.capstoneProject.dto.Missions.MissionResponse;
 import Capstone.capstoneProject.dto.Missions.MissionCreate;
+import Capstone.capstoneProject.dto.Missions.MonthGoalMissionRequest;
+import Capstone.capstoneProject.dto.MonthGoalMissionDTO;
 import Capstone.capstoneProject.entity.Missions.Missions;
 import Capstone.capstoneProject.entity.Missions.UserMissions;
 import Capstone.capstoneProject.entity.Users.Users;
@@ -20,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -33,7 +36,7 @@ public class MissionService {
     private final UserMissionRepositoryCustom userMissionRepositoryCustom;
     private final UsageHistoryRepository usageHistoryRepository;
 
-    public MissionResponse createMonthGoalMission(BigDecimal price) {
+    public MonthGoalMissionDTO createMonthGoalMission(MonthGoalMissionRequest request) {
         Users user = authenticatedUserUtils.getCurrentUser();
 
         // 기간 계산
@@ -46,7 +49,7 @@ public class MissionService {
                 .title("이번 달 목표 지출")
                 .category(null)
                 .maxInt(0)
-                .goalAmount(price)
+                .goalAmount(request.getPrice())
                 .experience(80)
                 .startDate(firstDay)
                 .endDate(lastDay)
@@ -63,14 +66,70 @@ public class MissionService {
                 .experience(missions.getExperience())
                 .build();
         userMissionRepository.save(userMissions);
+        boolean isSet = true;
 
-        return MissionResponse.from(missions, userMissions);
+        BigDecimal currentPrice = userMissions.getCurrentStreak() > 0
+                ? BigDecimal.valueOf(userMissions.getCurrentStreak())
+                : BigDecimal.ZERO;
 
+        // 목표까지 남은 금액 계산
+        BigDecimal remainingAmount = missions.getGoalAmount() != null
+                ? missions.getGoalAmount().subtract(currentPrice)
+                : BigDecimal.ZERO;
+
+        return MonthGoalMissionDTO.from(isSet, missions, userMissions, currentPrice, remainingAmount);
+
+    }
+
+    public MonthGoalMissionDTO getMonthGoalMission() {
+        Users user = authenticatedUserUtils.getCurrentUser();
+
+        Optional<UserMissions> optionalUserMission = userMissionRepository
+                .findByUsersAndMissions_MissionType(user, MissionType.MONTHLY_OUTLAY_GOAL);
+
+        boolean isSet = optionalUserMission.isPresent();
+
+        Missions mission = null;
+        UserMissions userMission = null;
+        BigDecimal currentPrice = BigDecimal.ZERO;
+        BigDecimal remainingAmount = BigDecimal.ZERO;
+
+        if (isSet) {
+            userMission = optionalUserMission.get();
+            mission = userMission.getMissions();
+
+            // 현재 지출 계산 (예시)
+            currentPrice = userMission.getCurrentStreak() > 0
+                    ? BigDecimal.valueOf(userMission.getCurrentStreak())
+                    : BigDecimal.ZERO;
+
+            // 목표까지 남은 금액 계산
+            remainingAmount = mission.getGoalAmount() != null
+                    ? mission.getGoalAmount().subtract(currentPrice)
+                    : BigDecimal.ZERO;
+            if (remainingAmount.compareTo(BigDecimal.ZERO) < 0) {
+                remainingAmount = BigDecimal.ZERO;
+            }
+        }
+
+        // DTO 반환
+        return MonthGoalMissionDTO.builder()
+                .id(mission != null ? mission.getId() : null)
+                .missionType(mission != null ? mission.getMissionType() : null)
+                .title(mission != null ? mission.getTitle() : null)
+                .status(userMission != null ? userMission.getMissionStatusType() : null)
+                .startDate(mission != null ? mission.getStartDate() : null)
+                .endDate(mission != null ? mission.getEndDate() : null)
+                .createdAt(mission != null ? mission.getCreatedAt() : null)
+                .currentPrice(currentPrice)
+                .remainingAmount(remainingAmount)
+                .goalAmount(mission != null ? mission.getGoalAmount() : null)
+                .build();
     }
 
     public MissionResponse createPersonalMission(MissionCreate request) {
         Users user = authenticatedUserUtils.getCurrentUser();
-            Missions missions;
+        Missions missions;
         if (request.getMissionType() == MissionType.SPENDING_COUNT) {
             missions = Missions.builder()
                     .challenges(null)

@@ -9,4 +9,5 @@ import java.util.List;
 
 public interface UserMissionRepositoryCustom {
     List<UserMissions> findAllByUsersWithMissions(Users user, MissionCategory category, DateSortType sortType);
+
 }
