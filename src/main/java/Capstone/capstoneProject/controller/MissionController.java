@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -30,6 +31,21 @@ public class MissionController {
         MissionResponse result = missionService.createPersonalMission(request);
         return ResponseEntity.ok(ApiResponse.ok(result, "생성되었습니다."));
     }
+
+    @PostMapping("/month-goal")
+    @Operation(summary = "이번 달 목표 미션 생성",
+            description = "이번 달 목표 미션 생성 시 사용하는 API 입니다.\n"
+            + "이번달 최대 지출 금액을 입력해주면 됩니다.")
+    public ResponseEntity<ApiResponse<MissionResponse>> createMonthGoal
+            (@RequestBody BigDecimal price) {
+        MissionResponse result = missionService.createMonthGoalMission(price);
+        return ResponseEntity.ok(ApiResponse.ok(result, "생성되었습니다."));
+    }
+
+//    @GetMapping("/month-goal")
+//    @Operation(summary = "이번달 목표 미션 조회", description = "이번 달 목표 미션 조회 시 사용하는 API 입니다.")
+//    public ResponseEntity<ApiResponse<>>
+
 
     @GetMapping
     @Operation(summary = "유저 전체미션 조회", description = "유저 전체미션 조회 시 사용하는 API 입니다.")
