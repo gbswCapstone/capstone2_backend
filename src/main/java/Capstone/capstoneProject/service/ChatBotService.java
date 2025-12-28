@@ -27,7 +27,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import java.security.Principal;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.UUID;
 
@@ -157,7 +159,7 @@ public class ChatBotService {
                 .toList();
     }
 
-    public ChatBotMessageResponse createChatRoomAnalysis() {
+    public ChatBotMessageResponse createChatRoomAnalysisMonth() {
         Users user = authenticatedUserUtils.getCurrentUser();
 
         ChatBotRooms chatBotRooms = chatBotRoomRepository.findByUser(user)
@@ -217,6 +219,72 @@ public class ChatBotService {
         );
         return response.getBody();
     }
+
+
+    public ChatBotMessageResponse createChatRoomAnalysisWeek() {
+        Users user = authenticatedUserUtils.getCurrentUser();
+
+        ChatBotRooms chatBotRooms = chatBotRoomRepository.findByUser(user)
+                .orElseThrow(() -> new ChatBotRoomNotFoundException("해당 챗봇 채팅방을 찾을 수 없습니다."));
+        // 사용자 질문 메시지 생성 및 저장
+        ChatBotMessages userMassageDTO = ChatBotMessages.builder()
+                .chatBotRooms(chatBotRooms)
+                .senderType(ChatBotSenderType.USER)
+                .message("이번주 소비 분석 해줘")
+                .build();
+        chatBotMessageRepository.save(userMassageDTO);
+
+        // 유저 메시지 전송
+        messagingTemplate.convertAndSend(
+                "/sub/chat/bot/" + chatBotRooms.getChatBotRoomId(),
+                ChatBotMessageDTO.from(userMassageDTO)
+        );
+
+        List<ChatBotMessages> chatBotMessages = chatBotMessageRepository.findByChatBotRooms(chatBotRooms);
+
+        // 현재 날짜 기준
+        LocalDate now = LocalDate.now();
+        // 이번 주 월요일
+        LocalDate startOfWeek = now.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        // 이번 주 일요일
+        LocalDate endOfWeek = now.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        List<UsageHistory> currentWeekHistories = usageHistoryRepository.findAllByUsersForCurrentWeek(user, startOfWeek, endOfWeek);
+        UsageSummaryDTO usageSummaryDTO = usageService.createUsageSummary(currentWeekHistories);
+
+        ChatRoomAnalysisRequest request = ChatRoomAnalysisRequest.from("이번주 소비 분석 해줘", chatBotMessages, usageSummaryDTO, currentWeekHistories);
+
+        String url = "http://13.125.64.51:8080/chat_analysis";
+
+        // 요청 그대로 전달
+        ResponseEntity<ChatBotMessageResponse> response =
+                restTemplate.postForEntity(
+                        url,
+                        request,
+                        ChatBotMessageResponse.class
+                );
+
+        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+            throw new ChatBotMessageFailedException("챗봇 메시지 생성에 실패했습니다.");
+        }
+
+        // ai가 생성한 메시지 저장
+        ChatBotMessages saveChatBotMessages =
+                ChatBotMessages.builder()
+                        .chatBotRooms(chatBotRooms)
+                        .senderType(ChatBotSenderType.ANALYSIS)
+                        .message(response.getBody().getMessage())
+                        .build();
+        chatBotMessageRepository.save(saveChatBotMessages);
+
+        // ai 메시지 전송
+        messagingTemplate.convertAndSend(
+                "/sub/chat/bot/" + chatBotRooms.getChatBotRoomId(),
+                ChatBotMessageDTO.from(saveChatBotMessages)
+        );
+        return response.getBody();
+    }
+
+
 
 
     public ChatBotMessageResponse createChatSummary() {

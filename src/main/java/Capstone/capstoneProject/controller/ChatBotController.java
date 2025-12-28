@@ -60,12 +60,20 @@ public class ChatBotController {
         return ResponseEntity.ok(ApiResponse.ok(result, "조회되었습니다."));
     }
 
-    @PostMapping("/chat/rooms/analysis")
-    @Operation(summary = "채팅방 소비습관 분석 메시지 생성", description = "챗봇 채팅방에서의 소비습관 분석입니다.")
-    public ResponseEntity<ApiResponse<ChatBotMessageResponse>> chatRoomAnalysis() {
-        ChatBotMessageResponse result = chatBotService.createChatRoomAnalysis();
+    @PostMapping("/chat/rooms/analysis/month")
+    @Operation(summary = "챗봇 채팅방 이번달 소비습관 분석 메시지 생성", description = "챗봇 채팅방에서의 이번달 소비습관 분석입니다.")
+    public ResponseEntity<ApiResponse<ChatBotMessageResponse>> chatRoomAnalysisMonth() {
+        ChatBotMessageResponse result = chatBotService.createChatRoomAnalysisMonth();
         return ResponseEntity.ok(ApiResponse.ok(result, "생성되었습니다."));
     }
+
+    @PostMapping("/chat/rooms/analysis/week")
+    @Operation(summary = "챗봇 채팅방 이번주 소비습관 분석 메시지 생성", description = "챗봇 채팅방에서의 이번주 소비습관 분석입니다.")
+    public ResponseEntity<ApiResponse<ChatBotMessageResponse>> chatRoomAnalysisWeek() {
+        ChatBotMessageResponse result = chatBotService.createChatRoomAnalysisWeek();
+        return ResponseEntity.ok(ApiResponse.ok(result, "생성되었습니다."));
+    }
+
 
     @PostMapping("/chat/summary")
     @Operation(summary = "홈 화면 챗봇 메시지 생성", description = "유저 사용내역 기반으로 챗봇이 답변을 내려줍니다.")

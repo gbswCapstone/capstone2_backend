@@ -1,10 +1,8 @@
 package Capstone.capstoneProject.config;
 
 import Capstone.capstoneProject.global.ApiResponse;
-
 import Capstone.capstoneProject.security.CustomAuthenticationEntryPoint;
 import Capstone.capstoneProject.repository.AuthTokenRepository;
-
 import Capstone.capstoneProject.security.CustomSecurityUserDetails;
 import Capstone.capstoneProject.security.JwtAuthenticationFilter;
 import Capstone.capstoneProject.security.JwtTokenProvider;
@@ -80,7 +78,6 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/error"
                         ).permitAll()
-                        .requestMatchers("/room.html").permitAll() // 테스트용 나중에 빼야함
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception ->
