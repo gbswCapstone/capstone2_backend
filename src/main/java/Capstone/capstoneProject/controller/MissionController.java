@@ -10,8 +10,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -64,7 +62,7 @@ public class MissionController {
         return ResponseEntity.ok(ApiResponse.ok(dto));
     }
 
-    @PostMapping("/daily/complete")
+    @PostMapping("/complete/daily")
     @Operation(summary = "일일 미션(출석체크) 완료", description =
             "일일 미션(출석 체크) 완료(보상획득) 시 사용하는 API 입니다."
     + "이미 보상을 받은 상태라면 아무 일도 안 일어납니다.")
