@@ -36,20 +36,27 @@ public class ChallengeUsageShareService {
     private final SimpMessagingTemplate messagingTemplate;
 
 
-    public void shareChallengeChatUsage(String roomId, UsageShareRequest request) {
+    public void shareChallengeChatUsage(UsageShareRequest request) {
         Users user = authenticatedUserUtils.getCurrentUser();
 
-        chatRoomUsersRepository.findByChatRooms_RoomIdAndUsers(roomId, user)
-                .orElseThrow(() -> new ChatRoomAccessDeniedException("해당 채팅방 유저가 아닙니다."));
+        // 모든 채팅방에 대한 권한 검증
+        for (String roomId : request.getRoomIds()) {
+            chatRoomUsersRepository.findByChatRooms_RoomIdAndUsers(roomId, user)
+                    .orElseThrow(() -> new ChatRoomAccessDeniedException(roomId + "번 채팅방의 유저가 아닙니다."));
+        }
 
+        // 공유할 사용내역 조회
         List<UsageHistory> usages = usageHistoryRepository.findAllByIdInAndUsers(request.getUsageIds(), user);
 
         if (usages.size() != request.getUsageIds().size()) {
             throw new UsageAccessDeniedException("본인 사용내역만 공유 가능합니다.");
         }
 
-        for (UsageHistory usage : usages) {
-            challengeMessageService.saveAndSendUsageShareMessage(roomId, usage, user);
+        // 각 채팅방으로 메시지 전송
+        for (String roomId : request.getRoomIds()) {
+            for (UsageHistory usage : usages) {
+                challengeMessageService.saveAndSendUsageShareMessage(roomId, usage, user);
+            }
         }
     }
 

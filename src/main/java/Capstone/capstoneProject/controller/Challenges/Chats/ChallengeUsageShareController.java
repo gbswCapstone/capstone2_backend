@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class ChallengeUsageShareController {
     private final ChallengeUsageShareService challengeUsageShareService;
 
-    @PostMapping("/rooms/{roomId}/usage-share")
+    @PostMapping("/usage-share")
     @Operation(summary = "챌린지 채팅방으로 사용내역 공유", description =
             "챌린지 채팅방으로 사용내역 공유 시 사용하는 API 입니다.\n"
             + "본인 사용내역만 공유할 수 있습니다."
@@ -39,8 +39,8 @@ public class ChallengeUsageShareController {
             )
     })
     public ResponseEntity<ApiResponse<Void>> shareChallengeChatUsage
-            (@PathVariable String roomId, @RequestBody UsageShareRequest request) {
-        challengeUsageShareService.shareChallengeChatUsage(roomId, request);
+            (@RequestBody UsageShareRequest request) {
+        challengeUsageShareService.shareChallengeChatUsage(request);
         return ResponseEntity.ok(ApiResponse.ok("공유되었습니다."));
     }
 

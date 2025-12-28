@@ -15,6 +15,9 @@ import java.util.Optional;
 public interface UserMissionRepository extends JpaRepository<UserMissions, Long> {
     boolean existsByUsersAndMissions(Users user, Missions missions);
     List<UserMissions> findAllByUsers(Users user);
+    Optional<UserMissions> findByUsersAndMissions_MissionTypeAndMissions_StartDate(
+            Users users, MissionType missionType, LocalDate startDate);
+    boolean existsByUsersAndMissionsAndMissions_StartDate(Users users, Missions missions, LocalDate startDate);
 
     // 이번달 목표금액 미션 해놓았는지 조회
     Optional<UserMissions> findByUsersAndMissions_MissionType(Users user, MissionType missionType);

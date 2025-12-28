@@ -13,5 +13,7 @@ import java.util.List;
 @Builder
 public class UsageShareRequest {
     // 단건 다건 다됨
+    List<String> roomIds;
+    // 단건 다건 다됨
     private List<Long> usageIds;
 }

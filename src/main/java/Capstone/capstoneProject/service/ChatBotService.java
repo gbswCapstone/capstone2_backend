@@ -162,6 +162,19 @@ public class ChatBotService {
 
         ChatBotRooms chatBotRooms = chatBotRoomRepository.findByUser(user)
                 .orElseThrow(() -> new ChatBotRoomNotFoundException("해당 챗봇 채팅방을 찾을 수 없습니다."));
+        // 사용자 질문 메시지 생성 및 저장
+        ChatBotMessages userMassageDTO = ChatBotMessages.builder()
+                .chatBotRooms(chatBotRooms)
+                .senderType(ChatBotSenderType.USER)
+                .message("이번달 소비 분석 해줘")
+                .build();
+        chatBotMessageRepository.save(userMassageDTO);
+
+        // 유저 메시지 전송
+        messagingTemplate.convertAndSend(
+                "/sub/chat/bot/" + chatBotRooms.getChatBotRoomId(),
+                ChatBotMessageDTO.from(userMassageDTO)
+        );
 
         List<ChatBotMessages> chatBotMessages = chatBotMessageRepository.findByChatBotRooms(chatBotRooms);
 
@@ -171,7 +184,6 @@ public class ChatBotService {
         List<UsageHistory> currentMonthHistories = usageHistoryRepository.findAllByUsersForCurrentMonth(user, startOfMonth, endOfMonth);
 
         UsageSummaryDTO usageSummaryDTO = usageService.createUsageSummary(currentMonthHistories);
-
 
         ChatRoomAnalysisRequest request = ChatRoomAnalysisRequest.from("이번달 소비 분석 해줘", chatBotMessages, usageSummaryDTO, currentMonthHistories);
 
@@ -197,6 +209,12 @@ public class ChatBotService {
                         .message(response.getBody().getMessage())
                         .build();
         chatBotMessageRepository.save(saveChatBotMessages);
+
+        // ai 메시지 전송
+        messagingTemplate.convertAndSend(
+                "/sub/chat/bot/" + chatBotRooms.getChatBotRoomId(),
+                ChatBotMessageDTO.from(saveChatBotMessages)
+        );
         return response.getBody();
     }
 

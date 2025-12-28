@@ -20,7 +20,7 @@ public class UsageItemDTO {
     private BigDecimal price;
     private UsageCategory category;
     private HistoryType historyType;
-    private LocalDate proDate;
+    private String proDate;
 
     public static UsageItemDTO from(UsageHistory usageHistory) {
         return UsageItemDTO.builder()
@@ -28,7 +28,7 @@ public class UsageItemDTO {
                 .price(usageHistory.getPrice())
                 .category(usageHistory.getCategory())
                 .historyType(usageHistory.getHistoryType())
-                .proDate(usageHistory.getProDate())
+                .proDate(usageHistory.getProDate().toString())
                 .build();
     }
 }
