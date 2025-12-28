@@ -1,19 +1,19 @@
 package Capstone.capstoneProject.service;
 
-import Capstone.capstoneProject.dto.Missions.MissionListDTO;
-import Capstone.capstoneProject.dto.Missions.MissionResponse;
-import Capstone.capstoneProject.dto.Missions.MissionCreate;
-import Capstone.capstoneProject.dto.Missions.MonthGoalMissionRequest;
+import Capstone.capstoneProject.dto.Missions.*;
 import Capstone.capstoneProject.dto.MonthGoalMissionDTO;
 import Capstone.capstoneProject.entity.Missions.Missions;
 import Capstone.capstoneProject.entity.Missions.UserMissions;
 import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.*;
 import Capstone.capstoneProject.exceptions.badRequest.InvalidMissionTypeException;
+import Capstone.capstoneProject.exceptions.conflict.AlreadyCompletedException;
 import Capstone.capstoneProject.repository.*;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -35,10 +35,11 @@ public class MissionService {
     private final UserMissionRepository userMissionRepository;
     private final UserMissionRepositoryCustom userMissionRepositoryCustom;
     private final UsageHistoryRepository usageHistoryRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
+    // 이번달 목표 미션 생성
     public MonthGoalMissionDTO createMonthGoalMission(MonthGoalMissionRequest request) {
         Users user = authenticatedUserUtils.getCurrentUser();
-
         // 기간 계산
         LocalDate now = LocalDate.now();// 현재 날짜 기준 계산
         LocalDate firstDay = now.withDayOfMonth(1); // 이번 달 1일
@@ -56,7 +57,6 @@ public class MissionService {
                 .build();
         missionRepository.save(missions);
 
-
         UserMissions userMissions = UserMissions.builder()
                 .users(user)
                 .missions(missions)
@@ -67,20 +67,19 @@ public class MissionService {
                 .build();
         userMissionRepository.save(userMissions);
         boolean isSet = true;
-
         BigDecimal currentPrice = userMissions.getCurrentStreak() > 0
                 ? BigDecimal.valueOf(userMissions.getCurrentStreak())
                 : BigDecimal.ZERO;
-
         // 목표까지 남은 금액 계산
         BigDecimal remainingAmount = missions.getGoalAmount() != null
                 ? missions.getGoalAmount().subtract(currentPrice)
                 : BigDecimal.ZERO;
 
         return MonthGoalMissionDTO.from(isSet, missions, userMissions, currentPrice, remainingAmount);
-
     }
 
+
+    // 이번달 목표 미션 조회
     public MonthGoalMissionDTO getMonthGoalMission() {
         Users user = authenticatedUserUtils.getCurrentUser();
 
@@ -111,7 +110,6 @@ public class MissionService {
                 remainingAmount = BigDecimal.ZERO;
             }
         }
-
         // DTO 반환
         return MonthGoalMissionDTO.builder()
                 .id(mission != null ? mission.getId() : null)
@@ -127,6 +125,7 @@ public class MissionService {
                 .build();
     }
 
+    // 개인 미션 생성
     public MissionResponse createPersonalMission(MissionCreate request) {
         Users user = authenticatedUserUtils.getCurrentUser();
         Missions missions;
@@ -169,10 +168,7 @@ public class MissionService {
         } else {
             throw new InvalidMissionTypeException("사용할 수 없는 미션 타입 입니다.");
         }
-
         missionRepository.save(missions);
-
-
         UserMissions userMissions = UserMissions.builder()
                 .users(user)
                 .missions(missions)
@@ -182,10 +178,57 @@ public class MissionService {
                 .experience(missions.getExperience())
                 .build();
         userMissionRepository.save(userMissions);
-
         return MissionResponse.from(missions, userMissions);
     }
 
+    // 오늘의 출석체크 미션 조회
+    public AttendanceMissionDTO getTodayAttendanceMission() {
+        Users user = authenticatedUserUtils.getCurrentUser();
+        LocalDate today = LocalDate.now();
+
+        // 오늘 날짜 출석체크 미션 조회
+        UserMissions mission = userMissionRepository
+                .findByUsersAndMissions_MissionTypeAndMissions_StartDate(user, MissionType.ATTENDANCE_CHECK, today)
+                .orElse(null); // 오늘 미션이 없는 경우 null 처리
+
+        if (mission == null) {
+            return null;
+        }
+
+        // DTO로 변환
+        return AttendanceMissionDTO.builder()
+                .id(mission.getMissions().getId())
+                .status(mission.getMissionStatusType())
+                .title("우거우거에 접속하기")
+                .startDate(mission.getMissions().getStartDate())
+                .endDate(mission.getMissions().getEndDate())
+                .build();
+    }
+
+    // 출석미션 완료
+    public void checkDailyAttendance() {
+        Users user = authenticatedUserUtils.getCurrentUser();
+        LocalDate today = LocalDate.now();
+        UserMissions mission = userMissionRepository
+                .findByUsersAndMissions_MissionTypeAndMissions_StartDate(user, MissionType.ATTENDANCE_CHECK, today)
+                .orElseThrow();
+
+        if (mission.getMissionStatusType() == MissionStatusType.COMPLETED) {
+            return; // 이미 완료, 아무것도 안 함
+        }
+
+        mission.setMissionStatusType(MissionStatusType.COMPLETED);
+        mission.setCompletedAt(LocalDateTime.now());
+        mission.setCurrentStreak(mission.getCurrentStreak() + 1);
+        userMissionRepository.save(mission);
+
+        // 출석체크 이벤트 발행
+        eventPublisher.publishEvent(
+                new AttendanceEvent(user.getId())
+        );
+    }
+
+    // 유저 전체 미션 조회
     public List<MissionListDTO> getMissions(DateSortType dateSortType, MissionCategory category) {
         Users user = authenticatedUserUtils.getCurrentUser();
         List<UserMissions>  userMissions = userMissionRepositoryCustom.findAllByUsersWithMissions(user, category, dateSortType);
@@ -224,17 +267,5 @@ public class MissionService {
         };
     }
 
-
-
-//    public List<MissionListDTO> getMissions(SortType sortType) {
-//        Users user = authenticatedUserUtils.getCurrentUser();
-//        List<UserMissions> userMissions = userMissionRepository.findAllByUsers(user);
-//        List<Missions> missions = missionRepository.findAllById(userMissions.get().getMissions().getId());
-//
-//
-//        // 현재 진행률
-//        BigDecimal currentAmount;
-//        return MissionListDTO.from(missions, userMissions, currentAmount);
-//    }
 
 }

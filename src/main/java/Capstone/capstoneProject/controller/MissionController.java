@@ -1,9 +1,6 @@
 package Capstone.capstoneProject.controller;
 
-import Capstone.capstoneProject.dto.Missions.MissionListDTO;
-import Capstone.capstoneProject.dto.Missions.MissionResponse;
-import Capstone.capstoneProject.dto.Missions.MissionCreate;
-import Capstone.capstoneProject.dto.Missions.MonthGoalMissionRequest;
+import Capstone.capstoneProject.dto.Missions.*;
 import Capstone.capstoneProject.dto.MonthGoalMissionDTO;
 import Capstone.capstoneProject.enums.DateSortType;
 import Capstone.capstoneProject.enums.MissionCategory;
@@ -49,6 +46,7 @@ public class MissionController {
         return ResponseEntity.ok(ApiResponse.ok(result, "조회되었습니다."));
     }
 
+
     @GetMapping
     @Operation(summary = "유저 전체미션 조회", description = "유저 전체미션 조회 시 사용하는 API 입니다.")
     public ResponseEntity<ApiResponse<List<MissionListDTO>>> getMissions
@@ -57,6 +55,22 @@ public class MissionController {
              ) {
         List<MissionListDTO> result = missionService.getMissions(sortType, category);
         return ResponseEntity.ok(ApiResponse.ok(result, "조회되었습니다."));
+    }
+
+    @GetMapping("/daily")
+    @Operation(summary = "오늘의 출석체크 미션 조회")
+    public ResponseEntity<ApiResponse<AttendanceMissionDTO>> getTodayAttendance() {
+        AttendanceMissionDTO dto = missionService.getTodayAttendanceMission();
+        return ResponseEntity.ok(ApiResponse.ok(dto));
+    }
+
+    @PostMapping("/daily/complete")
+    @Operation(summary = "일일 미션(출석체크) 완료", description =
+            "일일 미션(출석 체크) 완료(보상획득) 시 사용하는 API 입니다."
+    + "이미 보상을 받은 상태라면 아무 일도 안 일어납니다.")
+    public ResponseEntity<ApiResponse<Void>> completedDailyMission() {
+        missionService.checkDailyAttendance();
+        return ResponseEntity.ok(ApiResponse.ok("처리되었습니다."));
     }
 
 

@@ -6,7 +6,7 @@ import Capstone.capstoneProject.enums.HistoryType;
 import Capstone.capstoneProject.enums.MissionStatusType;
 import Capstone.capstoneProject.enums.MissionType;
 import Capstone.capstoneProject.enums.SourceType;
-import Capstone.capstoneProject.repository.MissionRepository;
+import Capstone.capstoneProject.repository.ExperienceHistoryRepository;
 import Capstone.capstoneProject.repository.UsageHistoryRepository;
 import Capstone.capstoneProject.repository.UserMissionRepository;
 import jakarta.transaction.Transactional;
@@ -22,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MissionProgressService {
     private final UserMissionRepository userMissionRepository;
-    private final MissionRepository missionRepository;
+    private final ExperienceHistoryRepository experienceHistoryRepository;
     private final UsageHistoryRepository usageHistoryRepository;
     private final ExperienceService experienceService;
 
@@ -35,25 +35,38 @@ public class MissionProgressService {
         }
     }
 
-    // 출석
     @Transactional
     public void checkAttendance(Long userId) {
         LocalDate today = LocalDate.now();
 
-        List<UserMissions> attendanceMissions =
+        List<UserMissions> missions =
                 userMissionRepository.findTodayAttendanceMissions(userId, today);
-
-        for (UserMissions um : attendanceMissions) {
-
-            // 이미 오늘 출석 완료한 경우 스킵
-            if (um.getCompletedAt() != null &&
-                    um.getCompletedAt().toLocalDate().isEqual(today)) {
+        for (UserMissions um : missions) {
+            // 오늘 완료 안 했으면 스킵
+            if (um.getCompletedAt() == null ||
+                    !um.getCompletedAt().toLocalDate().isEqual(today)) {
                 continue;
             }
-
-           evaluateMission(um);
+            // 이미 보상 받았는지 체크
+            boolean rewarded = experienceHistoryRepository
+                    .existsByUser_IdAndSourceTypeAndSourceId(
+                            userId,
+                            SourceType.ATTENDANCE_REWARD,
+                            um.getId()
+                    );
+            if (rewarded) {
+                continue;
+            }
+            // 경험치 지급
+            evaluateMission(um);
         }
     }
+
+    // 출석
+    private void checkAttendanceMission(UserMissions um) {
+        completeCheckAttendanceMission(um);
+    }
+
 
     private void evaluateMission(UserMissions userMission) {
         Missions mission = userMission.getMissions();
@@ -116,6 +129,23 @@ public class MissionProgressService {
         }
     }
 
+    // 출석 미션 저장
+    private void completeCheckAttendanceMission(UserMissions um) {
+        if (um.getMissionStatusType() == MissionStatusType.COMPLETED) return;
+
+        um.setMissionStatusType(MissionStatusType.COMPLETED);
+        um.setCompletedAt(LocalDateTime.now());
+
+        experienceService.giveExperience(
+                um.getUsers().getId(),
+                um.getExperience(),
+                SourceType.ATTENDANCE_REWARD,
+                um.getId()
+        );
+    }
+
+
+    // 미션 저장
     private void completeMission(UserMissions um) {
         if (um.getMissionStatusType() == MissionStatusType.COMPLETED) return;
 
@@ -152,9 +182,6 @@ public class MissionProgressService {
     }
 
 
-    // 출석
-    private void checkAttendanceMission(UserMissions um) {
-        completeMission(um);
-    }
+
 }
 
