@@ -44,6 +44,7 @@ public class UsageService {
     private final AuthenticatedUserUtils authenticatedUserUtils;
     private final UsageHistoryRepository usageHistoryRepository;
     private final RestTemplate restTemplate;
+    private final BalanceService balanceService;
 
 
     public UsageResponse plusIncomeHistory(IncomeRequest request) {
@@ -82,6 +83,8 @@ public class UsageService {
                 .build();
         usageHistoryRepository.save(usageHistory);
 
+        // 잔액 변경
+        balanceService.applyUsage(user, usageHistory);
         return new UsageResponse(usageHistory);
     }
 
@@ -121,6 +124,8 @@ public class UsageService {
                 .build();
         usageHistoryRepository.save(usageHistory);
 
+        // 잔액 변경
+        balanceService.applyUsage(user, usageHistory);
         return new UsageResponse(usageHistory);
     }
 
@@ -186,9 +191,14 @@ public class UsageService {
             UsageHistory savedHistory = usageHistoryRepository.save(usageHistory);
             usageList.add(ReceiptListDTO.from(savedHistory));
 
+            // 잔액 변경
+            balanceService.applyUsage(user, savedHistory);
+
             totalPrice = totalPrice.add(price.multiply(BigDecimal.valueOf(amount)));
             receiptDate = proDate;
         }
+
+
 
         return ReceiptResponse.builder()
                 .usageResponseList(usageList)
@@ -200,6 +210,7 @@ public class UsageService {
     public ReceiptResponse patchReceiptOutlay(ReceiptPatchRequest request) {
         Users user = authenticatedUserUtils.getCurrentUser();
 
+
         List<ReceiptListDTO> resultList = new ArrayList<>();
         BigDecimal totalPrice = BigDecimal.ZERO;
         LocalDate proDate = null;
@@ -209,6 +220,11 @@ public class UsageService {
             UsageHistory usageHistory = usageHistoryRepository
                     .findByIdAndUsers(item.getUsageHistoryId(), user)
                     .orElseThrow(() -> new UsageHistoryNotFoundException("해당 지출 내역이 존재하지 않습니다."));
+
+            // 수정 전 금액
+            BigDecimal beforeTotal =
+                    usageHistory.getPrice()
+                            .multiply(BigDecimal.valueOf(usageHistory.getAmount()));
 
             // id빼고 null처리 id는 필수 입력
             String name = (item.getName() != null) ? item.getName() : usageHistory.getName();
@@ -225,8 +241,28 @@ public class UsageService {
 
             UsageHistory saved = usageHistoryRepository.save(usageHistory);
 
+            // 수정 후 금액
+            BigDecimal afterTotal =
+                    price.multiply(BigDecimal.valueOf(amount));
+
+            // 차액 계산
+            BigDecimal diff = afterTotal.subtract(beforeTotal);
+
+            // 잔액 변경
+            if (diff.compareTo(BigDecimal.ZERO) != 0) {
+                UsageHistory diffHistory = UsageHistory.builder()
+                        .users(user)
+                        .price(diff)
+                        .historyType(HistoryType.OUTLAY)
+                        .build();
+
+                balanceService.applyUsage(user, diffHistory);
+            }
+
             resultList.add(ReceiptListDTO.from(saved));
-            totalPrice = totalPrice.add(saved.getPrice());
+            totalPrice = totalPrice.add(
+                    saved.getPrice().multiply(BigDecimal.valueOf(saved.getAmount()))
+            );
             proDate = saved.getProDate();
         }
 
