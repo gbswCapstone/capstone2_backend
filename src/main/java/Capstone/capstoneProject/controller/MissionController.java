@@ -72,12 +72,12 @@ public class MissionController {
     }
 
 
-//    @PostMapping("/complete/{missionId}")
-//    @Operation(summary = "미션 완료하기", description = "미션 완료 시 사용하는 API 입니다.")
-//    public ResponseEntity<ApiResponse<Void>> completeMission(@PathVariable Long missionId) {
-//        missionService.completeMission(missionId);
-//        return ResponseEntity.ok(ApiResponse.ok("완료되었습니다."));
-//    }
+    @PostMapping("/complete/{missionId}")
+    @Operation(summary = "미션 완료하기", description = "미션 완료 시 사용하는 API 입니다.")
+    public ResponseEntity<ApiResponse<Void>> completeMission(@PathVariable Long missionId) {
+        missionService.completeMission(missionId);
+        return ResponseEntity.ok(ApiResponse.ok("완료되었습니다."));
+    }
 
 
 

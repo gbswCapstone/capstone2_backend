@@ -7,15 +7,15 @@ import Capstone.capstoneProject.entity.Missions.UserMissions;
 import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.*;
 import Capstone.capstoneProject.exceptions.badRequest.InvalidMissionTypeException;
-import Capstone.capstoneProject.exceptions.conflict.AlreadyCompletedException;
+import Capstone.capstoneProject.exceptions.forbidden.MissionAccessDeniedException;
+import Capstone.capstoneProject.exceptions.notfound.MissionNotFoundException;
+import Capstone.capstoneProject.exceptions.notfound.TodayAttendanceMissionNotFoundException;
 import Capstone.capstoneProject.repository.*;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -184,34 +184,44 @@ public class MissionService {
     // 오늘의 출석체크 미션 조회
     public AttendanceMissionDTO getTodayAttendanceMission() {
         Users user = authenticatedUserUtils.getCurrentUser();
-        LocalDate today = LocalDate.now();
 
-        // 오늘 날짜 출석체크 미션 조회
         UserMissions mission = userMissionRepository
-                .findByUsersAndMissions_MissionTypeAndMissions_StartDate(user, MissionType.ATTENDANCE_CHECK, today)
-                .orElse(null); // 오늘 미션이 없는 경우 null 처리
+                .findTopByUsersAndMissions_MissionTypeOrderByCreatedAtDesc(
+                        user,
+                        MissionType.ATTENDANCE_CHECK
+                )
+                .orElse(null);
 
         if (mission == null) {
             return null;
         }
 
-        // DTO로 변환
+        boolean completedToday =
+                mission.getCompletedAt() != null &&
+                        mission.getCompletedAt().toLocalDate().isEqual(LocalDate.now());
+
         return AttendanceMissionDTO.builder()
-                .id(mission.getMissions().getId())
-                .status(mission.getMissionStatusType())
+                .id(mission.getId())
+                .status(completedToday
+                        ? MissionStatusType.COMPLETED
+                        : MissionStatusType.PROGRESS)
                 .title("우거우거에 접속하기")
-                .startDate(mission.getMissions().getStartDate())
-                .endDate(mission.getMissions().getEndDate())
+                .startDate(LocalDate.now())
+                .endDate(LocalDate.now())
                 .build();
     }
 
     // 출석미션 완료
     public void checkDailyAttendance() {
         Users user = authenticatedUserUtils.getCurrentUser();
-        LocalDate today = LocalDate.now();
         UserMissions mission = userMissionRepository
-                .findByUsersAndMissions_MissionTypeAndMissions_StartDate(user, MissionType.ATTENDANCE_CHECK, today)
-                .orElseThrow();
+                .findTopByUsersAndMissions_MissionTypeOrderByCreatedAtDesc(
+                        user,
+                        MissionType.ATTENDANCE_CHECK
+                )
+                .orElseThrow(() ->
+                        new TodayAttendanceMissionNotFoundException("오늘의 출석 미션이 존재하지 않습니다.")
+                );
 
         if (mission.getMissionStatusType() == MissionStatusType.COMPLETED) {
             return; // 이미 완료, 아무것도 안 함
@@ -267,7 +277,62 @@ public class MissionService {
         };
     }
 
-    
+    // 미션 완료하기
+    public void completeMission(Long missionId) {
+        Users user = authenticatedUserUtils.getCurrentUser();
+
+        UserMissions um = userMissionRepository.findById(missionId)
+                .orElseThrow(() -> new MissionNotFoundException("해당 미션을 찾을 수 없습니다."));
+
+        // 내 미션인지 검증
+        if (!um.getUsers().getId().equals(user.getId())) {
+            throw new MissionAccessDeniedException("본인 미션만 완료 가능합니다.");
+        }
+
+        // 이미 완료된 경우 아무 일도 안 일어남
+        if (um.getMissionStatusType() == MissionStatusType.COMPLETED) {
+            return;
+        }
+
+        um.setMissionStatusType(MissionStatusType.COMPLETED);
+        um.setCompletedAt(LocalDateTime.now());
+
+        // 이벤트 발행
+        eventPublisher.publishEvent(
+                new MissionCompletedEvent(user.getId(), um.getId())
+        );
+    }
+
+    // 출석 미션 생성
+    @Transactional
+    public void ensureAttendanceMission(Users user) {
+
+        boolean exists =
+                userMissionRepository.existsByUsersAndMissions_MissionType(
+                        user,
+                        MissionType.ATTENDANCE_CHECK
+                );
+
+        if (exists) return;
+
+        Missions attendanceMission = missionRepository
+                .findByMissionType(MissionType.ATTENDANCE_CHECK)
+                .orElseThrow(() ->
+                        new IllegalStateException("출석 미션 템플릿이 없습니다.")
+                );
+
+        userMissionRepository.save(
+                UserMissions.builder()
+                        .users(user)
+                        .missions(attendanceMission)
+                        .missionStatusType(MissionStatusType.PROGRESS)
+                        .currentStreak(0)
+                        .experience(0)
+                        .build()
+        );
+    }
+
+
 
 
 }

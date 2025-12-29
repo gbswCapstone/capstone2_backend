@@ -25,24 +25,30 @@ public class DailyMissionScheduler {
     private final UserMissionRepository userMissionRepository;
 
     // 필수 출석체크 미션
-    @Scheduled(cron = "0 0 0 * * *") // 매일 0시
+    @Scheduled(cron = "0 0 0 * * *")
     public void createDailyAttendanceMissions() {
         List<Users> users = userRepository.findAll();
-        Missions template = missionRepository.findByMissionType(MissionType.ATTENDANCE_CHECK)
+        Missions template = missionRepository
+                .findByMissionType(MissionType.ATTENDANCE_CHECK)
                 .orElseThrow();
 
-        LocalDate today = LocalDate.now();
-
         for (Users user : users) {
-            boolean exists = userMissionRepository.existsByUsersAndMissionsAndMissions_StartDate(user, template, today);
+            boolean exists =
+                    userMissionRepository
+                            .existsByUsersAndMissionsAndMissionStatusType(
+                                    user,
+                                    template,
+                                    MissionStatusType.PROGRESS
+                            );
+
             if (!exists) {
                 UserMissions um = UserMissions.builder()
                         .users(user)
                         .missions(template)
                         .missionStatusType(MissionStatusType.PROGRESS)
                         .currentStreak(0)
-                        .createdAt(LocalDateTime.now())
                         .build();
+
                 userMissionRepository.save(um);
             }
         }

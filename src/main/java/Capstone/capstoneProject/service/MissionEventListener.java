@@ -13,7 +13,7 @@ public class MissionEventListener {
 
     // 사용 내역 미션
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handleTransactionEvent(UsageCreatedEvent event) {
+    public void handleTransactionEvent(MissionCompletedEvent event) {
         missionProgressService.checkMissionProgress(event.getUserId());
     }
 
