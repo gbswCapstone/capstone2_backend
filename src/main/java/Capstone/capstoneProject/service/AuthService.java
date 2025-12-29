@@ -36,6 +36,7 @@ public class AuthService {
     private final UserProfileRepository userProfileRepository;
     private final AuthenticatedUserUtils authenticatedUserUtils;
     private final ChatBotService chatBotService;
+    private final MissionService missionService;
 
 
     public LoginResponse login(LoginRequest request) {
@@ -66,6 +67,8 @@ public class AuthService {
 
         // 챗봇방 생성 or 넘어가기
         ChatBotRooms chatBotRooms = chatBotService.createRoom(user);
+        // 출석 미션 생성
+        missionService.ensureAttendanceMission(user);
 
         return new LoginResponse(accessToken, refreshToken, chatBotRooms.getChatBotRoomId());
     }

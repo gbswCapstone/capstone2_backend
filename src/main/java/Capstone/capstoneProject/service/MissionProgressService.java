@@ -26,15 +26,6 @@ public class MissionProgressService {
     private final UsageHistoryRepository usageHistoryRepository;
     private final ExperienceService experienceService;
 
-    public void checkMissionProgress(Long userId) {
-        List<UserMissions> activeMissions =
-                userMissionRepository.findActiveMissions(userId, LocalDate.now());
-
-        for (UserMissions userMission : activeMissions) {
-            evaluateMission(userMission);
-        }
-    }
-
     @Transactional
     public void checkAttendance(Long userId) {
         LocalDate today = LocalDate.now();
@@ -67,6 +58,14 @@ public class MissionProgressService {
         completeCheckAttendanceMission(um);
     }
 
+    public void checkMissionProgress(Long userId) {
+        List<UserMissions> activeMissions =
+                userMissionRepository.findActiveMissions(userId, LocalDate.now());
+
+        for (UserMissions userMission : activeMissions) {
+            evaluateMission(userMission);
+        }
+    }
 
     private void evaluateMission(UserMissions userMission) {
         Missions mission = userMission.getMissions();
@@ -79,7 +78,7 @@ public class MissionProgressService {
 
             case NO_OUTLAY -> checkNoExpenseMission(userMission);
 
-            case ATTENDANCE_CHECK -> checkAttendanceMission(userMission);
+//            case ATTENDANCE_CHECK -> checkAttendanceMission(userMission);
         }
     }
 
