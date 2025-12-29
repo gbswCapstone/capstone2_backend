@@ -6,6 +6,7 @@ import Capstone.capstoneProject.entity.Missions.UserMissions;
 import Capstone.capstoneProject.enums.MissionStatusType;
 import Capstone.capstoneProject.enums.MissionType;
 import Capstone.capstoneProject.enums.UsageCategory;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,6 +21,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class MonthGoalMissionDTO {
+
+    @JsonProperty("isSet")
     private boolean isSet;
     private Long id;
     private MissionType missionType;
