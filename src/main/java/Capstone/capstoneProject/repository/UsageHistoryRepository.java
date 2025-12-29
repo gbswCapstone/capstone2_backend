@@ -83,6 +83,21 @@ public interface UsageHistoryRepository extends JpaRepository<UsageHistory, Long
                                                      @Param("start") LocalDate start,
                                                      @Param("end") LocalDate end);
 
+    // 사용자의 이번달 지출 가격합산
+    @Query("""
+    SELECT COALESCE(SUM(u.price * u.amount), 0)
+    FROM UsageHistory u
+    WHERE u.users = :user
+      AND u.historyType = :historyType
+      AND u.proDate BETWEEN :start AND :end
+""")
+    BigDecimal sumOutlayForCurrentMonth(
+            @Param("user") Users user,
+            @Param("historyType") HistoryType historyType,
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end
+    );
+
     // 이번주 사용내역 전체 조회
     @Query("SELECT u FROM UsageHistory u WHERE u.users = :user AND u.proDate BETWEEN :start AND :end ORDER BY u.proDate DESC")
     List<UsageHistory> findAllByUsersForCurrentWeek(@Param("user") Users user,
