@@ -90,7 +90,17 @@ public class MissionService {
 
         Missions mission = null;
         UserMissions userMission = null;
-        BigDecimal currentPrice = BigDecimal.ZERO;
+        LocalDate start = LocalDate.now().withDayOfMonth(1);
+        LocalDate end = start.plusMonths(1).minusDays(1);
+
+        // 이번달 지출 총 가격
+        BigDecimal currentPrice =
+                usageHistoryRepository.sumOutlayForCurrentMonth(
+                        user,
+                        HistoryType.OUTLAY,
+                        start,
+                        end
+                );
         BigDecimal remainingAmount = BigDecimal.ZERO;
 
         if (isSet) {
@@ -98,9 +108,13 @@ public class MissionService {
             mission = userMission.getMissions();
 
             // 현재 지출 계산 (예시)
-            currentPrice = userMission.getCurrentStreak() > 0
-                    ? BigDecimal.valueOf(userMission.getCurrentStreak())
-                    : BigDecimal.ZERO;
+            currentPrice =
+                    usageHistoryRepository.sumOutlayForCurrentMonth(
+                            user,
+                            HistoryType.OUTLAY,
+                            start,
+                            end
+                    );
 
             // 목표까지 남은 금액 계산
             remainingAmount = mission.getGoalAmount() != null
