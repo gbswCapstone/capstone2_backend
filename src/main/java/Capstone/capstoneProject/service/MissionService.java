@@ -119,6 +119,7 @@ public class MissionService {
                 .startDate(mission != null ? mission.getStartDate() : null)
                 .endDate(mission != null ? mission.getEndDate() : null)
                 .createdAt(mission != null ? mission.getCreatedAt() : null)
+                .isSet(isSet)
                 .currentPrice(currentPrice)
                 .remainingAmount(remainingAmount)
                 .goalAmount(mission != null ? mission.getGoalAmount() : null)
