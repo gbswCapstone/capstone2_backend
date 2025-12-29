@@ -1,8 +1,10 @@
 package Capstone.capstoneProject.service;
 
 import Capstone.capstoneProject.dto.BalanceDTO;
+import Capstone.capstoneProject.entity.UsageHistory;
 import Capstone.capstoneProject.entity.Users.UserAccounts;
 import Capstone.capstoneProject.entity.Users.Users;
+import Capstone.capstoneProject.enums.HistoryType;
 import Capstone.capstoneProject.exceptions.conflict.AlreadyJoinedException;
 import Capstone.capstoneProject.exceptions.conflict.BalanceAlreadyExistsException;
 import Capstone.capstoneProject.exceptions.notfound.BalanceNotFoundException;
@@ -55,5 +57,30 @@ public class BalanceService {
         UserAccounts userAccounts = userAccountRepository.findByUser(user)
                 .orElseThrow(() -> new BalanceNotFoundException("잔액을 찾을 수 없습니다."));
         return new BalanceDTO(userAccounts.getBalance());
+    }
+
+    // 잔액 갱신
+    public void applyUsage(Users user, UsageHistory usageHistory) {
+
+        UserAccounts account = userAccountRepository
+                .findByUser(user)
+                .orElseGet(() -> UserAccounts.builder()
+                        .user(user)
+                        .balance(BigDecimal.ZERO)
+                        .thisIncome(BigDecimal.valueOf(0))
+                        .thisOutlay(BigDecimal.valueOf(0))
+                        .thisMonth(String.valueOf(YearMonth.now()))
+                        .build()
+                );
+
+        BigDecimal amount = usageHistory.getPrice();
+
+        if (usageHistory.getHistoryType() == HistoryType.INCOME) {
+            account.setBalance(account.getBalance().add(amount));
+        } else {
+            account.setBalance(account.getBalance().subtract(amount));
+        }
+
+        userAccountRepository.save(account);
     }
 }
