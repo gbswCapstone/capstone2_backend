@@ -38,3 +38,6 @@ out/
 
 #application.properties
 src/main/resources/application.properties
+
+# bfg-1.15.0.jar
+bfg-1.15.0.jar
