@@ -1,12 +1,12 @@
-package Capstone.capstoneProject.config;
+﻿package Capstone.capstoneProject.config;
 
 
-import Capstone.capstoneProject.entity.Chats.ChatRooms;
-import Capstone.capstoneProject.entity.Users.Users;
+import Capstone.capstoneProject.entity.chat.ChatRooms;
+import Capstone.capstoneProject.entity.user.Users;
 import Capstone.capstoneProject.exceptions.forbidden.ChatRoomAccessDeniedException;
 import Capstone.capstoneProject.exceptions.notfound.ChatRoomNotFoundException;
-import Capstone.capstoneProject.repository.ChatRoomUsersRepository;
-import Capstone.capstoneProject.repository.ChatRoomsRepository;
+import Capstone.capstoneProject.repository.chat.ChatRoomUsersRepository;
+import Capstone.capstoneProject.repository.chat.ChatRoomsRepository;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;

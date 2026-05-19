@@ -8,7 +8,15 @@
       "PowerShell(Get-ChildItem -Path \"D:\\\\capstoneProject\\\\capstoneProject\" | Where-Object {$_.PSIsContainer} | ForEach-Object {Write-Host $_.Name})",
       "Bash(cd /d D:\\\\capstoneProject\\\\capstoneProject)",
       "Bash(./gradlew compileJava)",
-      "Bash(xargs grep -l \"Logger\\\\|@Slf4j\")"
+      "Bash(xargs grep -l \"Logger\\\\|@Slf4j\")",
+      "Bash(Get-ChildItem -Path \"D:\\\\capstoneProject\\\\capstoneProject\" -Recurse -Depth 3)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Format-Table -AutoSize)",
+      "PowerShell(& \"D:\\\\capstoneProject\\\\refactor-step1-entity.ps1\")",
+      "PowerShell(& \"D:\\\\capstoneProject\\\\refactor-step2-dto.ps1\")",
+      "PowerShell(& \"D:\\\\capstoneProject\\\\refactor-step3-repo-service-controller.ps1\")",
+      "PowerShell(& \"D:\\\\capstoneProject\\\\refactor-step4-imports.ps1\")",
+      "Bash(git ls-tree *)"
     ]
   }
 }

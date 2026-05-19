@@ -1,9 +1,9 @@
-package Capstone.capstoneProject.config;
+﻿package Capstone.capstoneProject.config;
 
-import Capstone.capstoneProject.entity.ChatBot.ChatBotRooms;
-import Capstone.capstoneProject.entity.Users.Users;
+import Capstone.capstoneProject.entity.chatbot.ChatBotRooms;
+import Capstone.capstoneProject.entity.user.Users;
 import Capstone.capstoneProject.exceptions.notfound.ChatBotRoomNotFoundException;
-import Capstone.capstoneProject.repository.ChatBotRoomRepository;
+import Capstone.capstoneProject.repository.chatbot.ChatBotRoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;

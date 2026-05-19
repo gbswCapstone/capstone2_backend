@@ -1,6 +1,6 @@
-package Capstone.capstoneProject.security.oauth;
+﻿package Capstone.capstoneProject.security.oauth;
 
-import Capstone.capstoneProject.repository.oauth.OAuth2UserInfo;
+import Capstone.capstoneProject.security.oauth.OAuth2UserInfo;
 import lombok.AllArgsConstructor;
 
 import java.util.Map;

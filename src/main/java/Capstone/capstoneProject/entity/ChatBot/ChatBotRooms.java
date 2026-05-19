@@ -1,6 +1,6 @@
-package Capstone.capstoneProject.entity.ChatBot;
+﻿package Capstone.capstoneProject.entity.chatbot;
 
-import Capstone.capstoneProject.entity.Users.Users;
+import Capstone.capstoneProject.entity.user.Users;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
