@@ -4,9 +4,12 @@ import Capstone.capstoneProject.entity.Boards.BoardLikes;
 import Capstone.capstoneProject.entity.Boards.Boards;
 import Capstone.capstoneProject.entity.Users.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface BoardLikeRepository extends JpaRepository<BoardLikes, Long> {
 
@@ -22,4 +25,8 @@ public interface BoardLikeRepository extends JpaRepository<BoardLikes, Long> {
     Optional<BoardLikes> findByUsersAndBoardsAndBoards_DeletedAtIsNull(Users user, Boards boards);
     // 내가 좋아요한 게시물인지 판단
     boolean existsByUsersAndBoardsAndBoards_DeletedAtIsNull(Users user, Boards boards);
+
+    // N+1 방지: 여러 게시글에 대한 좋아요 여부를 한 번에 조회
+    @Query("SELECT bl.boards.id FROM BoardLikes bl WHERE bl.users = :user AND bl.boards.id IN :boardIds AND bl.boards.deletedAt IS NULL")
+    Set<Long> findLikedBoardIdsByUserAndBoardIds(@Param("user") Users user, @Param("boardIds") List<Long> boardIds);
 }
