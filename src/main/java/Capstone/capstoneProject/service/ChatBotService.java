@@ -17,6 +17,7 @@ import Capstone.capstoneProject.repository.*;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +42,9 @@ public class ChatBotService {
 
     private final AuthenticatedUserUtils authenticatedUserUtils;
     private final RestTemplate restTemplate;
+
+    @Value("${ai.server.url:http://13.125.64.51:8080}")
+    private String aiServerUrl;
     private final UsageHistoryRepository usageHistoryRepository;
     private final ChatBotMessageRepository chatBotMessageRepository;
     private final ChatBotRoomRepository chatBotRoomRepository;
@@ -113,7 +117,7 @@ public class ChatBotService {
         List<UsageHistory> currentMonthHistories = usageHistoryRepository.findAllByUsersForCurrentMonth(user, startOfMonth, endOfMonth);
         ChatBotRoomMessageRequest request = ChatBotRoomMessageRequest.from(userMessage, chatBotMessages, currentMonthHistories);
 
-        String url = "http://13.125.64.51:8080/chat";
+        String url = aiServerUrl + "/chat";
         // 요청 그대로 전달
         ResponseEntity<ChatBotMessageResponse> response =
                 restTemplate.postForEntity(
@@ -189,7 +193,7 @@ public class ChatBotService {
 
         ChatRoomAnalysisRequest request = ChatRoomAnalysisRequest.from("이번달 소비 분석 해줘", chatBotMessages, usageSummaryDTO, currentMonthHistories);
 
-        String url = "http://13.125.64.51:8080/chat_analysis";
+        String url = aiServerUrl + "/chat_analysis";
 
         // 요청 그대로 전달
         ResponseEntity<ChatBotMessageResponse> response =
@@ -253,7 +257,7 @@ public class ChatBotService {
 
         ChatRoomAnalysisRequest request = ChatRoomAnalysisRequest.from("이번주 소비 분석 해줘", chatBotMessages, usageSummaryDTO, currentWeekHistories);
 
-        String url = "http://13.125.64.51:8080/chat_analysis";
+        String url = aiServerUrl + "/chat_analysis";
 
         // 요청 그대로 전달
         ResponseEntity<ChatBotMessageResponse> response =
@@ -296,7 +300,7 @@ public class ChatBotService {
         
         ChatBotSummaryRequest request = ChatBotSummaryRequest.from(recentMessages, usageHistory);
 
-        String url = "http://13.125.64.51:8080/summary";
+        String url = aiServerUrl + "/summary";
         // 요청 그대로 전달
         ResponseEntity<ChatBotMessageResponse> response =
                 restTemplate.postForEntity(

@@ -20,11 +20,13 @@ import Capstone.capstoneProject.exceptions.notfound.ChatRoomNotFoundException;
 import Capstone.capstoneProject.exceptions.notfound.MissionNotFoundException;
 import Capstone.capstoneProject.repository.*;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ChallengeMissionService {
 
     private final AuthenticatedUserUtils authenticatedUserUtils;
@@ -55,11 +57,11 @@ public class ChallengeMissionService {
                     .category(request.getCategory())
                     .maxInt(request.getMexInt())
                     .goalAmount(null)
-                    .experience(30) // 기본 경험치
+                    .experience(30)
                     .startDate(request.getStartDate())
                     .endDate(request.getEndDate())
                     .build();
-        } else if (request.getMissionType() != MissionType.NO_OUTLAY) {
+        } else if (request.getMissionType() == MissionType.NO_OUTLAY) {
             missions = Missions.builder()
                     .challenges(chatRooms.getChallenge())
                     .missionType(MissionType.NO_OUTLAY)
@@ -71,7 +73,7 @@ public class ChallengeMissionService {
                     .startDate(request.getStartDate())
                     .endDate(request.getEndDate())
                     .build();
-        } else if (request.getMissionType() != MissionType.INCOME_GOAL || request.getMissionType() != MissionType.OUTLAY_GOAL) {
+        } else if (request.getMissionType() == MissionType.INCOME_GOAL || request.getMissionType() == MissionType.OUTLAY_GOAL) {
             missions = Missions.builder()
                     .challenges(chatRooms.getChallenge())
                     .missionType(request.getMissionType())
