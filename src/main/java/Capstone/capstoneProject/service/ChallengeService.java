@@ -195,11 +195,13 @@ public class ChallengeService {
 
         ChallengeDetailResponse challengeDetailResponse = ChallengeDetailResponse.fromEntity(challenges, isLiked);
 
-        // 작성자이기 때문에 참여
-        challengeDetailResponse.setJoined(true);
+        boolean isJoined = challengeUsersRepository.existsByChallengeIdAndUserId(challenges.getId(), user.getId());
+        challengeDetailResponse.setJoined(isJoined);
 
-        chatRoomsRepository.findByChallenge(challenges)
-                .ifPresent(cr -> challengeDetailResponse.setRoomId(cr.getRoomId()));
+        if (isJoined) {
+            chatRoomsRepository.findByChallenge(challenges)
+                    .ifPresent(cr -> challengeDetailResponse.setRoomId(cr.getRoomId()));
+        }
         return challengeDetailResponse;
     }
 
@@ -278,11 +280,13 @@ public class ChallengeService {
         boolean isLiked = isLikedByUser(challenges, user);
         ChallengeDetailResponse challengeDetailResponse = ChallengeDetailResponse.fromEntity(challenges, isLiked);
 
-        // 작성자이기 때문에 참여
-        challengeDetailResponse.setJoined(true);
+        boolean isJoinedAfterUpdate = challengeUsersRepository.existsByChallengeIdAndUserId(challenges.getId(), user.getId());
+        challengeDetailResponse.setJoined(isJoinedAfterUpdate);
 
-        chatRoomsRepository.findByChallenge(challenges)
-                .ifPresent(cr -> challengeDetailResponse.setRoomId(cr.getRoomId()));
+        if (isJoinedAfterUpdate) {
+            chatRoomsRepository.findByChallenge(challenges)
+                    .ifPresent(cr -> challengeDetailResponse.setRoomId(cr.getRoomId()));
+        }
         return challengeDetailResponse;
     }
 

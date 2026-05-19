@@ -155,9 +155,10 @@ public class AuthService {
                 .build();
         authTokenRepository.save(tokenEntity);
         ChatBotRooms chatBotRooms = chatBotService.createRoom(user);
+        missionService.ensureAttendanceMission(user);
 
         return new LoginResponse(accessToken, refreshToken, chatBotRooms.getChatBotRoomId());
-        }
+    }
 
 
     public LoginResponse kakaoLogin(OauthRequest request) {
@@ -207,6 +208,7 @@ public class AuthService {
                 .build();
         authTokenRepository.save(tokenEntity);
         ChatBotRooms chatBotRooms = chatBotService.createRoom(user);
+        missionService.ensureAttendanceMission(user);
         return new LoginResponse(accessToken, refreshToken, chatBotRooms.getChatBotRoomId());
     }
 
