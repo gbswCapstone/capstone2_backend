@@ -15,6 +15,7 @@ import Capstone.capstoneProject.repository.UsageHistoryRepository;
 import Capstone.capstoneProject.security.AuthenticatedUserUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -46,6 +47,9 @@ public class UsageService {
     private final RestTemplate restTemplate;
     private final BalanceService balanceService;
 
+    @Value("${ai.server.url:http://13.125.64.51:8080}")
+    private String aiServerUrl;
+
 
     public UsageResponse plusIncomeHistory(IncomeRequest request) {
         // user 정보 가져오기 (baarer token에서 추출)
@@ -55,7 +59,7 @@ public class UsageService {
         }
 
         // 외부 AI 서버로 importer 전송
-        String url = "http://13.125.64.51:8080/income";
+        String url = aiServerUrl + "/income";
         Map<String, String> requestBody = Map.of("income_name", request.getImporter());
         ResponseEntity<Map> response = restTemplate.postForEntity(url, requestBody, Map.class);
         // 응답에서 category 추출
@@ -96,7 +100,7 @@ public class UsageService {
         }
 
         // 외부 AI 서버로 productName 전송
-        String url = "http://13.125.64.51:8080/category";
+        String url = aiServerUrl + "/category";
         Map<String, String> requestBody = Map.of("product_name", request.getProductName());
         ResponseEntity<Map> response = restTemplate.postForEntity(url, requestBody, Map.class);
         // 응답에서 category 추출
@@ -131,7 +135,7 @@ public class UsageService {
 
     public ReceiptResponse plusReceiptOutlay(MultipartFile image) {
         Users user = authenticatedUserUtils.getCurrentUser();
-        String url = "http://13.125.64.51:8080/ocr";
+        String url = aiServerUrl + "/ocr";
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         try {
@@ -517,7 +521,7 @@ public class UsageService {
 
     public AnalysisResponseDTO getAiUsageAnalysis() {
         UsageSummaryResponse request = getUsageSummary();
-        String url = "http://13.125.64.51:8080/analysis";
+        String url = aiServerUrl + "/analysis";
         // 요청 그대로 전달
         ResponseEntity<AnalysisResponseDTO> response =
                 restTemplate.postForEntity(
@@ -606,19 +610,16 @@ public class UsageService {
             UsageCategory category = history.getCategory();
 
             // 전체 합계
-            if ("OUTLAY".equals(history.getHistoryType())) {
+            if (history.getHistoryType() == HistoryType.OUTLAY) {
                 totalOutlay = totalOutlay.add(price);
-            } else if ("INCOME".equals(history.getHistoryType())) {
+            } else if (history.getHistoryType() == HistoryType.INCOME) {
                 totalIncome = totalIncome.add(price);
             }
 
             // 카테고리별 요약
             CategorySummariesDTO summary = categoryMap.computeIfAbsent(
                     category,
-                    k -> {
-                        CategorySummariesDTO dto = new CategorySummariesDTO(category, price, history.getAmount());
-                        return dto;
-                    }
+                    k -> new CategorySummariesDTO(category, BigDecimal.ZERO, 0)
             );
 
             summary.setPrice(summary.getPrice().add(price));

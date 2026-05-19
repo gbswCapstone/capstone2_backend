@@ -152,11 +152,11 @@ public class MissionService {
                     .category(request.getCategory())
                     .maxInt(request.getMexInt())
                     .goalAmount(null)
-                    .experience(30) // 기본 경험치
+                    .experience(30)
                     .startDate(request.getStartDate())
                     .endDate(request.getEndDate())
                     .build();
-        } else if (request.getMissionType() != MissionType.NO_OUTLAY) {
+        } else if (request.getMissionType() == MissionType.NO_OUTLAY) {
             missions = Missions.builder()
                     .challenges(null)
                     .missionType(MissionType.NO_OUTLAY)
@@ -168,7 +168,7 @@ public class MissionService {
                     .startDate(request.getStartDate())
                     .endDate(request.getEndDate())
                     .build();
-        } else if (request.getMissionType() != MissionType.INCOME_GOAL || request.getMissionType() != MissionType.OUTLAY_GOAL) {
+        } else if (request.getMissionType() == MissionType.INCOME_GOAL || request.getMissionType() == MissionType.OUTLAY_GOAL) {
             missions = Missions.builder()
                     .challenges(null)
                     .missionType(request.getMissionType())
