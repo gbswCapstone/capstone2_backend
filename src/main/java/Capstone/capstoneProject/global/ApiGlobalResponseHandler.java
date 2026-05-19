@@ -77,6 +77,13 @@ public class ApiGlobalResponseHandler {
         return ResponseEntity.badRequest().body(ApiResponse.error(errorMessage));
     }
 
+    // 미처리 예외 catch-all
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnexpectedException(Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error("서버 내부 오류가 발생했습니다."));
+    }
+
 
 
 
