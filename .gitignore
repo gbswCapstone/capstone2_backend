@@ -52,5 +52,10 @@ src/main/resources/application-*.yml
 .env.*
 !.env.example
 
+.claude/
+capstone2_backend.git/
+capstone2_backend.git.bfg-report/
+chat_test/
+
 # BFG (git history 정리 도구)
 bfg*.jar
