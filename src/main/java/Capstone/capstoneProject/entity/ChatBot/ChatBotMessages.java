@@ -1,4 +1,4 @@
-package Capstone.capstoneProject.entity.ChatBot;
+package Capstone.capstoneProject.entity.chatbot;
 
 import Capstone.capstoneProject.enums.ChatBotSenderType;
 import jakarta.persistence.*;

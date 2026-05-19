@@ -1,8 +1,8 @@
-package Capstone.capstoneProject.security;
+﻿package Capstone.capstoneProject.security;
 
-import Capstone.capstoneProject.entity.Users.Users;
+import Capstone.capstoneProject.entity.user.Users;
 import Capstone.capstoneProject.exceptions.unauthorized.NotAuthenticatedException;
-import Capstone.capstoneProject.repository.UserRepository;
+import Capstone.capstoneProject.repository.user.UserRepository;
 import Capstone.capstoneProject.security.oauth.CustomOauth2UserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;

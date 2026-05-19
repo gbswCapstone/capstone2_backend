@@ -1,8 +1,8 @@
-package Capstone.capstoneProject.init;
+﻿package Capstone.capstoneProject.init;
 
-import Capstone.capstoneProject.entity.Missions.Missions;
+import Capstone.capstoneProject.entity.mission.Missions;
 import Capstone.capstoneProject.enums.MissionType;
-import Capstone.capstoneProject.repository.MissionRepository;
+import Capstone.capstoneProject.repository.mission.MissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

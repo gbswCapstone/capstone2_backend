@@ -1,9 +1,9 @@
-package Capstone.capstoneProject.config;
+﻿package Capstone.capstoneProject.config;
 
-import Capstone.capstoneProject.entity.Users.Users;
+import Capstone.capstoneProject.entity.user.Users;
 import Capstone.capstoneProject.exceptions.forbidden.InvalidJwtAuthenticationException;
 import Capstone.capstoneProject.exceptions.notfound.UserNotFoundException;
-import Capstone.capstoneProject.repository.UserRepository;
+import Capstone.capstoneProject.repository.user.UserRepository;
 import Capstone.capstoneProject.security.CustomSecurityUserDetails;
 import Capstone.capstoneProject.security.JwtTokenProvider;
 import Capstone.capstoneProject.security.oauth.CustomOauth2UserDetails;
