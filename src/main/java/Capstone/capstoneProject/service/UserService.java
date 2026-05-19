@@ -26,7 +26,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,6 +46,7 @@ public class UserService {
     private final CommentRepository commentRepository;
     private final LikeRepository likeRepository;
     private final ChatRoomsRepository chatRoomsRepository;
+    private final ChallengeUsersRepository challengeUsersRepository;
 
     //회원가입
     public void signup(SecuritySignupRequest request) {
@@ -144,12 +149,8 @@ public class UserService {
                     .findByUsersAndBoards_DeletedAtIsNullOrderByCreatedAtDesc(user);
         }
 
-        List<Boards> boards = boardLikes.stream()
-                .map(BoardLikes::getBoards)
-                .collect(Collectors.toList());
-
-        return boards.stream().map(board -> {
-                boolean isLiked = boardLikeRepository.existsByUsersAndBoardsAndBoards_DeletedAtIsNull(user, board); // 내가 눌렀는지 여부
+        return boardLikes.stream().map(like -> {
+            Boards board = like.getBoards();
             return BoardListDTO.builder()
                     .id(board.getId())
                     .user(UserSummaryDTO.from(board.getUsers()))
@@ -158,7 +159,7 @@ public class UserService {
                     .content(board.getContent())
                     .likes(BoardLikesDTO.builder()
                             .likeCount(board.getLikeCount())
-                            .isLiked(isLiked)
+                            .isLiked(true)
                             .build())
                     .commentCount(board.getCommentCount())
                     .createdAt(board.getCreatedAt())
@@ -183,24 +184,25 @@ public class UserService {
             // 기본 최신순
             boards = boardRepository.findByUsersAndDeletedAtIsNullOrderByCreatedAtDesc(user);
         }
-        return boards.stream().map(board -> {
-            boolean isLiked = boardLikeRepository.existsByUsersAndBoardsAndBoards_DeletedAtIsNull(user, board); // 내가 눌렀는지 여부
+        List<Long> boardIds = boards.stream().map(Boards::getId).collect(Collectors.toList());
+        Set<Long> likedIds = boards.isEmpty()
+                ? Collections.emptySet()
+                : boardLikeRepository.findLikedBoardIdsByUserAndBoardIds(user, boardIds);
 
-            return BoardListDTO.builder()
-                    .id(board.getId())
-                    .user(UserSummaryDTO.from(board.getUsers()))
-                    .title(board.getTitle())
-                    .category(board.getCategory())
-                    .content(board.getContent())
-                    .likes(BoardLikesDTO.builder()
-                            .likeCount(board.getLikeCount())
-                            .isLiked(isLiked)
-                            .build())
-                    .commentCount(board.getCommentCount())
-                    .createdAt(board.getCreatedAt())
-                    .image(BoardImageDTO.from(board))
-                    .build();
-        }).collect(Collectors.toList());
+        return boards.stream().map(board -> BoardListDTO.builder()
+                .id(board.getId())
+                .user(UserSummaryDTO.from(board.getUsers()))
+                .title(board.getTitle())
+                .category(board.getCategory())
+                .content(board.getContent())
+                .likes(BoardLikesDTO.builder()
+                        .likeCount(board.getLikeCount())
+                        .isLiked(likedIds.contains(board.getId()))
+                        .build())
+                .commentCount(board.getCommentCount())
+                .createdAt(board.getCreatedAt())
+                .image(BoardImageDTO.from(board))
+                .build()).collect(Collectors.toList());
     }
 
     public UserSummaryDTO getProfile(Long userId) {
@@ -230,24 +232,28 @@ public class UserService {
     public List<ChallengeListDTO> getMyLikeChallengeList() {
         // user 정보 가져오기 (baarer token에서 추출)
         Users user = authenticatedUserUtils.getCurrentUser();
-        // 유저가 좋아요한 챌린지 목록
         List<ChallengeLikes> likes = likeRepository.findAllByUserOrderByCreatedAtDesc(user);
-
+        List<Long> challengeIds = likes.stream()
+                .map(l -> l.getChallenges().getId()).collect(Collectors.toList());
+        Set<Long> joinedIds = challengeIds.isEmpty()
+                ? Collections.emptySet()
+                : challengeUsersRepository.findJoinedChallengeIdsByUserIdAndChallengeIds(user.getId(), challengeIds);
+        List<Long> joinedChallengeIds = new ArrayList<>(joinedIds);
+        Map<Long, String> roomIdMap = joinedChallengeIds.isEmpty()
+                ? Collections.emptyMap()
+                : chatRoomsRepository.findByChallengeIds(joinedChallengeIds).stream()
+                        .collect(Collectors.toMap(cr -> cr.getChallenge().getId(), cr -> cr.getRoomId()));
 
         return likes.stream()
                 .map(like -> {
                     Challenges challenge = like.getChallenges();
                     ChallengeListDTO dto = new ChallengeListDTO(challenge);
-                    // 현재 참여 여부
-                    boolean isJoined = challenge.getChallengeUsers().stream()
-                            .anyMatch(cu -> cu.getUser().getId().equals(user.getId()));
+                    boolean isJoined = joinedIds.contains(challenge.getId());
                     dto.setJoined(isJoined);
-
                     if (isJoined) {
-                        chatRoomsRepository.findByChallenge(challenge)
-                                .ifPresent(cr -> dto.setRoomId(cr.getRoomId()));
+                        String roomId = roomIdMap.get(challenge.getId());
+                        if (roomId != null) dto.setRoomId(roomId);
                     }
-
                     return dto;
                 })
                 .collect(Collectors.toList());

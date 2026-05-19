@@ -5,7 +5,10 @@
       "Bash(Select-Object Name)",
       "PowerShell(Get-ChildItem -Path \"D:\\\\capstoneProject\\\\capstoneProject\" -Force | Select-Object Name, @{Name='Type';Expression={if\\($_.PSIsContainer\\){'Directory'}else{'File'}}} | Format-Table -AutoSize)",
       "PowerShell(Get-ChildItem -Path \"D:\\\\capstoneProject\\\\capstoneProject\\\\src\" -Force | Select-Object Name, @{Name='Type';Expression={if\\($_.PSIsContainer\\){'Directory'}else{'File'}}} | Format-Table -AutoSize)",
-      "PowerShell(Get-ChildItem -Path \"D:\\\\capstoneProject\\\\capstoneProject\" | Where-Object {$_.PSIsContainer} | ForEach-Object {Write-Host $_.Name})"
+      "PowerShell(Get-ChildItem -Path \"D:\\\\capstoneProject\\\\capstoneProject\" | Where-Object {$_.PSIsContainer} | ForEach-Object {Write-Host $_.Name})",
+      "Bash(cd /d D:\\\\capstoneProject\\\\capstoneProject)",
+      "Bash(./gradlew compileJava)",
+      "Bash(xargs grep -l \"Logger\\\\|@Slf4j\")"
     ]
   }
 }
