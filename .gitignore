@@ -36,8 +36,21 @@ out/
 ### VS Code ###
 .vscode/
 
-#application.properties
+# 환경 설정 파일 (민감 정보 포함 — 절대 커밋 금지)
 src/main/resources/application.properties
+src/main/resources/application-*.properties
+src/main/resources/application.yml
+src/main/resources/application-*.yml
 
-# bfg-1.15.0.jar
-bfg-1.15.0.jar
+# Firebase 서비스 계정 키
+**/firebase-*.json
+**/serviceAccountKey.json
+**/firebase-adminsdk-*.json
+
+# 환경변수 파일
+.env
+.env.*
+!.env.example
+
+# BFG (git history 정리 도구)
+bfg*.jar
