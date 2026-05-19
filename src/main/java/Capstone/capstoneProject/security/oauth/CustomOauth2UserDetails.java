@@ -1,6 +1,6 @@
-package Capstone.capstoneProject.security.oauth;
+﻿package Capstone.capstoneProject.security.oauth;
 
-import Capstone.capstoneProject.entity.Users.Users;
+import Capstone.capstoneProject.entity.user.Users;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

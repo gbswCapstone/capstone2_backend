@@ -1,12 +1,12 @@
-package Capstone.capstoneProject.security.oauth;
+﻿package Capstone.capstoneProject.security.oauth;
 
 import Capstone.capstoneProject.global.ApiResponse;
-import Capstone.capstoneProject.dto.TokenResponse;
-import Capstone.capstoneProject.entity.AuthToken;
-import Capstone.capstoneProject.entity.Users.Users;
+import Capstone.capstoneProject.dto.auth.TokenResponse;
+import Capstone.capstoneProject.entity.auth.AuthToken;
+import Capstone.capstoneProject.entity.user.Users;
 import Capstone.capstoneProject.exceptions.notfound.UserNotFoundException;
-import Capstone.capstoneProject.repository.AuthTokenRepository;
-import Capstone.capstoneProject.repository.UserRepository;
+import Capstone.capstoneProject.repository.auth.AuthTokenRepository;
+import Capstone.capstoneProject.repository.user.UserRepository;
 import Capstone.capstoneProject.security.JwtTokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,11 +1,11 @@
-package Capstone.capstoneProject.security.oauth;
+﻿package Capstone.capstoneProject.security.oauth;
 
-import Capstone.capstoneProject.entity.Users.UserProfile;
-import Capstone.capstoneProject.entity.Users.Users;
+import Capstone.capstoneProject.entity.user.UserProfile;
+import Capstone.capstoneProject.entity.user.Users;
 import Capstone.capstoneProject.enums.UserRole;
-import Capstone.capstoneProject.repository.UserProfileRepository;
-import Capstone.capstoneProject.repository.UserRepository;
-import Capstone.capstoneProject.repository.oauth.OAuth2UserInfo;
+import Capstone.capstoneProject.repository.user.UserProfileRepository;
+import Capstone.capstoneProject.repository.user.UserRepository;
+import Capstone.capstoneProject.security.oauth.OAuth2UserInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

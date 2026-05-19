@@ -1,8 +1,8 @@
-package Capstone.capstoneProject.dto.ChatBot;
+﻿package Capstone.capstoneProject.dto.chatbot;
 
-import Capstone.capstoneProject.dto.Usages.RecentTransactionDTO;
-import Capstone.capstoneProject.entity.ChatBot.ChatBotMessages;
-import Capstone.capstoneProject.entity.ChatBot.HomeChatBotMessages;
+import Capstone.capstoneProject.dto.usage.RecentTransactionDTO;
+import Capstone.capstoneProject.entity.chatbot.ChatBotMessages;
+import Capstone.capstoneProject.entity.chatbot.HomeChatBotMessages;
 import Capstone.capstoneProject.entity.UsageHistory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
