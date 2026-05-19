@@ -133,18 +133,24 @@ public class ChallengeService {
                     : challengeRepository.findAllByJobAndDeletedAtIsNullOrderByCreatedAtDesc(finalJob);
         }
 
+        List<Long> challengeIds = challenges.stream().map(Challenges::getId).collect(Collectors.toList());
+        Set<Long> joinedIds = challenges.isEmpty()
+                ? Collections.emptySet()
+                : challengeUsersRepository.findJoinedChallengeIdsByUserIdAndChallengeIds(user.getId(), challengeIds);
+        List<Long> joinedChallengeIds = new ArrayList<>(joinedIds);
+        Map<Long, String> roomIdMap = joinedChallengeIds.isEmpty()
+                ? Collections.emptyMap()
+                : chatRoomsRepository.findByChallengeIds(joinedChallengeIds).stream()
+                        .collect(Collectors.toMap(cr -> cr.getChallenge().getId(), ChatRooms::getRoomId));
+
         return challenges.stream()
                 .map(ch -> {
                     ChallengeListDTO dto = new ChallengeListDTO(ch);
-
-                    // 참여여부 체크
-                    boolean isJoined = challengeUsersRepository.existsByChallengeIdAndUserId(ch.getId(), user.getId());
+                    boolean isJoined = joinedIds.contains(ch.getId());
                     dto.setJoined(isJoined);
-
-                    // 참여한 경우에만 roomId 세팅
                     if (isJoined) {
-                        chatRoomsRepository.findByChallenge(ch)
-                                .ifPresent(cr -> dto.setRoomId(cr.getRoomId()));
+                        String roomId = roomIdMap.get(ch.getId());
+                        if (roomId != null) dto.setRoomId(roomId);
                     }
                     return dto;
                 })
@@ -306,20 +312,24 @@ public class ChallengeService {
     public List<ChallengeListDTO> searchChallenge(String hashtag, String keyword, SortType sortType, UserJobs userJobs) {
         Users user = authenticatedUserUtils.getCurrentUser();
         List<Challenges> challenges = challengeRepository.searchDynamic(hashtag, keyword, sortType, userJobs);
+        List<Long> challengeIds = challenges.stream().map(Challenges::getId).collect(Collectors.toList());
+        Set<Long> joinedIds = challenges.isEmpty()
+                ? Collections.emptySet()
+                : challengeUsersRepository.findJoinedChallengeIdsByUserIdAndChallengeIds(user.getId(), challengeIds);
+        List<Long> joinedChallengeIds = new ArrayList<>(joinedIds);
+        Map<Long, String> roomIdMap = joinedChallengeIds.isEmpty()
+                ? Collections.emptyMap()
+                : chatRoomsRepository.findByChallengeIds(joinedChallengeIds).stream()
+                        .collect(Collectors.toMap(cr -> cr.getChallenge().getId(), ChatRooms::getRoomId));
+
         return challenges.stream()
                 .map(ch -> {
                     ChallengeListDTO dto = new ChallengeListDTO(ch);
-
-
-                    // 참여여부 체크
-                    boolean isJoined = ch.getChallengeUsers().stream()
-                            .anyMatch(cu -> cu.getUser().getId().equals(user.getId()));
+                    boolean isJoined = joinedIds.contains(ch.getId());
                     dto.setJoined(isJoined);
-
-                    // 참여한 경우에만 roomId 세팅
                     if (isJoined) {
-                        chatRoomsRepository.findByChallenge(ch)
-                                .ifPresent(cr -> dto.setRoomId(cr.getRoomId()));
+                        String roomId = roomIdMap.get(ch.getId());
+                        if (roomId != null) dto.setRoomId(roomId);
                     }
                     return dto;
                 })
@@ -370,16 +380,20 @@ public class ChallengeService {
         Users user = authenticatedUserUtils.getCurrentUser();
 
         List<ChallengeUsers> joined = challengeUsersRepository.findByUserId(user.getId());
+        List<Long> challengeIds = joined.stream()
+                .map(cu -> cu.getChallenge().getId()).collect(Collectors.toList());
+        Map<Long, String> roomIdMap = challengeIds.isEmpty()
+                ? Collections.emptyMap()
+                : chatRoomsRepository.findByChallengeIds(challengeIds).stream()
+                        .collect(Collectors.toMap(cr -> cr.getChallenge().getId(), ChatRooms::getRoomId));
 
         return joined.stream()
                 .map(cu -> {
                     Challenges challenge = cu.getChallenge();
                     ChallengeListDTO dto = new ChallengeListDTO(challenge);
-
                     dto.setJoined(true);
-                    // roomId 세팅
-                    chatRoomsRepository.findByChallenge(challenge)
-                            .ifPresent(cr -> dto.setRoomId(cr.getRoomId()));
+                    String roomId = roomIdMap.get(challenge.getId());
+                    if (roomId != null) dto.setRoomId(roomId);
                     return dto;
                 })
                 .collect(Collectors.toList());
