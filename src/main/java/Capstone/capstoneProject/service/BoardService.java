@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -114,24 +115,25 @@ public class BoardService {
             }
         }
 
-        return boards.stream().map(board -> {
-            boolean isLiked = boardLikeRepository.existsByUsersAndBoardsAndBoards_DeletedAtIsNull(users, board); // 내가 눌렀는지 여부
+        List<Long> boardIds = boards.stream().map(Boards::getId).collect(Collectors.toList());
+        Set<Long> likedIds = boards.isEmpty()
+                ? Collections.emptySet()
+                : boardLikeRepository.findLikedBoardIdsByUserAndBoardIds(users, boardIds);
 
-            return BoardListDTO.builder()
-                    .id(board.getId())
-                    .user(UserSummaryDTO.from(board.getUsers()))
-                    .title(board.getTitle())
-                    .category(board.getCategory())
-                    .content(board.getContent())
-                    .likes(BoardLikesDTO.builder()
-                            .likeCount(board.getLikeCount())
-                            .isLiked(isLiked)
-                            .build())
-                    .commentCount(board.getCommentCount())
-                    .createdAt(board.getCreatedAt())
-                    .image(BoardImageDTO.from(board))
-                    .build();
-        }).collect(Collectors.toList());
+        return boards.stream().map(board -> BoardListDTO.builder()
+                .id(board.getId())
+                .user(UserSummaryDTO.from(board.getUsers()))
+                .title(board.getTitle())
+                .category(board.getCategory())
+                .content(board.getContent())
+                .likes(BoardLikesDTO.builder()
+                        .likeCount(board.getLikeCount())
+                        .isLiked(likedIds.contains(board.getId()))
+                        .build())
+                .commentCount(board.getCommentCount())
+                .createdAt(board.getCreatedAt())
+                .image(BoardImageDTO.from(board))
+                .build()).collect(Collectors.toList());
     }
 
 
@@ -234,24 +236,25 @@ public class BoardService {
             }
         }
 
-        return boards.stream().map(board -> {
-            boolean isLiked = boardLikeRepository.existsByUsersAndBoardsAndBoards_DeletedAtIsNull(user, board); // 내가 눌렀는지 여부
+        List<Long> boardIds = boards.stream().map(Boards::getId).collect(Collectors.toList());
+        Set<Long> likedIds = boards.isEmpty()
+                ? Collections.emptySet()
+                : boardLikeRepository.findLikedBoardIdsByUserAndBoardIds(user, boardIds);
 
-            return BoardListDTO.builder()
-                    .id(board.getId())
-                    .user(UserSummaryDTO.from(board.getUsers()))
-                    .title(board.getTitle())
-                    .category(board.getCategory())
-                    .content(board.getContent())
-                    .likes(BoardLikesDTO.builder()
-                            .likeCount(board.getLikeCount())
-                            .isLiked(isLiked)
-                            .build())
-                    .commentCount(board.getCommentCount())
-                    .createdAt(board.getCreatedAt())
-                    .image(BoardImageDTO.from(board))
-                    .build();
-        }).collect(Collectors.toList());
+        return boards.stream().map(board -> BoardListDTO.builder()
+                .id(board.getId())
+                .user(UserSummaryDTO.from(board.getUsers()))
+                .title(board.getTitle())
+                .category(board.getCategory())
+                .content(board.getContent())
+                .likes(BoardLikesDTO.builder()
+                        .likeCount(board.getLikeCount())
+                        .isLiked(likedIds.contains(board.getId()))
+                        .build())
+                .commentCount(board.getCommentCount())
+                .createdAt(board.getCreatedAt())
+                .image(BoardImageDTO.from(board))
+                .build()).collect(Collectors.toList());
     }
 
     public BoardLikesDTO likeBoard(Long id) {
