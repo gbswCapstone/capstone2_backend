@@ -1,6 +1,6 @@
-package Capstone.capstoneProject.dto.ChatBot;
+﻿package Capstone.capstoneProject.dto.chatbot;
 
-import Capstone.capstoneProject.dto.Usages.SpendingItem;
+import Capstone.capstoneProject.dto.usage.SpendingItem;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
