@@ -1,14 +1,14 @@
-package Capstone.capstoneProject.scheduler;
+﻿package Capstone.capstoneProject.scheduler;
 
 
-import Capstone.capstoneProject.entity.Missions.Missions;
-import Capstone.capstoneProject.entity.Missions.UserMissions;
-import Capstone.capstoneProject.entity.Users.Users;
+import Capstone.capstoneProject.entity.mission.Missions;
+import Capstone.capstoneProject.entity.mission.UserMissions;
+import Capstone.capstoneProject.entity.user.Users;
 import Capstone.capstoneProject.enums.MissionStatusType;
 import Capstone.capstoneProject.enums.MissionType;
-import Capstone.capstoneProject.repository.MissionRepository;
-import Capstone.capstoneProject.repository.UserMissionRepository;
-import Capstone.capstoneProject.repository.UserRepository;
+import Capstone.capstoneProject.repository.mission.MissionRepository;
+import Capstone.capstoneProject.repository.mission.UserMissionRepository;
+import Capstone.capstoneProject.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;

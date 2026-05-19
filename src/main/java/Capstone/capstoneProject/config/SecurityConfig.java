@@ -1,8 +1,8 @@
-package Capstone.capstoneProject.config;
+﻿package Capstone.capstoneProject.config;
 
 import Capstone.capstoneProject.global.ApiResponse;
 import Capstone.capstoneProject.security.CustomAuthenticationEntryPoint;
-import Capstone.capstoneProject.repository.AuthTokenRepository;
+import Capstone.capstoneProject.repository.auth.AuthTokenRepository;
 import Capstone.capstoneProject.security.CustomSecurityUserDetails;
 import Capstone.capstoneProject.security.JwtAuthenticationFilter;
 import Capstone.capstoneProject.security.JwtTokenProvider;
