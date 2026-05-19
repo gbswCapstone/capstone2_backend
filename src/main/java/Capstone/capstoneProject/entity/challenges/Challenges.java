@@ -4,6 +4,7 @@ import Capstone.capstoneProject.entity.Users.Users;
 import Capstone.capstoneProject.enums.UserJobs;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -66,11 +67,13 @@ public class Challenges {
     private LocalDateTime deletedAt;
 
     // 해시태그랑 매핑
+    @BatchSize(size = 100)
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<ChallengeHashtag> challengeHashtags = new HashSet<>();
 
     // 챌린지 유저랑 매핑
+    @BatchSize(size = 100)
     @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ChallengeUsers> challengeUsers = new ArrayList<>();
