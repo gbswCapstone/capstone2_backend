@@ -20,6 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class MissionProgressService {
     private final UserMissionRepository userMissionRepository;
     private final ExperienceHistoryRepository experienceHistoryRepository;

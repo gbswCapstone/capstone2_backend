@@ -19,5 +19,5 @@ public class CreateBoard {
     private String content;
     private BoardCategory category;
     private List<BoardImages> imagesList;
-    private List<BoardVideos> VideosList;
+    private List<BoardVideos> videosList;
 }

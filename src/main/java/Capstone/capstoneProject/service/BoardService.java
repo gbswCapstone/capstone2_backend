@@ -166,6 +166,7 @@ public class BoardService {
 
         // 비디오 변환 & 저장
         if (request.getVideosList() != null && !request.getVideosList().isEmpty()) {
+            boardVideoRepository.deleteByBoards(board);
             List<BoardVideos> videosList = request.getVideosList().stream()
                     .map(vid -> BoardVideos.builder()
                             .boards(board)
