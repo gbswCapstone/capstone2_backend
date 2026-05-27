@@ -8,16 +8,6 @@
 
 <img src="https://raw.githubusercontent.com/yoonjeonggg/readme-assets/main/woogeo/%EC%9A%B0%EA%B1%B0%EC%9A%B0%EA%B1%B0_%EB%AA%A9%EC%97%85.png" width="800">
 
-<br>
-
-<img src="https://raw.githubusercontent.com/yoonjeonggg/readme-assets/main/stacks/springBoot_icon.png" width="40" height="40" />
-<img src="https://raw.githubusercontent.com/yoonjeonggg/readme-assets/main/stacks/mysql_icon.png" width="40" height="40" />
-<img src="https://raw.githubusercontent.com/yoonjeonggg/readme-assets/main/stacks/aws_icon.png" width="40" height="40" />
-<img src="https://raw.githubusercontent.com/yoonjeonggg/readme-assets/main/stacks/AWS_EC2_icon.png" width="40" height="40" />
-<img src="https://raw.githubusercontent.com/yoonjeonggg/readme-assets/main/stacks/flutter-icon.png" width="40" height="40" />
-<img src="https://raw.githubusercontent.com/yoonjeonggg/readme-assets/main/stacks/webSocket_icon.png" width="40" height="40" />
-<img src="https://raw.githubusercontent.com/yoonjeonggg/readme-assets/main/stacks/github_icon.png" width="40" height="40" />
-
 </div>
 
 <br>
@@ -55,6 +45,13 @@ AI 기반 소비 분석과 게임화 요소를 결합해 사용자가 지속적�
 
 ---
 
+## <img src="https://raw.githubusercontent.com/yoonjeonggg/readme-assets/main/woogeo/solid_logo.png" width="20"> 팀 · solid
+
+> 흔들림 없이 단단한 기술과 가치를 만들어가는 팀  
+> 구성 : 프론트엔드 1 · 백엔드 1 · AI 1 · 디자인 3
+
+<br>
+
 ## 팀원 구성
 
 <div align="center">
@@ -65,15 +62,6 @@ AI 기반 소비 분석과 게임화 요소를 결합해 사용자가 지속적�
 | Flutter 프론트엔드 | Spring Boot 백엔드 · 디자인 | Python AI | UI/UX 디자인 (Figma) | UI/UX 디자인 (Figma) |
 
 </div>
-
-<br>
-
----
-
-## <img src="https://raw.githubusercontent.com/yoonjeonggg/readme-assets/main/woogeo/solid_logo.png" width="20"> 팀 · solid
-
-> 흔들림 없이 단단한 기술과 가치를 만들어가는 팀  
-> 구성 : 프론트엔드 1 · 백엔드 1 · AI 1 · 디자인 3
 
 <br>
 
@@ -166,7 +154,7 @@ AI 기반 소비 분석과 게임화 요소를 결합해 사용자가 지속적�
 
 ---
 
-## 5. 🗄 ERD
+## 5. 🗄 ERD &nbsp; [![ERDCloud](https://img.shields.io/badge/ERDCloud-4DB33D?style=flat-square&logo=databricks&logoColor=white)](https://www.erdcloud.com/d/rKQxjNgafRXN2XZ2r)
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/yoonjeonggg/readme-assets/main/woogeo/%EC%9A%B0%EA%B1%B0%EC%9A%B0%EA%B1%B0_ERD.png" alt="ERD" width="800">
